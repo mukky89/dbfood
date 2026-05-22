@@ -1,5 +1,7 @@
 {
-  "install": {
-    "cmd": "npm install"
+  "steps": {
+    "install": {
+      "cmds": ["npm install"]
+    }
   }
 }
