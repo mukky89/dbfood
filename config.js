@@ -15,5 +15,6 @@ module.exports = {
   smtpPort: parseInt(process.env.SMTP_PORT) || 587,
   smtpUser: process.env.SMTP_USER,
   ntfyTopic: process.env.NTFY_TOPIC,
-  ntfyUrl: process.env.NTFY_URL || "https://ntfy.sh"
+  ntfyUrl: process.env.NTFY_URL || "https://ntfy.sh",
+  allowedEmails: process.env.ALLOWED_EMAILS ? process.env.ALLOWED_EMAILS.split(',').map(e => e.trim()) : []
 };
