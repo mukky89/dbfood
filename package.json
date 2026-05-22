@@ -1,0 +1,24 @@
+{
+  "name": "fantozzi-objednavky",
+  "version": "1.0.0",
+  "description": "Objednávkový systém obedov z Fantozzi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "bysquare": "^4.0.0",
+    "cheerio": "^1.0.0",
+    "express": "^4.18.0",
+    "jimp": "^1.6.1",
+    "node-cron": "^3.0.0",
+    "nodemailer": "^6.9.0",
+    "qrcode": "^1.5.4",
+    "mongoose": "^8.0.0",
+    "stripe": "^22.1.1"
+  },
+  "devDependencies": {
+    "jsqr": "^1.4.0"
+  }
+}

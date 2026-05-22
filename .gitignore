@@ -1,0 +1,4 @@
+config.json
+evennode/config.json
+node_modules/
+.env

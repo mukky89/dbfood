@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍕 Fantozzi Objednávky</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand: #2c3e50; --accent: #e74c3c; --green: #27ae60;
+      --orange: #f39c12; --bg: #f5f6fa; --card: #ffffff;
+      --border: #dde1e7; --text: #2c3e50; --muted: #7f8c8d; --radius: 10px;
+    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    body.fob-open { padding-bottom: 62px; }
+
+    /* Header */
+    header { background: linear-gradient(135deg, #1a2637 0%, #2c3e50 50%, #1e3a5f 100%); color: white; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,.35); }
+    header h1 { font-size: 21px; font-weight: 800; display:flex; align-items:center; gap:4px; line-height:1; }
+
+    @keyframes brandFire {
+      0%   { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+    @keyframes pizzaBob {
+      0%, 55%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+      20%            { transform: translateY(-5px) rotate(-12deg) scale(1.15); }
+      38%            { transform: translateY(-2px) rotate(6deg) scale(1.05); }
+    }
+    @keyframes subtitleGlow {
+      0%, 100% { opacity: .85; text-shadow: none; }
+      50%       { opacity: 1;   text-shadow: 0 0 12px rgba(255,255,255,.25); }
+    }
+
+    .hdr-pizza {
+      display: inline-block;
+      font-size: 26px;
+      animation: pizzaBob 2.8s ease-in-out infinite;
+      margin-right: 2px;
+      cursor: default;
+    }
+    .hdr-brand {
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #ff9f43, #ff6348, #ffd93d, #ff6b6b);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: brandFire 3s linear infinite;
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: -.5px;
+    }
+    .hdr-sep { color: rgba(255,255,255,.25); font-weight: 300; margin: 0 3px; font-size: 18px; }
+    .hdr-sub {
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: .3px;
+      color: rgba(255,255,255,.9);
+      animation: subtitleGlow 4s ease-in-out infinite;
+    }
+
+    /* Telefónne čísla dropdown */
+    .phone-wrap { position: relative; }
+    .phone-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 20px; padding: 5px 13px; font-size: 13px; color: white; cursor: pointer; transition: background .2s, transform .15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .phone-btn:hover { background: rgba(255,255,255,.22); transform: scale(1.03); }
+    .phone-btn-label { font-weight: 600; }
+    @media (max-width: 640px) { .phone-btn-label { display: none; } }
+    .phone-dropdown { position: absolute; right: 0; top: calc(100% + 10px); background: white; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.22), 0 2px 8px rgba(0,0,0,.1); padding: 14px; min-width: 210px; z-index: 200; display: none; animation: dropIn .18s ease; }
+    @keyframes dropIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .phone-dropdown.open { display: block; }
+    .phone-drop-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .phone-item { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: 8px; text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600; transition: background .15s, color .15s; font-family: monospace; letter-spacing: .3px; }
+    .phone-item:hover { background: #fff5f5; color: var(--accent); }
+    .phone-item-icon { font-size: 16px; flex-shrink: 0; }
+    .phone-drop-addr { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    #user-badge { background: rgba(255,255,255,.15); border-radius: 20px; padding: 4px 14px; font-size: 14px; cursor: pointer; transition: background .2s; }
+    #user-badge:hover { background: rgba(255,255,255,.25); }
+    .nav-link { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
+    .nav-link:hover { background: rgba(255,255,255,.15); color: white; }
+
+    /* Countdown */
+    #countdown-bar { text-align: center; padding: 10px 20px; font-weight: 600; font-size: 15px; transition: background .5s; }
+    #countdown-bar.green  { background: #d4edda; color: #155724; }
+    #countdown-bar.orange { background: #fff3cd; color: #856404; }
+    #countdown-bar.red    { background: #f8d7da; color: #721c24; }
+    #countdown-bar.closed { background: #e2e3e5; color: #383d41; }
+
+    /* Layout */
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    .grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+    /* Card */
+    .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--brand); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--bg); }
+
+    /* Menu */
+    .menu-section { margin-bottom: 20px; }
+    .menu-section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .price-badge { background: var(--accent); color: white; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+
+    .menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all .15s; margin-bottom: 6px; background: var(--bg); position: relative; }
+    .menu-item:hover { border-color: var(--accent); background: #fff5f5; }
+    .menu-item.selected { border-color: var(--accent); background: #fff5f5; }
+    .menu-item.hot-dish { border-color: #f39c12 !important; background: linear-gradient(135deg, #fffbeb, #fff5f5) !important; }
+    .menu-item input[type=radio], .menu-item input[type=checkbox] { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+    .menu-item-text { flex: 1; }
+    .menu-item-name { font-size: 14px; font-weight: 500; line-height: 1.4; }
+    .menu-item-weight { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .menu-item-num { background: var(--brand); color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+    /* HOT badge */
+    .hot-badge { position: absolute; top: -8px; right: 8px; background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(231,76,60,.4); }
+
+    /* Allergens */
+    .allergen-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .allergen-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px 2px 4px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: help; transition: all .15s; border: 1px solid transparent; white-space: nowrap; }
+    .allergen-chip:hover { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .allergen-chip .a-icon { font-size: 13px; line-height: 1; }
+    .allergen-chip .a-num { background: rgba(0,0,0,.12); border-radius: 10px; padding: 0 4px; font-size: 10px; font-weight: 700; }
+    .a-gluten{background:#fef3c7;color:#92400e;border-color:#fde68a} .a-krusty{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+    .a-vajcia{background:#fffbeb;color:#78350f;border-color:#fde68a} .a-ryby{background:#e0f2fe;color:#075985;border-color:#7dd3fc}
+    .a-arasisdy{background:#fef9c3;color:#713f12;border-color:#fde047} .a-soja{background:#dcfce7;color:#14532d;border-color:#86efac}
+    .a-mlieko{background:#ede9fe;color:#4c1d95;border-color:#c4b5fd} .a-orechy{background:#ffedd5;color:#7c2d12;border-color:#fdba74}
+    .a-zeler{background:#d1fae5;color:#065f46;border-color:#6ee7b7} .a-horcica{background:#fef08a;color:#713f12;border-color:#facc15}
+    .a-sezam{background:#fee2e2;color:#7f1d1d;border-color:#fca5a5} .a-so2{background:#f3e8ff;color:#581c87;border-color:#d8b4fe}
+    .a-vlci{background:#ecfdf5;color:#064e3b;border-color:#6ee7b7} .a-makkyce{background:#fdf4ff;color:#6b21a8;border-color:#e9d5ff}
+    .allergen-legend { margin-top: 12px; padding: 10px 14px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.8; }
+    .allergen-legend summary { cursor: pointer; font-weight: 600; color: var(--text); font-size: 13px; user-select: none; }
+    .allergen-legend summary:hover { color: var(--accent); }
+
+    /* Form */
+    .poznamka-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; }
+    textarea { width: 100%; border: 2px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 60px; transition: border-color .2s; }
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .btn-primary { background: var(--accent); color: white; width: 100%; justify-content: center; margin-top: 14px; font-size: 16px; padding: 13px; }
+    .btn-primary:hover { background: #c0392b; }
+    .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger { background: #fee; color: var(--accent); border: 1px solid #fcc; }
+    .btn-danger:hover { background: #fcc; }
+    .btn-qr { background: #1a5276; color: white; width: 100%; justify-content: center; margin-top: 10px; font-size: 15px; padding: 11px; }
+    .btn-qr:hover { background: #154360; }
+
+    /* Orders list */
+    .order-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg); align-items: flex-start; }
+    .order-item:last-child { border-bottom: none; }
+    .order-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .order-name { font-weight: 600; font-size: 14px; }
+    .order-detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .order-note { font-size: 12px; color: var(--orange); margin-top: 2px; font-style: italic; }
+    .order-time { font-size: 11px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+    .empty-state { text-align: center; padding: 30px 0; color: var(--muted); font-size: 14px; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+
+    /* Summary table */
+    .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .summary-table th { background: var(--brand); color: white; padding: 8px 10px; text-align: left; font-size: 12px; font-weight: 600; }
+    .summary-table th:last-child { text-align: center; width: 48px; }
+    .summary-table td { padding: 7px 10px; border-bottom: 1px solid var(--bg); vertical-align: middle; }
+    .summary-table tr:last-child td { border-bottom: none; }
+    .summary-table tr:nth-child(even) td { background: #fafbfc; }
+    .summary-count { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; font-weight: 700; font-size: 13px; }
+    .summary-section-header td { background: var(--bg) !important; font-weight: 700; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 6px 10px 4px; }
+    .summary-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--brand); color: white; font-size: 10px; font-weight: 700; margin-right: 5px; flex-shrink: 0; }
+    .polievka-badge { color: #1565c0; }
+    .jedlo-badge { color: #b71c1c; }
+    .hot-row td { background: linear-gradient(135deg, #fffbeb, #fff) !important; }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 15px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 320px; }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--green); }
+    #toast.error { background: var(--accent); }
+
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 28px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .modal h2 { font-size: 20px; margin-bottom: 8px; color: var(--brand); }
+    .modal p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+    .modal input { width: 100%; border: 2px solid var(--border); border-radius: 8px; padding: 11px 14px; font-size: 15px; font-family: inherit; margin-bottom: 12px; transition: border-color .2s; }
+    .modal input:focus { outline: none; border-color: var(--accent); }
+    .modal-tabs { display: flex; gap: 0; margin-bottom: 20px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .modal-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 600; background: var(--bg); color: var(--muted); transition: all .2s; border: none; }
+    .modal-tab.active { background: var(--accent); color: white; }
+
+    /* QR / Platobný Modal */
+    .qr-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .qr-modal-overlay.open { display: flex; }
+    .qr-modal { background: white; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 360px; box-shadow: 0 24px 80px rgba(0,0,0,.35); text-align: center; }
+    .qr-modal h2 { font-size: 20px; color: var(--brand); margin-bottom: 4px; }
+    .qr-modal .qr-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .qr-modal img { width: 240px; height: 240px; border: 3px solid var(--border); border-radius: 12px; margin-bottom: 16px; }
+    .qr-suma { font-size: 32px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+    .qr-detail { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+    .qr-iban { font-family: monospace; font-size: 12px; background: var(--bg); border-radius: 6px; padding: 8px 12px; margin-bottom: 16px; color: var(--text); word-break: break-all; }
+    .qr-note { font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .qr-loading { padding: 40px; color: var(--muted); font-size: 14px; }
+
+    /* Admin */
+    #admin-section { display: none; }
+    .admin-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 700px) { .admin-stats-row { grid-template-columns: repeat(2,1fr); } }
+    .admin-stat-card { background: white; border-radius: var(--radius); border: 2px solid var(--accent); padding: 16px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .admin-stat-num { font-size: 36px; font-weight: 800; color: var(--accent); line-height: 1; }
+    .admin-stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+    .admin-three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    @media (max-width: 900px) { .admin-three-col { grid-template-columns: 1fr; } }
+    .admin-item-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--bg); }
+    .admin-item-row:last-child { border-bottom: none; }
+    .admin-item-bar-wrap { flex: 1; }
+    .admin-item-bar-bg { background: var(--bg); border-radius: 4px; height: 6px; overflow: hidden; }
+    .admin-item-bar-fill { height: 6px; border-radius: 4px; transition: width .4s; }
+    .admin-item-name { font-size: 13px; color: var(--text); line-height: 1.3; margin-bottom: 3px; }
+    .admin-item-cnt { min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; flex-shrink: 0; }
+    .admin-num-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; margin-right: 4px; }
+    .admin-user-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg); }
+    .admin-user-row:last-child { border-bottom: none; }
+    .admin-user-avatar { width: 32px; height: 32px; border-radius: 50%; color: white; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .admin-user-detail { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .admin-delete-btn { margin-left: auto; background: #fee; border: 1px solid #fcc; color: var(--accent); border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+    .admin-delete-btn:hover { background: #fcc; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .admin-table th { background: var(--brand); color: white; padding: 10px 12px; text-align: left; }
+    .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .admin-table tr:nth-child(even) td { background: var(--bg); }
+
+    /* Admin tabs */
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+    .admin-tab-btn { padding: 10px 18px; border: none; background: none; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .2s; }
+    .admin-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .admin-tab-content { display: none; }
+    .admin-tab-content.active { display: block; }
+
+    /* History chart */
+    .history-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
+    .history-bar-row:last-child { border-bottom: none; }
+    .history-date { width: 90px; color: var(--muted); flex-shrink: 0; font-size: 12px; }
+    .history-bar-wrap { flex: 1; }
+    .history-bar { height: 20px; border-radius: 4px; background: linear-gradient(90deg, var(--brand), #3498db); display: flex; align-items: center; padding-left: 8px; color: white; font-size: 11px; font-weight: 700; min-width: 30px; transition: width .5s; }
+    .history-price { width: 70px; text-align: right; font-weight: 700; color: var(--green); flex-shrink: 0; }
+
+    @keyframes discord-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(88,101,242,.4); } 50% { box-shadow: 0 0 0 8px rgba(88,101,242,0); } }
+    @keyframes pulse-badge { 0%,100% { opacity:1; } 50% { opacity:.6; } }
+    .discord-btn { animation: discord-glow 2.5s ease-in-out infinite; }
+
+    /* Countdown redesign */
+    @keyframes cd-pulse-red { 0%,100% { opacity:1; } 50% { opacity:.7; } }
+    @keyframes cd-shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+    @keyframes cd-flip { 0% { transform: translateY(-6px); opacity:0; } 100% { transform: translateY(0); opacity:1; } }
+
+    #countdown-bar { padding: 0; overflow: hidden; }
+    .cd-inner { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 24px; transition: background .5s, color .5s; position: relative; }
+    .cd-label { font-size: 13px; font-weight: 600; opacity: .85; white-space: nowrap; }
+    .cd-time { display: flex; align-items: center; gap: 6px; }
+    .cd-unit { display: flex; flex-direction: column; align-items: center; min-width: 46px; }
+    .cd-num { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -1px; animation: cd-flip .25s ease; }
+    .cd-ulab { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; opacity: .65; margin-top: 2px; }
+    .cd-sep { font-size: 24px; font-weight: 900; opacity: .4; margin-bottom: 14px; line-height: 1; }
+
+    /* Progress bar */
+    .cd-progress { height: 8px; background: rgba(0,0,0,.1); position: relative; overflow: hidden; }
+    .cd-progress-fill {
+      height: 8px;
+      transition: width 1s linear, background .5s;
+      position: relative;
+      border-radius: 0 4px 4px 0;
+    }
+    .cd-progress-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.45) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: cd-shimmer 2s linear infinite;
+    }
+
+    /* Color states */
+    #countdown-bar.green  .cd-inner { background: linear-gradient(135deg, #d4edda, #c3e6cb); color: #155724; }
+    #countdown-bar.orange .cd-inner { background: linear-gradient(135deg, #fff3cd, #ffe8a1); color: #7d5a00; }
+    #countdown-bar.red    .cd-inner { background: linear-gradient(135deg, #f8d7da, #f5c2c7); color: #721c24; animation: cd-pulse-red 1.5s ease-in-out infinite; }
+    #countdown-bar.closed .cd-inner { background: #e2e3e5; color: #383d41; }
+
+    #countdown-bar.green  .cd-progress { background: rgba(21,87,36,.12); }
+    #countdown-bar.orange .cd-progress { background: rgba(125,90,0,.12); }
+    #countdown-bar.red    .cd-progress { background: rgba(114,28,36,.15); }
+
+    #countdown-bar.green  .cd-progress-fill { background: linear-gradient(90deg, #28a745, #5cb85c); }
+    #countdown-bar.orange .cd-progress-fill { background: linear-gradient(90deg, #e67e22, #f39c12); }
+    #countdown-bar.red    .cd-progress-fill { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+    #countdown-bar.closed .cd-progress-fill { background: #adb5bd; width: 0 !important; }
+
+    @media (max-width: 600px) { .cd-unit { min-width: 36px; } .cd-num { font-size: 22px; } .cd-label { font-size: 11px; } .cd-inner { gap: 12px; padding: 10px 12px; } }
+
+    /* User badge - neprihlaseny */
+    #user-badge.guest { background: rgba(231,76,60,.35); border: 1px solid rgba(231,76,60,.5); animation: pulse-badge 2s ease-in-out infinite; }
+    #user-badge.guest:hover { background: rgba(231,76,60,.55); }
+
+    /* Floating order bar */
+    #floating-order-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; transform: translateY(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); pointer-events: none; }
+    #floating-order-bar.visible { transform: translateY(0); pointer-events: all; }
+    .fob-inner { background: white; border-top: 2px solid var(--border); box-shadow: 0 -6px 24px rgba(0,0,0,.13); padding: 10px 20px; display: flex; align-items: center; gap: 12px; max-width: 100%; }
+    .fob-items { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+    .fob-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .fob-chip.main { background: #fff0ef; border-color: var(--accent); color: var(--accent); }
+    .fob-price { font-size: 22px; font-weight: 900; color: var(--green); letter-spacing: -0.5px; white-space: nowrap; flex-shrink: 0; }
+    @media (max-width: 600px) { .fob-inner { padding: 8px 12px; gap: 8px; } .fob-price { font-size: 18px; } }
+
+    /* Discord contact card */
+    .contact-card { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none;
+      background: linear-gradient(135deg, rgba(88,101,242,.4), rgba(88,101,242,.2));
+      border: 1px solid rgba(88,101,242,.55); border-radius: 10px; padding: 6px 14px;
+      transition: background .2s; animation: discord-glow 2.5s ease-in-out infinite; height: 44px; }
+    .contact-card:hover { background: linear-gradient(135deg, rgba(88,101,242,.65), rgba(88,101,242,.4)); }
+    .contact-card-text { line-height: 1.2; }
+    .contact-card-label { font-size: 9px; font-weight: 700; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
+    .contact-card-name { font-size: 14px; font-weight: 800; }
+    .contact-card-sub { font-size: 10px; opacity: .65; }
+
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+    .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+
+    /* Per-item note input */
+    .item-note-input { display: block; width: 100%; margin-top: 6px; border: 1px dashed #d0d0d0; border-radius: 6px; padding: 4px 8px; font-size: 12px; font-family: inherit; color: var(--text); background: rgba(255,255,255,0.7); outline: none; transition: border-color .2s, background .2s; }
+    .item-note-input:focus { border-color: var(--accent); border-style: solid; background: white; }
+    .item-note-input::placeholder { color: #bbb; font-style: italic; }
+    .menu-item.selected .item-note-input { border-color: #f0a0a0; background: white; }
+
+    /* Varianty jedal */
+    .variant-options { margin-top: 8px; padding: 8px 10px; background: #f0f4ff; border-radius: 8px; border: 1px solid #c5d3f0; display: none; }
+    .variant-options.visible { display: block; }
+    .variant-options-label { font-size: 12px; font-weight: 700; color: #3a5bbd; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+    .variant-radio-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .variant-radio-btn { display: flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; border: 2px solid #c5d3f0; background: white; cursor: pointer; font-size: 13px; font-weight: 600; color: #3a5bbd; transition: all .15s; }
+    .variant-radio-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .variant-radio-btn input[type=radio] { accent-color: var(--accent); width: 14px; height: 14px; }
+    .variant-radio-btn.variant-selected { border-color: var(--accent); background: #fff0ef; color: var(--accent); }
+
+    /* Historia navigacia */
+    .hist-nav { display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 0 12px; border-bottom:1px solid var(--bg); margin-bottom:12px; }
+    .hist-nav-btn { background:none; border:1px solid var(--border); border-radius:6px; width:28px; height:28px; cursor:pointer; font-size:13px; color:var(--brand); transition:all .15s; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .hist-nav-btn:hover:not(:disabled) { background:var(--brand); color:white; border-color:var(--brand); }
+    .hist-nav-btn:disabled { opacity:.3; cursor:not-allowed; }
+    .hist-nav-label { font-size:13px; font-weight:600; color:var(--brand); min-width:130px; text-align:center; }
+    .hist-badge { background:#fff3cd; color:#856404; border:1px solid #ffc107; border-radius:6px; padding:4px 10px; font-size:12px; margin-bottom:10px; text-align:center; }
+
+    /* Easter egg pizzarain animacia */
+    .easter-hdr-btn { background:none; border:none; font-size:15px; cursor:pointer; padding:1px 4px; border-radius:4px; opacity:.45; transition:transform .15s, opacity .15s; line-height:1; vertical-align:middle; }
+    .easter-hdr-btn:hover { opacity:.9; transform:scale(1.25) rotate(20deg); }
+    @keyframes pizzaFall { 0%{transform:translateY(-60px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:.7} }
+    .pizza-drop { position:fixed; top:0; pointer-events:none; z-index:9999; animation:pizzaFall linear forwards; user-select:none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>
+    <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:2px">
+      <span class="hdr-pizza">🍕</span>
+      <span class="hdr-brand">Fantozzi</span>
+      <span class="hdr-sep">|</span>
+      <span class="hdr-sub">Objednávky</span>
+    </a>
+    <button class="easter-hdr-btn" onclick="easterHdrClick()" title="">⭐</button>
+  </h1>
+  <div class="header-right">
+    <div class="phone-wrap">
+      <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
+        📞 <span class="phone-btn-label">Fantozzi</span>
+      </button>
+      <div class="phone-dropdown" id="phone-dropdown">
+        <div class="phone-drop-title">📞 Kontakt Fantozzi</div>
+        <a href="tel:+421952331262" class="phone-item"><span class="phone-item-icon">📱</span>0952 331 262</a>
+        <a href="tel:+421245245014" class="phone-item"><span class="phone-item-icon">☎️</span>02 / 45 245 014</a>
+        <a href="tel:+421903102591" class="phone-item"><span class="phone-item-icon">📱</span>0903 102 591</a>
+        <div class="phone-drop-addr">📍 Ipeľská 4, Bratislava</div>
+      </div>
+    </div>
+    <a href="https://discord.com/users/1359038724956098771" target="_blank" class="contact-card">
+      <svg width="22" height="22" viewBox="0 0 71 55" fill="white" style="flex-shrink:0"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.7 40.7 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.6 37.6 0 0 0 25.5.5a.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.6 5.3 24.1 5.3 35.5 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.2 36.2 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.7-8.9.2.2 0 0 0 .1-.2c1.5-15.2-2.5-28-10.5-39.6a.2.2 0 0 0-.1-.2zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+      <div class="contact-card-text">
+        <div class="contact-card-label">Hlavný kontakt</div>
+        <div class="contact-card-name">Filip Švolík</div>
+        <div class="contact-card-sub">Discord · mimosvk</div>
+      </div>
+    </a>
+    <span id="user-badge" onclick="changeUser()" title="Klikni pre zmenu">👤 <span id="username-display">...</span></span>
+    <a href="/admin" class="nav-link">Admin</a>
+  </div>
+</header>
+
+<div id="countdown-bar" onclick="countdownClick()" style="cursor:default">
+  <div class="cd-inner">
+    <div id="cd-datetime" style="display:flex;flex-direction:column;align-items:center;min-width:120px;opacity:.75;border-right:1px solid rgba(0,0,0,.12);padding-right:16px;margin-right:4px">
+      <span id="cd-date" style="font-size:12px;font-weight:700;letter-spacing:.3px"></span>
+      <span id="cd-clock" style="font-size:22px;font-weight:900;letter-spacing:-0.5px;line-height:1.1"></span>
+    </div>
+    <span class="cd-label" id="cd-label">⏳ Načítavam...</span>
+    <div class="cd-time" id="cd-time" style="display:none">
+      <div class="cd-unit"><span class="cd-num" id="cd-h">00</span><span class="cd-ulab">hod</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit"><span class="cd-num" id="cd-m">00</span><span class="cd-ulab">min</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit"><span class="cd-num" id="cd-s">00</span><span class="cd-ulab">sek</span></div>
+    </div>
+  </div>
+  <div class="cd-progress"><div class="cd-progress-fill" id="cd-progress-fill" style="width:0%"></div></div>
+  <div id="cd-info" style="display:none;text-align:center;padding:4px 20px;font-size:12px;font-weight:600;background:rgba(0,0,0,.07);letter-spacing:.2px"></div>
+</div>
+
+<!-- Modal: prihlasenie cez meno -->
+<div class="modal-overlay" id="name-modal" style="display:none">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h2 style="margin:0">👋 Prihlásenie</h2>
+      <button onclick="document.getElementById('name-modal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
+    </div>
+    <p style="margin-bottom:16px;color:var(--muted);font-size:14px">Zadaj svoje meno — uloží sa do prehliadača.</p>
+
+    <!-- Rychle prihlasenie pre znamych userov -->
+    <div id="known-users-list"></div>
+
+    <input type="text" id="name-input" placeholder="Meno a priezvisko..." maxlength="40"
+      style="width:100%;border:2px solid var(--border);border-radius:8px;padding:11px 14px;font-size:15px;font-family:inherit;margin-bottom:12px;outline:none;transition:border-color .2s"
+      onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" />
+
+    <div id="name-error" style="display:none;background:#f8d7da;color:#721c24;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px"></div>
+
+    <button class="btn btn-primary" onclick="saveName()" style="margin-top:0">Pokračovať →</button>
+  </div>
+</div>
+
+<!-- Modal: admin login -->
+<div class="modal-overlay" id="admin-modal" style="display:none">
+  <div class="modal">
+    <h2>🔐 Admin prístup</h2>
+    <p>Zadaj administrátorské heslo.</p>
+    <input type="password" id="admin-pass-input" placeholder="Heslo..." />
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" onclick="hideAdminModal()" style="flex:1">Zrušiť</button>
+      <button class="btn btn-primary" onclick="loginAdmin()" style="flex:2;margin-top:0">Prihlásiť</button>
+    </div>
+  </div>
+</div>
+
+<main id="main-content">
+
+  <!-- Hlavna stranka -->
+  <div id="order-section">
+    <div class="grid">
+      <!-- Lava strana: formular -->
+      <div>
+        <div class="card" id="menu-card">
+          <div class="card-title">📋 Dnešné menu</div>
+          <div id="menu-loading" class="loading">⏳ Načítavam menu z Fantozzi...</div>
+          <div id="menu-content" style="display:none"></div>
+          <div id="menu-error" style="display:none" class="alert alert-warning"></div>
+          <div id="order-form" style="display:none">
+            <!-- Banner pre neprihlasenych -->
+            <div id="login-banner" style="display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#2c3e50,#3498db);color:white;border-radius:10px;padding:14px 16px;margin-top:16px">
+              <div style="font-size:24px">🔐</div>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:14px">Pre objednávanie sa prihlás</div>
+                <div style="font-size:12px;opacity:.85">Menu môžeš prezerať, ale objednať si vyžaduje prihlásenie.</div>
+              </div>
+              <button onclick="showNameModal()" style="background:white;color:#2c3e50;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Prihlásiť sa</button>
+            </div>
+
+            <!-- Live cenovy kalkulator -->
+            <div id="price-calculator" style="display:none;margin-top:16px;background:linear-gradient(135deg,#27ae60,#2ecc71);border-radius:10px;padding:14px 18px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Predbežná cena</div>
+                  <div id="price-detail" style="font-size:12px;color:rgba(255,255,255,.75);line-height:1.5"></div>
+                </div>
+                <div id="price-total" style="font-size:32px;font-weight:900;color:white;letter-spacing:-1px"></div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" id="submit-btn" onclick="submitOrder()">✅ Potvrdiť objednávku</button>
+            <button class="btn btn-qr" id="qr-btn" onclick="showQR()">📱 Zobraziť QR kód pre platbu</button>
+          </div>
+          <!-- Potvrdena objednavka -->
+          <div id="order-confirmed" style="display:none">
+            <div style="background:#eafaf1;border:2px solid #27ae60;border-radius:10px;padding:16px 18px;margin-top:16px">
+              <div style="font-weight:700;color:#1e8449;font-size:15px;margin-bottom:6px">✅ Objednávka potvrdená</div>
+              <div id="confirmed-summary" style="font-size:14px;color:#2c3e50;line-height:1.7"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+              <button class="btn btn-secondary" onclick="enableEdit()" style="flex:1">✏️ Upraviť</button>
+              <button class="btn btn-qr" onclick="showQR()" style="flex:1;margin-top:0">📱 QR platba</button>
+              <button class="btn btn-danger" onclick="userDeleteOrder()" style="width:100%;margin-top:0">🗑️ Zrušiť objednávku</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prava strana -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <!-- Sumar -->
+        <div class="card">
+          <div class="card-title">📊 Súhrn objednávok</div>
+          <div id="summary-content"><div class="empty-state" style="padding:20px 0">Zatiaľ žiadne</div></div>
+        </div>
+        <!-- Kamarati -->
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>👥 Kto objednal</span>
+            <span id="order-count" style="font-size:13px;color:var(--muted);font-weight:400"></span>
+          </div>
+          <div class="hist-nav">
+            <button class="hist-nav-btn" id="hist-prev" onclick="histNav(1)" disabled title="Starší deň">◀</button>
+            <span class="hist-nav-label" id="hist-label">Dnes</span>
+            <button class="hist-nav-btn" id="hist-next" onclick="histNav(-1)" disabled title="Novší deň">▶</button>
+          </div>
+          <div id="hist-badge-container"></div>
+          <div id="orders-list"><div class="empty-state">Zatiaľ nikto</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin panel -->
+  <div id="admin-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 style="color:var(--brand);margin-bottom:2px">🔐 Admin panel</h2>
+        <div style="font-size:13px;color:var(--muted)" id="admin-last-refresh"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--bg);border:2px solid var(--border);border-radius:8px;padding:5px 10px">
+          <span style="font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap">⏰ Uzávierka:</span>
+          <input type="time" id="deadline-time-input" style="border:none;background:transparent;font-size:14px;font-weight:700;color:var(--brand);font-family:inherit;outline:none;width:80px" />
+          <button onclick="adminSetDeadline()" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer">Uložiť</button>
+        </div>
+        <a href="/" class="btn btn-secondary" style="width:auto;text-decoration:none">🏠 Hlavná stránka</a>
+        <button class="btn btn-primary" style="width:auto" onclick="adminSendEmail()">📧 Odoslať email</button>
+        <button class="btn btn-secondary" onclick="adminTestPush()">🔔 Test push</button>
+        <button class="btn btn-secondary" onclick="adminTestDeadline()" title="Manuálne spustí email + ntfy súhrn ako keby prišla uzávierka">🧪 Test uzávierky</button>
+        <button class="btn btn-secondary" onclick="showManualMenuForm()">✏️ Menu ručne</button>
+        <button class="btn btn-secondary" onclick="logoutAdmin()">Odhlásiť</button>
+      </div>
+    </div>
+
+    <div id="admin-config-info" style="display:none;margin-bottom:12px" class="card">
+      <div class="card-title" style="margin-bottom:10px">⚙️ Nastavenia systému</div>
+      <div id="admin-config-content" style="font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px"></div>
+    </div>
+
+    <div id="manual-menu-form" style="display:none;margin-bottom:16px" class="card">
+      <div class="card-title">✏️ Manuálne menu</div>
+      <textarea id="manual-menu-json" style="height:160px;font-family:monospace;font-size:12px">{"datum":"Utorok 28.04.2026","sekcie":[{"nazov":"Polievka","cena":null,"polozky":[{"cislo":1,"nazov":"Slepačia","hmotnost":"0,33l"}]},{"nazov":"Hlavné jedlo","cena":"6.50 €","polozky":[{"cislo":1,"nazov":"Kurací rezeň","hmotnost":"130g"}]}]}</textarea>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn btn-secondary" onclick="hideManualMenuForm()">Zrušiť</button>
+        <button class="btn btn-primary" style="width:auto" onclick="saveManualMenu()">Uložiť</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="admin-stats-row">
+      <div class="admin-stat-card"><div class="admin-stat-num" id="stat-total">0</div><div class="admin-stat-label">Objednávok</div></div>
+      <div class="admin-stat-card" style="border-color:#2980b9"><div class="admin-stat-num" style="color:#2980b9" id="stat-polievky">0</div><div class="admin-stat-label">Polievky</div></div>
+      <div class="admin-stat-card" style="border-color:#27ae60"><div class="admin-stat-num" style="color:#27ae60" id="stat-jedla">0</div><div class="admin-stat-label">Jedlá</div></div>
+      <div class="admin-stat-card" style="border-color:#f39c12"><div class="admin-stat-num" style="color:#f39c12" id="stat-upravy">0</div><div class="admin-stat-label">Úpravy</div></div>
+    </div>
+
+    <!-- Admin tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="switchAdminTab('dnes')">📋 Dnešné objednávky</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('historia')">📅 História</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('pouzivatelia')">👥 Používatelia</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('qrtest')">🧪 QR testovač</button>
+    </div>
+
+    <!-- Tab: dnesne -->
+    <div id="admin-tab-dnes" class="admin-tab-content active">
+      <div class="admin-three-col">
+        <div class="card"><div class="card-title" style="color:#1565c0">🍲 Polievky</div><div id="admin-polievky-list"><div class="empty-state">Žiadne</div></div></div>
+        <div class="card"><div class="card-title" style="color:#b71c1c">🍽️ Hlavné jedlá</div><div id="admin-jedla-list"><div class="empty-state">Žiadne</div></div></div>
+        <div class="card"><div class="card-title">👥 Ľudia dnes</div><div id="admin-users-today"><div class="empty-state">Žiadni</div></div></div>
+      </div>
+      <div class="card" style="margin-top:0">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📋 Detail objednávok</span>
+          <button class="btn btn-danger" style="padding:5px 12px;font-size:13px" onclick="adminClearOrders()">🗑️ Vymazať všetky</button>
+        </div>
+        <div id="admin-orders-content"><div class="loading">Načítavam...</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">📝 História zmien dnes</div>
+        <div id="admin-history-content"><div class="empty-state">Žiadne zmeny</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: historia -->
+    <div id="admin-tab-historia" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">📅 História objednávok podľa dní</div>
+        <div id="long-history-content"><div class="loading">Načítavam...</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: pouzivatelia -->
+    <div id="admin-tab-pouzivatelia" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">👥 Registrovaní používatelia</div>
+        <div id="admin-registered-users"><div class="loading">Načítavam...</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: QR testovač -->
+    <div id="admin-tab-qrtest" class="admin-tab-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+        <!-- Ľavý stĺpec: parametre -->
+        <div class="card">
+          <div class="card-title">⚙️ Parametre QR platby</div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Polievka</label>
+              <input id="qrt-polievka" type="text" placeholder="napr. č.1 Slepačia vývar" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Hlavné jedlo</label>
+              <input id="qrt-jedlo" type="text" placeholder="napr. č.2 Kurací rezeň, ryža" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Pizza</label>
+              <input id="qrt-pizza" type="text" placeholder="napr. Margherita 32cm" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Dezert</label>
+              <input id="qrt-dezert" type="text" placeholder="napr. Tiramisu" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <div style="border-top:2px solid var(--bg);padding-top:12px">
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Vlastná suma (€) <span style="font-weight:400;text-transform:none;letter-spacing:0">(prázdne = vypočítaj z menu)</span></label>
+              <input id="qrt-suma" type="number" step="0.01" min="0" placeholder="napr. 8.40" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start">
+              <div>
+                <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">IBAN (prázdne = z config)</label>
+                <input id="qrt-iban" type="text" placeholder="SK00 0000 0000 0000 0000 0000" autocomplete="off" spellcheck="false"
+                  style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;outline:none;letter-spacing:.5px"
+                  oninput="qrtIbanInput(this)" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=qrtIbanStatus(this.value)">
+                <div id="qrt-iban-status" style="font-size:12px;margin-top:4px;min-height:18px"></div>
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">BIC/SWIFT</label>
+                <input id="qrt-bic" type="text" placeholder="z config" autocomplete="off" spellcheck="false"
+                  style="width:110px;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;outline:none;letter-spacing:.5px;text-transform:uppercase"
+                  oninput="this.value=this.value.toUpperCase()"
+                  onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Správa pre príjemcu</label>
+              <input id="qrt-sprava" type="text" placeholder="napr. Obed Fantozzi" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:4px" onclick="adminQRTest()">📱 Vygenerovať QR</button>
+          </div>
+        </div>
+
+        <!-- Pravý stĺpec: výsledok -->
+        <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:12px;min-height:300px">
+          <div class="card-title" style="width:100%">📊 Výsledok</div>
+
+          <div id="qrt-loading" style="display:none;color:var(--muted);font-size:14px;padding:40px 0">⏳ Generujem...</div>
+          <div id="qrt-error" style="display:none;background:#f8d7da;color:#721c24;border-radius:8px;padding:12px 16px;font-size:13px;width:100%"></div>
+
+          <div id="qrt-result" style="display:none;width:100%">
+            <!-- Suma + detail -->
+            <div id="qrt-suma-result" style="background:linear-gradient(135deg,#27ae60,#2ecc71);border-radius:10px;padding:14px 18px;margin-bottom:12px;color:white">
+              <div style="font-size:11px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px">Vypočítaná suma</div>
+              <div style="font-size:32px;font-weight:900;letter-spacing:-1px" id="qrt-suma-val"></div>
+              <div style="font-size:12px;opacity:.8;margin-top:4px" id="qrt-detail-val"></div>
+            </div>
+
+            <!-- IBAN -->
+            <div style="font-size:12px;color:var(--muted);font-family:monospace;margin-bottom:12px;background:var(--bg);padding:8px 12px;border-radius:6px" id="qrt-iban-val"></div>
+
+            <!-- QR image -->
+            <div style="text-align:center">
+              <img id="qrt-qr-img" src="" alt="QR kód" style="max-width:220px;border:1px solid var(--border);border-radius:8px;padding:8px;background:white">
+            </div>
+
+            <!-- Raw JSON response -->
+            <details style="margin-top:12px">
+              <summary style="font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;user-select:none">🔍 Raw odpoveď servera</summary>
+              <pre id="qrt-raw" style="font-size:11px;background:#1e1e1e;color:#d4d4d4;padding:12px;border-radius:8px;overflow-x:auto;margin-top:8px;max-height:200px;overflow-y:auto"></pre>
+            </details>
+          </div>
+
+          <div id="qrt-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:40px 20px;opacity:.6">
+            <div style="font-size:40px;margin-bottom:8px">📱</div>
+            Vyplň parametre a klikni na <strong>Vygenerovať QR</strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<!-- Easter egg: Poplatok za predlzenie uzavierky -->
+<div class="qr-modal-overlay" id="easter-modal" style="z-index:400">
+  <div class="qr-modal" style="max-width:340px">
+    <div style="font-size:48px;margin-bottom:8px">🤑</div>
+    <h2 style="font-size:19px;margin-bottom:6px" id="easter-title">Predĺženie uzávierky</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px" id="easter-subtitle">
+      Predĺženie doby objednávania podlieha <strong>administratívnemu poplatku 3,00 €</strong>.<br>
+      Prosím uhradte pred pokračovaním.
+    </p>
+    <div id="easter-qr-loading" class="qr-loading" style="padding:20px">⏳ Generujem platbu...</div>
+    <div id="easter-qr-content" style="display:none">
+      <img id="easter-qr-image" src="" alt="QR platba" style="width:200px;height:200px;border:3px solid var(--border);border-radius:12px;margin-bottom:10px" />
+      <div style="font-size:28px;font-weight:900;color:var(--accent);margin-bottom:4px">3,00 €</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Poplatok za predĺženie objednávok</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      <button class="btn btn-primary" onclick="easterEggProceed()" style="font-size:14px">💸 Už som zaplatil — predĺžiť</button>
+      <button class="btn btn-secondary" onclick="easterEggClose()" style="font-size:13px">Zrušiť</button>
+    </div>
+    <p style="font-size:10px;color:var(--muted);margin-top:12px;opacity:.6">§42 ods. 7 Interného poriadku Fantozzi s.r.o.</p>
+  </div>
+</div>
+
+<!-- QR Modal -->
+<div class="qr-modal-overlay" id="qr-modal">
+  <div class="qr-modal">
+    <div id="qr-modal-loading" class="qr-loading">⏳ Generujem QR kód...</div>
+    <div id="qr-modal-content" style="display:none">
+      <h2>📱 Zaplať objednávku</h2>
+      <p class="qr-subtitle">Naskenuj QR kód v banking appke</p>
+      <img id="qr-image" src="" alt="Pay by Square QR" />
+      <div class="qr-suma" id="qr-suma"></div>
+      <div class="qr-detail" id="qr-detail"></div>
+      <div class="qr-iban" id="qr-iban"></div>
+      <div class="qr-note">Funguje v: <strong>SLSP, VÚB, Tatra, ČSOB, mBank, Raiffeisen</strong></div>
+      <div style="border-top:1px solid var(--border);margin:16px 0 12px;padding-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:8px">📧 Poslať QR na email</div>
+        <div style="display:flex;gap:8px">
+          <input type="email" id="qr-email-input" placeholder="vas@email.sk"
+            style="flex:1;border:2px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') sendQREmail()">
+          <button onclick="sendQREmail()" style="background:var(--brand);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s" onmouseover="this.style.background='#1a252f'" onmouseout="this.style.background='var(--brand)'">Poslať</button>
+        </div>
+        <div id="qr-email-status" style="font-size:12px;margin-top:6px;display:none"></div>
+      </div>
+      <button class="btn btn-secondary" style="width:100%" onclick="hideQR()">Zavrieť</button>
+    </div>
+    <div id="qr-modal-error" style="display:none">
+      <h2>⚠️ QR nedostupný</h2>
+      <p style="color:var(--muted);font-size:14px;margin:12px 0 20px">IBAN nie je nastavený.</p>
+      <button class="btn btn-secondary" style="width:100%" onclick="hideQR()">Zavrieť</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Cookie helpers (musia byt definovane ako prve) ─────────────────────────
+function loadUserFromCookiesEarly() {
+  try {
+    const fromCookie = document.cookie.match(/(?:^|; )fantozzi_user=([^;]*)/);
+    if (fromCookie) return decodeURIComponent(fromCookie[1]);
+  } catch(e) {}
+  try { return localStorage.getItem('fantozzi_user'); } catch(e) {}
+  return null;
+}
+
+function setCookie(name, value, days = 365) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
+function saveUserToCookies(meno, email) {
+  setCookie('fantozzi_user', meno);
+  if (email) setCookie('fantozzi_email', email);
+  localStorage.setItem('fantozzi_user', meno);
+  if (email) localStorage.setItem('fantozzi_email', email);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let currentUser = loadUserFromCookiesEarly();
+let currentEmail = null;
+let adminPassword = null;
+let menuData = null;
+let isEditMode = false;
+let isAdmin = window.location.pathname === '/admin';
+let orderingOpen = true;
+let knownUsers = {};
+let topJedlo = null;
+let availableDates = [];
+let currentDateIndex = 0;
+let config_deadline = '10:00';
+
+// ── Alergeny ──────────────────────────────────────────────────────────────
+const ALERGENY = {
+  '1':  { icon:'🌾', kratky:'Lepok',    plny:'Obilniny obsahujúce lepok', cls:'a-gluten' },
+  '2':  { icon:'🦐', kratky:'Kôrovce',  plny:'Kôrovce a výrobky',         cls:'a-krusty' },
+  '3':  { icon:'🥚', kratky:'Vajcia',   plny:'Vajcia a výrobky z vajec',   cls:'a-vajcia' },
+  '4':  { icon:'🐟', kratky:'Ryby',     plny:'Ryby a výrobky z rýb',       cls:'a-ryby' },
+  '5':  { icon:'🥜', kratky:'Arašidy',  plny:'Arašidy a výrobky',          cls:'a-arasisdy' },
+  '6':  { icon:'🌱', kratky:'Sója',     plny:'Sójové bôby a výrobky',      cls:'a-soja' },
+  '7':  { icon:'🥛', kratky:'Mlieko',   plny:'Mlieko a mliečne výrobky',   cls:'a-mlieko' },
+  '8':  { icon:'🌰', kratky:'Orechy',   plny:'Orechy a výrobky z nich',    cls:'a-orechy' },
+  '9':  { icon:'🌿', kratky:'Zeler',    plny:'Zeler a výrobky',            cls:'a-zeler' },
+  '10': { icon:'🟡', kratky:'Horčica',  plny:'Horčica a výrobky',          cls:'a-horcica' },
+  '11': { icon:'🫘', kratky:'Sezam',    plny:'Sezamové semená',            cls:'a-sezam' },
+  '12': { icon:'🍷', kratky:'SO₂',      plny:'Oxid siričitý a siričitany', cls:'a-so2' },
+  '13': { icon:'🌸', kratky:'Vlčí bôb', plny:'Vlčí bôb a výrobky',        cls:'a-vlci' },
+  '14': { icon:'🐙', kratky:'Mäkkýše',  plny:'Mäkkýše a výrobky',         cls:'a-makkyce' },
+};
+
+function parseHmotnost(raw) {
+  if (!raw?.trim()) return { hmotnostText: '', alergenyHtml: '' };
+  const cleaned = raw.trim();
+  const match = cleaned.match(/\(([0-9,\s]+)\)/);
+  if (!match) return { hmotnostText: cleaned, alergenyHtml: '' };
+  const hmotnostText = cleaned.substring(0, match.index).trim().replace(/,$/, '').trim();
+  const nums = match[1].split(',').map(s => s.trim()).filter(Boolean);
+  const chips = nums.map(num => {
+    const a = ALERGENY[num];
+    if (!a) return `<span class="allergen-chip" style="background:#eee;color:#666">${num}</span>`;
+    return `<span class="allergen-chip ${a.cls}" title="${a.plny}">${a.icon} <span class="a-num">${num}</span> ${a.kratky}</span>`;
+  }).join('');
+  return { hmotnostText, alergenyHtml: chips ? `<span class="allergen-row">${chips}</span>` : '' };
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadKnownUsers();
+
+  if (isAdmin) {
+    showAdminModal();
+    return;
+  }
+
+  // Menu a objednavky sa nacitaju VZDY - bez nutnosti prihlasenia
+  updateUserDisplay();
+  updateCdInfo();
+  await checkStatus();
+  await loadMenu();
+  await loadHistory();
+  await loadOrders();
+  setInterval(loadOrders, 30000);
+
+  // Ak nie je prihlaseny, zobraz banner (nie modal)
+  if (!currentUser) {
+    showLoginBanner();
+  }
+});
+
+async function init() {
+  // Uz nie je potrebne volat znova - vola sa z loginAdmin / verifyOTP
+  await loadOrders();
+}
+
+function showLoginBanner() {
+  const banner = document.getElementById('login-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function hideLoginBanner() {
+  const banner = document.getElementById('login-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+// ── Known users (rychle prihlasenie) ──────────────────────────────────────
+async function loadKnownUsers() {
+  try {
+    const saved = localStorage.getItem('fantozzi_known_users');
+    if (saved) knownUsers = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function renderKnownUsersList() {
+  const el = document.getElementById('known-users-list');
+  if (!el) return;
+  const entries = Object.values(knownUsers);
+  if (!entries.length) { el.innerHTML = ''; return; }
+  const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12'];
+  let html = '<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Naposledy prihlásení</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  entries.forEach(u => {
+    const initials = u.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const color = colors[u.meno.charCodeAt(0) % colors.length];
+    html += '<div onclick="quickNameLogin(\''+u.meno.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:8px;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:8px 12px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><div style="width:28px;height:28px;border-radius:50%;background:'+color+';color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">'+initials+'</div><div style="font-weight:600;font-size:13px">'+u.meno+'</div></div>';
+  });
+  html += '</div><div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:12px"><div style="flex:1;height:1px;background:var(--border)"></div><div style="font-size:12px;color:var(--muted)">alebo zadaj meno</div><div style="flex:1;height:1px;background:var(--border)"></div></div></div>';
+  el.innerHTML = html;
+}
+
+function quickNameLogin(meno) {
+  currentUser = meno;
+  setCookie('fantozzi_user', meno);
+  localStorage.setItem('fantozzi_user', meno);
+  knownUsers[meno] = { meno };
+  localStorage.setItem('fantozzi_known_users', JSON.stringify(knownUsers));
+  document.getElementById('name-modal').style.display = 'none';
+  updateUserDisplay();
+  hideLoginBanner();
+  resetMenuSelections(); // Bug 2 fix
+  showToast('👋 Vitaj, ' + meno + '!', 'success');
+  loadOrders();
+}
+
+// ── Prihlasenie cez meno ──────────────────────────────────────────────────
+function showNameModal() {
+  const errEl = document.getElementById('name-error');
+  if (errEl) errEl.style.display = 'none';
+  const inp = document.getElementById('name-input');
+  if (inp) inp.value = '';
+  document.getElementById('name-modal').style.display = 'flex';
+  renderKnownUsersList();
+  setTimeout(() => { const el = document.getElementById('name-input'); if(el) el.focus(); }, 100);
+}
+
+function saveName() {
+  const inp = document.getElementById('name-input');
+  const name = inp ? inp.value.trim() : '';
+  if (!name) {
+    const errEl = document.getElementById('name-error');
+    if (errEl) { errEl.textContent = '❌ Zadaj meno!'; errEl.style.display = 'block'; }
+    return;
+  }
+  currentUser = name;
+  setCookie('fantozzi_user', name, 365);
+  localStorage.setItem('fantozzi_user', name);
+  knownUsers[name] = { meno: name };
+  localStorage.setItem('fantozzi_known_users', JSON.stringify(knownUsers));
+  document.getElementById('name-modal').style.display = 'none';
+  updateUserDisplay();
+  hideLoginBanner();
+  showToast('👋 Vitaj, ' + name + '!', 'success');
+  loadOrders();
+}
+
+function changeUser() {
+  if (confirm('Odhlásiť sa ako ' + currentUser + '?')) {
+    deleteCookie('fantozzi_user');
+    localStorage.removeItem('fantozzi_user');
+    currentUser = null;
+    document.getElementById('username-display').textContent = '?';
+    // Bug 2 fix: reset vsetkych vyberov po odhlaseni
+    resetMenuSelections();
+    showLoginBanner();
+    showNameModal();
+  }
+}
+
+function resetMenuSelections() {
+  document.querySelectorAll('.menu-item input').forEach(el => {
+    el.checked = false;
+    el._prevChecked = false;
+    el.disabled = false;
+    document.getElementById('label_' + el.id)?.classList.remove('selected');
+  });
+  document.querySelectorAll('.variant-options').forEach(div => {
+    div.classList.remove('visible');
+    div.querySelectorAll('input[type=radio]').forEach(r => {
+      r.checked = false;
+      r.closest('.variant-radio-btn')?.classList.remove('variant-selected');
+    });
+  });
+  document.querySelectorAll('.item-note-input').forEach(el => el.value = '');
+  if (document.getElementById('price-calculator')) document.getElementById('price-calculator').style.display = 'none';
+  porcieCount = 1;
+  if (document.getElementById('porcie-count')) document.getElementById('porcie-count').textContent = '1';
+  // Reset confirmed state
+  if (document.getElementById('order-confirmed')) document.getElementById('order-confirmed').style.display = 'none';
+  if (document.getElementById('order-form')) document.getElementById('order-form').style.display = 'block';
+  const btn = document.getElementById('submit-btn');
+  if (btn) { btn.textContent = '✅ Potvrdiť objednávku'; btn.style.background = ''; btn.disabled = false; }
+  isEditMode = false;
+}
+
+function updateUserDisplay() {
+  const badge = document.getElementById('user-badge');
+  const display = document.getElementById('username-display');
+  if (currentUser) {
+    display.textContent = currentUser;
+    badge.classList.remove('guest');
+    badge.title = 'Klikni pre zmenu';
+  } else {
+    display.textContent = 'Prihlásiť sa';
+    badge.classList.add('guest');
+    badge.title = 'Nie si prihlásený — klikni pre prihlásenie';
+  }
+}
+
+function switchTab() {}
+function registerUser() {}
+function authRequestOTP() {}
+function authVerifyOTP() {}
+
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('name-modal').style.display !== 'none') saveName();
+    if (document.getElementById('admin-modal').style.display !== 'none') loginAdmin();
+  }
+});
+
+// ── Status / Countdown ────────────────────────────────────────────────────
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    orderingOpen = data.open;
+    config_deadline = data.deadline;
+    updateClock();
+    updateCountdown(data.deadline);
+    setInterval(() => { updateClock(); updateCountdown(data.deadline); }, 1000);
+  } catch(e) {}
+}
+
+// ── Meniny & Sviatky ──────────────────────────────────────────────────────
+const MENINY = {
+  "1-1":"Nový rok","1-2":"Štefánia","1-3":"Daniela","1-4":"Drahoslav","1-5":"Andrea","1-6":"Antónia","1-7":"Bohuslava","1-8":"Severín","1-9":"Alexej","1-10":"Dáša",
+  "1-11":"Malvína","1-12":"Ernest","1-13":"Rastislav","1-14":"Radovan","1-15":"Dobroslav","1-16":"Kristína","1-17":"Nataša","1-18":"Bohdana","1-19":"Drahomíra","1-20":"Dalibor",
+  "1-21":"Vincent","1-22":"Zora","1-23":"Miloš","1-24":"Timotej","1-25":"Gejza","1-26":"Tamara","1-27":"Bohdan","1-28":"Alfonz","1-29":"Gašpar","1-30":"Ľubica","1-31":"Emília",
+  "2-1":"Tatiana","2-2":"Erika","2-3":"Blažej","2-4":"Veronika","2-5":"Agáta","2-6":"Dorota","2-7":"Vanda","2-8":"Zoja","2-9":"Zdenko","2-10":"Gabriela",
+  "2-11":"Dezider","2-12":"Perla","2-13":"Arpád","2-14":"Valentín","2-15":"Pravoslav","2-16":"Ida","2-17":"Miloslava","2-18":"Jaromír","2-19":"Vlasta","2-20":"Lívia",
+  "2-21":"Eleonóra","2-22":"Etela","2-23":"Roman","2-24":"Matej","2-25":"Frederik","2-26":"Viktor","2-27":"Alexander","2-28":"Zlatica","2-29":"Radomír",
+  "3-1":"Albín","3-2":"Anežka","3-3":"Bohumila","3-4":"Kazimír","3-5":"Fridrich","3-6":"Radoslav","3-7":"Tomáš","3-8":"Alan","3-9":"Františka","3-10":"Branislav",
+  "3-11":"Celestín","3-12":"Gregor","3-13":"Vlastimil","3-14":"Matilda","3-15":"Svetlana","3-16":"Boleslav","3-17":"Ľubomír","3-18":"Eduard","3-19":"Jozef","3-20":"Víťazoslav",
+  "3-21":"Blahoslav","3-22":"Beňadik","3-23":"Adrián","3-24":"Gabriel","3-25":"Marián","3-26":"Emanuel","3-27":"Alena","3-28":"Soňa","3-29":"Miroslav","3-30":"Vieroslav","3-31":"Benjamín",
+  "4-1":"Hugo","4-2":"Zita","4-3":"Richard","4-4":"Izidor","4-5":"Miroslava","4-6":"Irena","4-7":"Zoltán","4-8":"Albert","4-9":"Milena","4-10":"Igor",
+  "4-11":"Július","4-12":"Estera","4-13":"Aleš","4-14":"Tiburc","4-15":"Fedor","4-16":"Dana","4-17":"Rudolf","4-18":"Valér","4-19":"Jela","4-20":"Marcel",
+  "4-21":"Ervín","4-22":"Slavomír","4-23":"Vojtech","4-24":"Juraj","4-25":"Marek","4-26":"Jaroslava","4-27":"Jaroslav","4-28":"Jarmila","4-29":"Lea","4-30":"Anastázia",
+  "5-1":"Filip","5-2":"Žigmund","5-3":"Galina","5-4":"Florián","5-5":"Lesana","5-6":"Hermína","5-7":"Monika","5-8":"Ingrida","5-9":"Ctibor","5-10":"Viktória",
+  "5-11":"Blažena","5-12":"Pankrác","5-13":"Servác","5-14":"Bonifác","5-15":"Žofia","5-16":"Svetozár","5-17":"Gizela","5-18":"Viola","5-19":"Gertrúda","5-20":"Bernard",
+  "5-21":"Zina","5-22":"Júlia","5-23":"Želmíra","5-24":"Ela","5-25":"Urban","5-26":"Dušan","5-27":"Iveta","5-28":"Viliam","5-29":"Vilma","5-30":"Ferdinand","5-31":"Petronela",
+  "6-1":"Žaneta","6-2":"Xénia","6-3":"Karolína","6-4":"Lenka","6-5":"Laura","6-6":"Norbert","6-7":"Róbert","6-8":"Medard","6-9":"Stanislava","6-10":"Margaréta",
+  "6-11":"Dobroslava","6-12":"Zlatko","6-13":"Anton","6-14":"Vasil","6-15":"Vít","6-16":"Blanka","6-17":"Adolf","6-18":"Vratislav","6-19":"Alfréd","6-20":"Valéria",
+  "6-21":"Alojz","6-22":"Paulína","6-23":"Sidónia","6-24":"Ján","6-25":"Tadeáš","6-26":"Adriána","6-27":"Ladislav","6-28":"Beáta","6-29":"Peter","6-30":"Melánia",
+  "7-1":"Diana","7-2":"Berta","7-3":"Miloslav","7-4":"Prokop","7-5":"Cyril a Metod","7-6":"Patrícia","7-7":"Cyril","7-8":"Ivan","7-9":"Lujza","7-10":"Milota",
+  "7-11":"Benedikt","7-12":"Nina","7-13":"Margita","7-14":"Kamil","7-15":"Henrich","7-16":"Drahomír","7-17":"Bohuslav","7-18":"Kamila","7-19":"Dušana","7-20":"Iľja",
+  "7-21":"Daniel","7-22":"Magdaléna","7-23":"Alžbeta","7-24":"Vladimír","7-25":"Jakub","7-26":"Anna","7-27":"Božena","7-28":"Krištof","7-29":"Marta","7-30":"Libuša","7-31":"Ignác",
+  "8-1":"Božidara","8-2":"Gustáv","8-3":"Jerguš","8-4":"Dominik","8-5":"Hortenzia","8-6":"Jozefína","8-7":"Štefánia","8-8":"Oskar","8-9":"Ľubomíra","8-10":"Vavrinec",
+  "8-11":"Zuzana","8-12":"Darina","8-13":"Ľubomír","8-14":"Mojmír","8-15":"Marcela","8-16":"Leonard","8-17":"Milica","8-18":"Helena","8-19":"Lýdia","8-20":"Anabela",
+  "8-21":"Jana","8-22":"Tichomír","8-23":"Filip","8-24":"Bartolomej","8-25":"Ľudovít","8-26":"Samuel","8-27":"Silvia","8-28":"Augustín","8-29":"Mária","8-30":"Ružena","8-31":"Nora",
+  "9-1":"Darina","9-2":"Konštantín","9-3":"Belo","9-4":"Rozália","9-5":"Regina","9-6":"Alica","9-7":"Mariána","9-8":"Miriama","9-9":"Martina","9-10":"Oľga",
+  "9-11":"Bystrík","9-12":"Mária","9-13":"Ctibor","9-14":"Ľudmila","9-15":"Jolana","9-16":"Ľudomila","9-17":"Olympia","9-18":"Eugénia","9-19":"Konštantín","9-20":"Ľuboš",
+  "9-21":"Matúš","9-22":"Móric","9-23":"Zdenka","9-24":"Ľuboš","9-25":"Vladislav","9-26":"Edita","9-27":"Cyprián","9-28":"Václav","9-29":"Michal","9-30":"Jarolím",
+  "10-1":"Arnold","10-2":"Levoslav","10-3":"Stela","10-4":"František","10-5":"Viera","10-6":"Natália","10-7":"Eliška","10-8":"Brigita","10-9":"Dionýz","10-10":"Slavomíra",
+  "10-11":"Valentína","10-12":"Maximilián","10-13":"Koloman","10-14":"Boris","10-15":"Terézia","10-16":"Vladimíra","10-17":"Hedviga","10-18":"Lukáš","10-19":"Kristián","10-20":"Vendelín",
+  "10-21":"Uršuľa","10-22":"Sergej","10-23":"Alojzia","10-24":"Kvetoslava","10-25":"Aurel","10-26":"Demeter","10-27":"Sabína","10-28":"Dobromila","10-29":"Klára","10-30":"Simona","10-31":"Aurélia",
+  "11-1":"Všetkých svätých","11-2":"Dušičky","11-3":"Hubert","11-4":"Karol","11-5":"Imrich","11-6":"René","11-7":"Rút","11-8":"Bohumír","11-9":"Teodor","11-10":"Tibor",
+  "11-11":"Martin","11-12":"Svätopluk","11-13":"Stanislav","11-14":"Irma","11-15":"Leopold","11-16":"Agnesa","11-17":"Klaudia","11-18":"Eugen","11-19":"Alžbeta","11-20":"Félix",
+  "11-21":"Elvíra","11-22":"Cecília","11-23":"Klement","11-24":"Emília","11-25":"Katarína","11-26":"Kornel","11-27":"Milan","11-28":"Henrieta","11-29":"Blažej","11-30":"Ondrej",
+  "12-1":"Edmund","12-2":"Bibiána","12-3":"Oldřich","12-4":"Barbora","12-5":"Oto","12-6":"Mikuláš","12-7":"Ambróz","12-8":"Mária","12-9":"Izabela","12-10":"Radúz",
+  "12-11":"Hilda","12-12":"Otília","12-13":"Lucia","12-14":"Branislava","12-15":"Ivica","12-16":"Albína","12-17":"Kornélia","12-18":"Sláva","12-19":"Judita","12-20":"Dagmara",
+  "12-21":"Bohdan","12-22":"Adela","12-23":"Nadežda","12-24":"Adam a Eva","12-25":"Vianoce","12-26":"Štefan","12-27":"Filoména","12-28":"Ivana","12-29":"Milada","12-30":"Dávid","12-31":"Silvester"
+};
+
+const SVIATKY = {
+  "1-1":"Deň vzniku SR","1-6":"Zjavenie Pána","5-1":"Sviatok práce","5-8":"Deň víťazstva",
+  "7-5":"Sv. Cyril a Metod","8-29":"Výročie SNP","9-1":"Deň Ústavy SR","9-15":"Sedem bolestí P. Márie",
+  "11-1":"Sviatok všetkých svätých","11-17":"Deň boja za slobodu","12-24":"Štedrý deň",
+  "12-25":"1. sviatok vianočný","12-26":"2. sviatok vianočný"
+};
+
+function getEaster(year) {
+  const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4;
+  const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+  const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  const month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+  return new Date(year,month-1,day);
+}
+
+function getDayInfo(date) {
+  const m = date.getMonth()+1, d = date.getDate(), y = date.getFullYear();
+  const key = `${m}-${d}`;
+  const easter = getEaster(y);
+  const goodFriday = new Date(easter); goodFriday.setDate(easter.getDate()-2);
+  const easterMon  = new Date(easter); easterMon.setDate(easter.getDate()+1);
+  const isSameDay  = (a,b) => a.getDate()===b.getDate() && a.getMonth()===b.getMonth();
+
+  let sviatok = SVIATKY[key] || null;
+  if (!sviatok && isSameDay(date, goodFriday)) sviatok = 'Veľký piatok';
+  if (!sviatok && isSameDay(date, easter))     sviatok = 'Veľká noc';
+  if (!sviatok && isSameDay(date, easterMon))  sviatok = 'Veľkonočný pondelok';
+
+  const meniny = MENINY[key] || null;
+  return { sviatok, meniny };
+}
+
+const MENINOVA_PARTA = ['Ivan','Marek','Michal','Filip','Brano','Branislav','Tomáš'];
+
+function updateClock() {
+  const now = new Date();
+  const days = ['Nedeľa','Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota'];
+  const months = ['jan','feb','mar','apr','máj','jún','júl','aug','sep','okt','nov','dec'];
+  const pad = n => String(n).padStart(2,'0');
+  const dateEl  = document.getElementById('cd-date');
+  const clockEl = document.getElementById('cd-clock');
+  if (dateEl)  dateEl.textContent  = `${days[now.getDay()]} ${now.getDate()}. ${months[now.getMonth()]}`;
+  if (clockEl) clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+
+function updateCdInfo() {
+  const el = document.getElementById('cd-info');
+  if (!el) return;
+  const { sviatok, meniny } = getDayInfo(new Date());
+  const parts = [];
+  if (sviatok) parts.push(`🎉 ${sviatok}`);
+  if (meniny)  parts.push(`🎂 Meniny: ${meniny}`);
+
+  if (meniny) {
+    const meninaNames = meniny.split(/[,\/\s]+/);
+    const maOslavenca = MENINOVA_PARTA.some(m => meninaNames.some(n => n.trim() === m));
+    if (maOslavenca) parts.push(`🍰 Kúpte na meniny dezert pre meninového oslávenca!`);
+  }
+
+  if (parts.length) { el.textContent = parts.join('   ·   '); el.style.display = 'block'; }
+  else el.style.display = 'none';
+}
+
+let _cdDeadlineTotal = null;
+function updateCountdown(deadline) {
+  const bar = document.getElementById('countdown-bar');
+  const [hh, mm] = deadline.split(':').map(Number);
+  const now = new Date();
+  const target = new Date();
+  target.setHours(hh, mm, 0, 0);
+  const diff = target - now;
+
+  if (_cdDeadlineTotal === null) {
+    const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+    _cdDeadlineTotal = target - startOfDay;
+  }
+
+  const timeEl  = document.getElementById('cd-time');
+  const labelEl = document.getElementById('cd-label');
+  const fillEl  = document.getElementById('cd-progress-fill');
+
+  if (diff <= 0) {
+    orderingOpen = false;
+    bar.className = 'closed';
+    bar.style.cursor = 'default';
+    labelEl.textContent = `⛔ Objednávanie uzavreté (po ${deadline})`;
+    if (timeEl) timeEl.style.display = 'none';
+    if (fillEl) fillEl.style.width = '0%';
+    disableForm(); return;
+  }
+  orderingOpen = true;
+  if (!isAdmin) bar.style.cursor = 'pointer';
+
+  orderingOpen = true;
+  const hodiny  = Math.floor(diff / 3600000);
+  const minuty  = Math.floor((diff % 3600000) / 60000);
+  const sekundy = Math.floor((diff % 60000) / 1000);
+  const pad = n => String(n).padStart(2, '0');
+
+  if (timeEl) {
+    timeEl.style.display = 'flex';
+    document.getElementById('cd-h').textContent = pad(hodiny);
+    document.getElementById('cd-m').textContent = pad(minuty);
+    document.getElementById('cd-s').textContent = pad(sekundy);
+  }
+
+  let label, cls;
+  if (diff > 3600000) {
+    cls = 'green'; label = `✅ Objednávanie otvorené — uzatvára o ${deadline}`;
+  } else if (diff > 900000) {
+    cls = 'orange'; label = `⚠️ Menej ako hodina! Uzatvára o ${deadline}`;
+  } else {
+    cls = 'red'; label = `🔴 Posledné minúty! Uzatvára o ${deadline}`;
+  }
+  bar.className = cls;
+  labelEl.textContent = label;
+
+  if (fillEl && _cdDeadlineTotal > 0) {
+    const pct = Math.max(0, Math.min(100, (diff / _cdDeadlineTotal) * 100));
+    fillEl.style.width = pct + '%';
+  }
+}
+
+function disableForm() {
+  const btn = document.getElementById('submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⛔ Objednávanie uzavreté'; }
+  document.querySelectorAll('.menu-item input').forEach(el => el.disabled = true);
+  document.querySelectorAll('.variant-options input[type=radio]').forEach(el => el.disabled = true);
+  document.querySelectorAll('.item-note-input').forEach(el => el.disabled = true);
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────────
+async function loadMenu() {
+  try {
+    const res = await fetch('/api/menu');
+    const data = await res.json();
+    document.getElementById('menu-loading').style.display = 'none';
+
+    if (!data.ok || !data.menu || !data.menu.sekcie || data.menu.sekcie.length === 0) {
+      // Menu nie je dostupne - zobraz informativnu hlasku
+      document.getElementById('menu-error').style.display = 'block';
+      document.getElementById('menu-error').innerHTML = `
+        <div style="text-align:center;padding:8px 0">
+          <div style="font-size:32px;margin-bottom:8px">⏳</div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:6px">Menu ešte nie je pripravené</div>
+          <div style="font-size:13px;color:#856404">Reštaurácia Fantozzi zatiaľ nezverejnila dnešné menu.<br>Skús to znova o chvíľu — menu býva dostupné okolo 8:00.</div>
+          <button onclick="retryLoadMenu()" style="margin-top:14px;background:#f39c12;color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer">🔄 Skúsiť znova</button>
+        </div>`;
+      // Skryj formular, nezobrazuj tlacidla
+      document.getElementById('order-form').style.display = 'none';
+      document.getElementById('order-confirmed').style.display = 'none';
+      return;
+    }
+
+    menuData = data.menu;
+    renderMenu(menuData);
+  } catch(e) {
+    document.getElementById('menu-loading').style.display = 'none';
+    document.getElementById('menu-error').style.display = 'block';
+    document.getElementById('menu-error').innerHTML = `
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-size:32px;margin-bottom:8px">🔌</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px">Chyba spojenia</div>
+        <div style="font-size:13px;color:#856404">Nepodarilo sa spojiť so serverom.</div>
+        <button onclick="retryLoadMenu()" style="margin-top:14px;background:#e74c3c;color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer">🔄 Skúsiť znova</button>
+      </div>`;
+    document.getElementById('order-form').style.display = 'none';
+  }
+}
+
+async function retryLoadMenu() {
+  document.getElementById('menu-error').style.display = 'none';
+  document.getElementById('menu-loading').style.display = 'block';
+  document.getElementById('menu-loading').textContent = '⏳ Znova načítavam menu...';
+  await loadMenu();
+}
+
+function renderMenu(menu) {
+  const content = document.getElementById('menu-content');
+  content.style.display = 'block';
+  // Vzdy zobraz formular - pre neprihlasenych bude banner, pre prihlasenych tlacidla
+  document.getElementById('order-form').style.display = 'block';
+
+  // Zobraz/skry login banner podla stavu prihlasenia
+  const banner = document.getElementById('login-banner');
+  if (banner) banner.style.display = currentUser ? 'none' : 'flex';
+
+  // Ak je prihlaseny a uz ma objednavku, skry formular (ukaze sa confirmed)
+  // Toto sa resi v loadOrders
+
+  let html = '';
+  if (menu.datum) html += `
+    <div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+      <div style="font-size:36px;line-height:1">📅</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Denné menu</div>
+        <div style="font-size:20px;font-weight:800;color:white;line-height:1.2">${menu.datum}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Objednávky do ${config_deadline || '10:00'}</div>
+      </div>
+    </div>`;
+
+  menu.sekcie.forEach(sekcia => {
+    const isPolievka = sekcia.nazov.toLowerCase().includes('polievka');
+    const isPizza    = sekcia.nazov.toLowerCase().includes('pizza');
+    const isJedlo    = sekcia.nazov.toLowerCase().includes('hlavné');
+    const isDezert   = sekcia.nazov.toLowerCase().includes('dezert');
+    const inputType  = isPolievka ? 'radio' : isJedlo ? 'radio' : isPizza ? 'radio' : 'checkbox';
+    const groupName  = isPolievka ? 'polievka' : isJedlo ? 'jedlo' : isPizza ? 'pizza' : 'dezert';
+
+    const isHotSekcia = isPizza || isJedlo;
+
+    html += `<div class="menu-section"><div class="menu-section-title">${sekcia.nazov.toUpperCase()}`;
+    if (sekcia.cena) html += ` <span class="price-badge">${sekcia.cena}</span>`;
+    html += `</div>`;
+
+    sekcia.polozky.forEach(p => {
+      const id = `${groupName}_${p.cislo}`;
+      const { varianty, nazovClean } = parseVarianty(p.nazov);
+      const hasVariants = varianty.length >= 2;
+      const value = `č.${p.cislo} ${nazovClean}`;
+      const { hmotnostText, alergenyHtml } = parseHmotnost(p.hmotnost);
+      const isHot = topJedlo && (topJedlo.startsWith(value) || topJedlo === value) && isHotSekcia;
+
+      const variantRadios = hasVariants ? `
+        <div class="variant-options" id="variants_${id}">
+          <div class="variant-options-label">🎨 Vyberte druh (povinné)</div>
+          <div class="variant-radio-row">
+            ${varianty.map(v => `
+              <label class="variant-radio-btn" id="variant_label_${id}_${v}" onclick="event.stopPropagation()">
+                <input type="radio" name="variant_${groupName}_${p.cislo}" value="${v}"
+                  onchange="onVariantChange(this,'${id}','${v}')" onclick="event.stopPropagation()">
+                ${v}
+              </label>`).join('')}
+          </div>
+        </div>` : '';
+
+      html += `
+        <label class="menu-item${isHot ? ' hot-dish' : ''}" id="label_${id}" onclick="handleMenuClick(event,'${id}','${groupName}')">
+          ${isHot ? `<div class="hot-badge">🔥 TOP</div>` : ''}
+          <input type="${inputType}" name="${groupName}" id="${id}" value="${value}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
+          <span class="menu-item-num">${p.cislo}</span>
+          <span class="menu-item-text">
+            <span class="menu-item-name">${nazovClean}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
+            <span class="menu-item-weight">${hmotnostText}</span>
+            ${alergenyHtml}
+            ${variantRadios}
+            ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="poznámka k tejto položke..." maxlength="120"
+              onclick="event.stopPropagation()" onfocus="event.stopPropagation()" onkeydown="event.stopPropagation()">` : ''}
+          </span>
+        </label>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `<details class="allergen-legend"><summary>ℹ️ Zoznam alergenov</summary>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px">
+      ${Object.entries(ALERGENY).map(([num, a]) =>
+        `<div><span class="allergen-chip ${a.cls}" style="margin:2px 0">${a.icon} <span class="a-num">${num}</span> ${a.kratky}</span></div>`
+      ).join('')}
+    </div></details>`;
+
+  content.innerHTML = html;
+}
+
+function onVariantChange(radio, itemId, value) {
+  const name = radio.name;
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    r.closest('.variant-radio-btn')?.classList.remove('variant-selected');
+  });
+  radio.closest('.variant-radio-btn')?.classList.add('variant-selected');
+}
+
+function deselectGroup(group) {
+  document.querySelectorAll(`input[name="${group}"]`).forEach(el => {
+    el.checked = false;
+    el._prevChecked = false;
+    document.getElementById('label_' + el.id)?.classList.remove('selected');
+    toggleVariantOptions(el.id, group, false);
+  });
+}
+
+function onMenuChange(input, group) {
+  document.querySelectorAll(`input[name="${group}"]`).forEach(el => {
+    document.getElementById('label_' + el.id)?.classList.toggle('selected', el.checked);
+    toggleVariantOptions(el.id, group, el.checked);
+  });
+  // jedlo a pizza su vzajomne exkluzivne
+  if (group === 'jedlo' && input.checked) deselectGroup('pizza');
+  else if (group === 'pizza' && input.checked) deselectGroup('jedlo');
+  updateLivePrice();
+}
+
+// Bug 1 fix: kliknutie na uz zvolenu polozku ju odznaci
+function handleMenuClick(event, id, group) {
+  const input = document.getElementById(id);
+  if (!input) return;
+
+  if (input.type === 'checkbox') {
+    // checkbox - normalne spravanie, onchange resi zvysok
+    return;
+  }
+
+  // radio - ak uz je checked, odznac ho
+  if (input.checked && input._prevChecked) {
+    input.checked = false;
+    input._prevChecked = false;
+    document.getElementById('label_' + id)?.classList.remove('selected');
+    toggleVariantOptions(id, group, false);
+    updateLivePrice();
+    event.preventDefault();
+    return;
+  }
+
+  // Resetuj _prevChecked pre vsetky v skupine
+  document.querySelectorAll(`input[name="${group}"]`).forEach(el => {
+    el._prevChecked = false;
+    document.getElementById('label_' + el.id)?.classList.remove('selected');
+    toggleVariantOptions(el.id, group, false);
+  });
+
+  input.checked = true;
+  input._prevChecked = true;
+  document.getElementById('label_' + id)?.classList.add('selected');
+  toggleVariantOptions(id, group, true);
+  if (group === 'jedlo') deselectGroup('pizza');
+  else if (group === 'pizza') deselectGroup('jedlo');
+  updateLivePrice();
+  event.preventDefault();
+}
+
+let porcieCount = 1;
+
+function changePorcie(delta) {
+  porcieCount = Math.max(1, Math.min(10, porcieCount + delta));
+  document.getElementById('porcie-count').textContent = porcieCount;
+  updateLivePrice();
+}
+
+function updateLivePrice() {
+  if (!menuData) return;
+  const polievka = document.querySelector('input[name="polievka"]:checked')?.value || null;
+  const jedlo    = document.querySelector('input[name="jedlo"]:checked')?.value    || null;
+  const pizza    = document.querySelector('input[name="pizza"]:checked')?.value    || null;
+  const dezert   = document.querySelector('input[name="dezert"]:checked')?.value   || null;
+
+  const calc = document.getElementById('price-calculator');
+  const totalEl = document.getElementById('price-total');
+  const detailEl = document.getElementById('price-detail');
+
+  const cenaJedlo  = getCenaZMenuFE('hlavné') || 6.50;
+  const cenaPizza  = getCenaZMenuFE('pizza')  || 6.70;
+  const cenaDezert = getCenaZMenuFE('dezert') || 1.50;
+
+  let celkom = 0;
+  const detail = [];
+
+  if (jedlo && polievka) { celkom += cenaJedlo; detail.push('Polievka + Hlavné jedlo: ' + cenaJedlo.toFixed(2) + ' €'); }
+  else if (pizza && polievka) { celkom += cenaPizza; detail.push('Polievka + Pizza: ' + cenaPizza.toFixed(2) + ' €'); }
+  else if (pizza && !polievka) { celkom += cenaPizza; detail.push('Pizza: ' + cenaPizza.toFixed(2) + ' €'); }
+  else if (polievka && !jedlo) { celkom += 1.90; detail.push('Polievka: 1.90 €'); }
+
+  if (dezert) { celkom += cenaDezert; detail.push('Dezert: ' + cenaDezert.toFixed(2) + ' €'); }
+
+  if (celkom > 0 && calc) {
+    const total = celkom * porcieCount;
+    calc.style.display = 'block';
+    totalEl.textContent = total.toFixed(2) + ' €';
+    const porcieText = porcieCount > 1 ? ' × ' + porcieCount + ' porcie = ' + total.toFixed(2) + ' €' : '';
+    detailEl.innerHTML = detail.join(' + ') + porcieText;
+  } else if (calc) {
+    calc.style.display = 'none';
+  }
+  updateFloatingBar();
+}
+
+function getCenaZMenuFE(typ) {
+  if (!menuData?.sekcie) return null;
+  const sekcia = menuData.sekcie.find(s => s.nazov.toLowerCase().includes(typ));
+  if (!sekcia?.cena) return null;
+  const m = sekcia.cena.match(/(\d+)[.,](\d{2})/);
+  return m ? parseFloat(m[1] + '.' + m[2]) : null;
+}
+
+// ── Objednanie ────────────────────────────────────────────────────────────
+async function submitOrder() {
+  if (!orderingOpen) { showToast('Objednávanie je uzavreté!', 'error'); return; }
+  if (!currentUser) { showToast('Pre objednávanie sa musíš prihlásiť', 'error'); showNameModal(); return; }
+
+  const polievkaEl = document.querySelector('input[name="polievka"]:checked');
+  const jedloEl    = document.querySelector('input[name="jedlo"]:checked');
+  const pizzaEl    = document.querySelector('input[name="pizza"]:checked');
+  const dezertEl   = document.querySelector('input[name="dezert"]:checked');
+
+  // Validacia
+  if (!polievkaEl) { showToast('Polievka je povinná!', 'error'); return; }
+  if (!jedloEl && !pizzaEl) { showToast('Vyber hlavné jedlo alebo pizzu!', 'error'); return; }
+
+  // Validacia variant - ak ma polozka varianty, musi byt vybrata
+  function getValueWithVariant(el, groupName) {
+    if (!el) return null;
+    if (el.dataset.hasVariants !== 'true') return el.value;
+    const cislo = el.id.replace(groupName + '_', '');
+    const variant = document.querySelector(`input[name="variant_${groupName}_${cislo}"]:checked`);
+    if (!variant) return null; // chyba - varianta nevybrana
+    return el.value + ' — ' + variant.value;
+  }
+
+  const jedloVal   = getValueWithVariant(jedloEl, 'jedlo');
+  const pizzaVal   = getValueWithVariant(pizzaEl, 'pizza');
+  const dezertVal  = getValueWithVariant(dezertEl, 'dezert');
+  const polievkaVal = getValueWithVariant(polievkaEl, 'polievka');
+
+  if (jedloEl   && jedloVal   === null) { showToast('Vyber druh hlavného jedla!', 'error'); return; }
+  if (pizzaEl   && pizzaVal   === null) { showToast('Vyber druh pizze!', 'error'); return; }
+  if (dezertEl  && dezertVal  === null) { showToast('Vyber druh dezertu!', 'error'); return; }
+  if (polievkaEl && polievkaVal === null) { showToast('Vyber druh polievky!', 'error'); return; }
+
+  // Zbieraj poznamky od vybranych poloziek
+  const noteEmojis = { jedlo: '🍽️', pizza: '🍕' };
+  const notesParts = [];
+  [['jedlo', jedloEl], ['pizza', pizzaEl]].forEach(([group, el]) => {
+    if (!el) return;
+    const noteEl = document.getElementById('note_' + el.id);
+    if (noteEl?.value.trim()) notesParts.push(noteEmojis[group] + ' ' + noteEl.value.trim());
+  });
+
+  const body = {
+    meno: currentUser,
+    polievka: polievkaVal,
+    jedlo:    jedloVal,
+    pizza:    pizzaVal,
+    dezert:   dezertVal,
+    poznamka: notesParts.join(' | '),
+    porcie: porcieCount,
+    editMode: isEditMode
+  };
+
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      isEditMode = false;
+      showToast(body.editMode ? '✏️ Objednávka upravená!' : '✅ Objednávka uložená!', 'success');
+      lockOrderForm(body.polievka, body.jedlo, body.pizza, body.dezert, body.poznamka, body.porcie);
+      await loadOrders();
+      showQR();
+    } else { showToast('❌ ' + data.error, 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+function lockOrderForm(polievka, jedlo, pizza, dezert, poznamka, porcie) {
+  // Uloz pre QR modal - funguje aj po refresh bez checked inputov
+  currentQROrder = { polievka: polievka||null, jedlo: jedlo||null, pizza: pizza||null, dezert: dezert||null, poznamka: poznamka||'' };
+
+  document.getElementById('order-form').style.display = 'none';
+  document.getElementById('order-confirmed').style.display = 'block';
+  let html = '';
+  if (polievka) html += `🍲 <strong>Polievka:</strong> ${polievka}<br>`;
+  if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${jedlo}<br>`;
+  if (pizza)    html += `🍕 <strong>Pizza:</strong> ${pizza}<br>`;
+  if (dezert)   html += `🍮 <strong>Dezert:</strong> ${dezert}<br>`;
+  if (porcie > 1) html += `👥 <strong>Počet porcií:</strong> ${porcie}<br>`;
+  if (poznamka) html += `📝 <em>${poznamka}</em>`;
+  document.getElementById('confirmed-summary').innerHTML = html;
+  document.querySelectorAll('.menu-item input').forEach(el => el.disabled = true);
+  porcieCount = 1;
+  if (document.getElementById('porcie-count')) document.getElementById('porcie-count').textContent = '1';
+  updateFloatingBar();
+}
+
+function enableEdit() {
+  if (!orderingOpen) { showToast('Po 10:00 sa nedá upraviť', 'error'); return; }
+  isEditMode = true;
+  document.getElementById('order-confirmed').style.display = 'none';
+  document.getElementById('order-form').style.display = 'block';
+  document.querySelectorAll('.menu-item input').forEach(el => el.disabled = false);
+  document.querySelectorAll('.item-note-input').forEach(el => el.disabled = false);
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = '💾 Uložiť zmenu'; btn.style.background = '#f39c12';
+  showToast('Uprav výber a potvrď', 'success');
+}
+
+async function userDeleteOrder() {
+  if (!orderingOpen) { showToast('Po 10:00 sa nedá zrušiť', 'error'); return; }
+  if (!currentUser || !confirm('Naozaj zrušiť objednávku?')) return;
+  try {
+    const res = await fetch(`/api/orders/${encodeURIComponent(currentUser)}?adminPass=__user__`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('🗑️ Objednávka zrušená', 'success');
+      isEditMode = false;
+      document.getElementById('order-confirmed').style.display = 'none';
+      document.getElementById('order-form').style.display = 'block';
+      document.querySelectorAll('.menu-item input').forEach(el => { el.checked = false; el.disabled = false; document.getElementById('label_'+el.id)?.classList.remove('selected'); });
+      document.querySelectorAll('.variant-options').forEach(div => {
+        div.classList.remove('visible');
+        div.querySelectorAll('input[type=radio]').forEach(r => { r.checked = false; r.closest('.variant-radio-btn')?.classList.remove('variant-selected'); });
+      });
+      document.querySelectorAll('.item-note-input').forEach(el => el.value = '');
+      const btn = document.getElementById('submit-btn');
+      btn.textContent = '✅ Potvrdiť objednávku'; btn.style.background = ''; btn.disabled = false;
+      await loadOrders();
+    } else { showToast('❌ ' + data.error, 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+// ── Orders ────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  try {
+    const res = await fetch('/api/orders');
+    const data = await res.json();
+
+    // Zisti TOP jedlo (HOT) vzdy z dnesnych dat
+    const jedlaMap = {};
+    Object.values(data.orders).forEach(o => {
+      if (o.jedlo)  jedlaMap[o.jedlo]  = (jedlaMap[o.jedlo]  || 0) + 1;
+      if (o.pizza)  jedlaMap[o.pizza]  = (jedlaMap[o.pizza]  || 0) + 1;
+    });
+    const sorted = Object.entries(jedlaMap).sort((a,b) => b[1]-a[1]);
+    const newTop = sorted.length > 0 && sorted[0][1] >= 2 ? sorted[0][0] : null;
+    if (newTop !== topJedlo) { topJedlo = newTop; if (menuData) renderMenu(menuData); }
+
+    // Renderuj objednavky len ked sme na dnesnom dni
+    if (currentDateIndex === 0) {
+      renderOrders(data.orders, data.count);
+
+      if (!isEditMode && currentUser && data.orders[currentUser]) {
+        const o = data.orders[currentUser];
+        if (document.getElementById('order-form').style.display !== 'none' &&
+            document.getElementById('order-confirmed').style.display === 'none') {
+          lockOrderForm(o.polievka, o.jedlo, o.pizza, o.dezert, o.poznamka, o.porcie || 1);
+        }
+      }
+
+      if (isAdmin && adminPassword) renderAdminOrders(data.orders, data.history || []);
+    }
+  } catch(e) { console.error('loadOrders error:', e); }
+}
+
+// ── Historia ──────────────────────────────────────────────────────────────
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/history');
+    const data = await res.json();
+    if (!data.ok) return;
+    const todayStr = new Date().toDateString();
+    const historicDates = data.history.map(h => h.datum).filter(d => d !== todayStr);
+    availableDates = [todayStr, ...historicDates];
+    updateHistNav();
+  } catch(e) {}
+}
+
+function formatHistDatum(datumStr) {
+  const d = new Date(datumStr);
+  if (isNaN(d)) return datumStr;
+  if (datumStr === new Date().toDateString()) return 'Dnes';
+  const days = ['Ne','Po','Ut','St','Št','Pi','So'];
+  return `${days[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+}
+
+function updateHistNav() {
+  const label = document.getElementById('hist-label');
+  const prevBtn = document.getElementById('hist-prev');
+  const nextBtn = document.getElementById('hist-next');
+  const badge = document.getElementById('hist-badge-container');
+  if (!label) return;
+  label.textContent = formatHistDatum(availableDates[currentDateIndex] || new Date().toDateString());
+  if (prevBtn) prevBtn.disabled = currentDateIndex >= availableDates.length - 1;
+  if (nextBtn) nextBtn.disabled = currentDateIndex <= 0;
+  if (badge) {
+    badge.innerHTML = currentDateIndex > 0
+      ? '<div class="hist-badge">📅 Historický prehľad — iba na čítanie</div>'
+      : '';
+  }
+}
+
+async function histNav(delta) {
+  const newIdx = currentDateIndex + delta;
+  if (newIdx < 0 || newIdx >= availableDates.length) return;
+  currentDateIndex = newIdx;
+  updateHistNav();
+  if (currentDateIndex === 0) {
+    await loadOrders();
+    return;
+  }
+  try {
+    const datum = availableDates[currentDateIndex];
+    const res = await fetch('/api/history/' + encodeURIComponent(datum));
+    const data = await res.json();
+    renderOrders(data.orders || {}, data.count || 0);
+  } catch(e) { console.error('histNav error:', e); }
+}
+
+// ── Easter egg (hlavicka) ─────────────────────────────────────────────────
+let easterHdrClicks = 0;
+let easterHdrTimeout;
+
+function togglePhoneDropdown() {
+  const d = document.getElementById('phone-dropdown');
+  d.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.phone-wrap')) {
+    document.getElementById('phone-dropdown')?.classList.remove('open');
+  }
+});
+
+function easterHdrClick() {
+  easterHdrClicks++;
+  clearTimeout(easterHdrTimeout);
+  easterHdrTimeout = setTimeout(() => { easterHdrClicks = 0; }, 2000);
+  if (easterHdrClicks >= 5) {
+    easterHdrClicks = 0;
+    pizzaRain();
+  }
+}
+
+function pizzaRain() {
+  const emojis = ['🍕','🍕','🍕','🍝','🍜','🧀','🫕','🥗','🍖'];
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'pizza-drop';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (Math.random() * 96) + 'vw';
+      el.style.fontSize = (18 + Math.random() * 22) + 'px';
+      el.style.animationDuration = (1.8 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, i * 70);
+  }
+  showToast('🍕 Fantozzi mode aktivovaný!', 'success');
+}
+
+function renderOrders(orders, count) {
+  const list = document.getElementById('orders-list');
+  const countEl = document.getElementById('order-count');
+  const entries = Object.values(orders);
+  if (countEl) countEl.textContent = entries.length ? `${entries.length} ľudí` : '';
+  renderSummary(entries);
+  if (!entries.length) { list.innerHTML = '<div class="empty-state">Zatiaľ nikto</div>'; return; }
+  const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c'];
+  list.innerHTML = entries.map(o => {
+    const initials = o.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const color = colors[o.meno.charCodeAt(0) % colors.length];
+    const isMine = o.meno === currentUser;
+    const editBadge = o.editCount > 0 ? `<span style="font-size:10px;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:4px">upravené ${o.editCount}x</span>` : '';
+    return `<div class="order-item" style="${isMine ? 'background:#fff5f5;border-radius:8px;padding:10px;margin:-4px;' : ''}">
+      <div class="order-avatar" style="background:${color}">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="order-name">${o.meno} ${isMine ? '<span style="font-size:11px;color:var(--accent)">(ty)</span>' : ''}${editBadge}</div>
+        <div class="order-detail">
+            ${o.polievka ? '🍲 ' + o.polievka : ''}
+            ${o.polievka && o.jedlo ? '<br>' : ''}
+            ${o.jedlo ? '🍽️ ' + o.jedlo : ''}
+            ${(o.polievka || o.jedlo) && o.pizza ? '<br>' : ''}
+            ${o.pizza ? '🍕 ' + o.pizza : ''}
+            ${(o.jedlo || o.pizza) && o.dezert ? '<br>' : ''}
+            ${o.dezert ? '🍮 ' + o.dezert : ''}
+          </div>
+        ${o.poznamka ? `<div class="order-note">📝 ${o.poznamka}</div>` : ''}
+      </div>
+      <div class="order-time">${o.cas||''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSummary(entries) {
+  const el = document.getElementById('summary-content');
+  if (!el) return;
+  if (!entries.length) { el.innerHTML = '<div class="empty-state" style="padding:20px 0">Zatiaľ žiadne</div>'; return; }
+
+  const polievkyMap = {}, jedlaMap = {}, pizzaMap = {}, dezertMap = {};
+  entries.forEach(o => {
+    if (o.polievka) polievkyMap[o.polievka] = (polievkyMap[o.polievka]||0)+1;
+    if (o.jedlo)    jedlaMap[o.jedlo]       = (jedlaMap[o.jedlo]      ||0)+1;
+    if (o.pizza)    pizzaMap[o.pizza]        = (pizzaMap[o.pizza]       ||0)+1;
+    if (o.dezert)   dezertMap[o.dezert]      = (dezertMap[o.dezert]    ||0)+1;
+  });
+
+  function skrat(text, max=36) { return text.replace(/^č\.\d+\s*/,'').slice(0,max); }
+  function numOf(text) { const m=text.match(/č\.(\d+)/); return m?m[1]:'?'; }
+
+  function buildRows(map, color) {
+    return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
+      const isTop = topJedlo && k === topJedlo;
+      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-num" style="background:${color}">${numOf(k)}</span><span style="color:${color}">${isTop?'🔥 ':''}<strong style="color:var(--text)">${skrat(k)}</strong></span></td><td style="text-align:center"><span class="summary-count" style="background:${color}">${v}</span></td></tr>`;
+    }).join('');
+  }
+
+  const hasJedlo  = Object.keys(jedlaMap).length > 0;
+  const hasPizza  = Object.keys(pizzaMap).length > 0;
+  const hasDezert = Object.keys(dezertMap).length > 0;
+  const hasPol    = Object.keys(polievkyMap).length > 0;
+
+  el.innerHTML = `<table class="summary-table"><thead><tr><th>Položka</th><th style="text-align:center">Počet</th></tr></thead><tbody>
+    ${hasPol ? `<tr class="summary-section-header"><td colspan="2">🍲 Polievky</td></tr>${buildRows(polievkyMap,'#1565c0')}` : ''}
+    ${hasJedlo ? `<tr class="summary-section-header"><td colspan="2">🍽️ Hlavné jedlá</td></tr>${buildRows(jedlaMap,'#c0392b')}` : ''}
+    ${hasPizza ? `<tr class="summary-section-header"><td colspan="2">🍕 Pizza</td></tr>${buildRows(pizzaMap,'#e67e22')}` : ''}
+    ${hasDezert ? `<tr class="summary-section-header"><td colspan="2">🍮 Dezert</td></tr>${buildRows(dezertMap,'#8e44ad')}` : ''}
+    <tr style="border-top:2px solid var(--border)"><td style="font-weight:700;color:var(--brand)">Celkom</td><td style="text-align:center"><span class="summary-count" style="background:var(--brand)">${entries.length}</span></td></tr>
+  </tbody></table>`;
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────
+function showAdminModal() { document.getElementById('admin-modal').style.display = 'flex'; }
+function hideAdminModal() {
+  document.getElementById('admin-modal').style.display = 'none';
+  if (isAdmin) window.location.href = '/';
+}
+
+// ── Varianty jedal ────────────────────────────────────────────────────────
+function parseVarianty(nazov) {
+  const match = nazov.match(/\(([^)]+)\)\s*$/);
+  if (!match) return { nazovClean: nazov, varianty: [] };
+  const parts = match[1].split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length < 2) return { nazovClean: nazov, varianty: [] };
+  if (parts.every(p => /^\d+$/.test(p))) return { nazovClean: nazov, varianty: [] };
+  return { nazovClean: nazov.slice(0, match.index).trim(), varianty: parts };
+}
+
+function getSelectedVariant(groupName, cislo) {
+  const el = document.querySelector(`input[name="variant_${groupName}_${cislo}"]:checked`);
+  return el ? el.value : null;
+}
+
+function toggleVariantOptions(id, groupName, show) {
+  const variantDiv = document.getElementById('variants_' + id);
+  if (!variantDiv) return;
+  if (show) {
+    variantDiv.classList.add('visible');
+  } else {
+    variantDiv.classList.remove('visible');
+    variantDiv.querySelectorAll('input[type=radio]').forEach(r => {
+      r.checked = false;
+      r.closest('.variant-radio-btn')?.classList.remove('variant-selected');
+    });
+  }
+}
+
+async function loginAdmin() {
+  const pass = document.getElementById('admin-pass-input').value;
+  if (!pass) return;
+  try {
+    // Pouzi dedikovaný endpoint bez vedlajsich efektov
+    const res = await fetch('/api/admin/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPass: pass })
+    });
+    if (res.status === 401) { showToast('❌ Nesprávne heslo', 'error'); return; }
+    const data = await res.json();
+    if (!data.ok) { showToast('❌ Nesprávne heslo', 'error'); return; }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); return; }
+
+  adminPassword = pass;
+  document.getElementById('admin-modal').style.display = 'none';
+  document.getElementById('name-modal').style.display = 'none';
+  document.getElementById('order-section').style.display = 'none';
+  document.getElementById('admin-section').style.display = 'block';
+  await checkStatus();
+  const deadlineInput = document.getElementById('deadline-time-input');
+  if (deadlineInput) deadlineInput.value = config_deadline || '10:00';
+  await loadAdminConfigInfo();
+  await loadMenu();
+  await loadOrders();
+  await loadLongHistory();
+  await loadRegisteredUsers();
+  setInterval(loadOrders, 30000);
+}
+
+function logoutAdmin() { window.location.href = '/'; }
+
+let easterPendingDeadline = null;
+
+async function showEasterModal(isAdmin) {
+  const titleEl = document.getElementById('easter-title');
+  const subtitleEl = document.getElementById('easter-subtitle');
+  const proceedBtn = document.querySelector('#easter-modal .btn-primary');
+
+  if (isAdmin) {
+    titleEl.textContent = 'Predĺženie uzávierky';
+    subtitleEl.innerHTML = 'Predĺženie doby objednávania podlieha <strong>administratívnemu poplatku 3,00 €</strong>.<br>Prosím uhradte pred pokračovaním.';
+    proceedBtn.textContent = '💸 Už som zaplatil — predĺžiť';
+    proceedBtn.onclick = easterEggProceed;
+  } else {
+    titleEl.textContent = 'Chcete predĺžiť uzávierku?';
+    subtitleEl.innerHTML = 'Predĺženie doby objednávania podlieha <strong>poplatku 3,00 €</strong>.<br>Po uhradení bude uzávierka predĺžená o 30 minút.';
+    proceedBtn.textContent = '💸 Zaplatil/a som!';
+    proceedBtn.onclick = () => { easterEggClose(); showToast('✅ Ďakujeme! Uzávierka bola predĺžená. (nie)', 'success'); };
+  }
+
+  document.getElementById('easter-modal').classList.add('open');
+  document.getElementById('easter-qr-loading').style.display = 'block';
+  document.getElementById('easter-qr-content').style.display = 'none';
+
+  try {
+    let qr;
+    if (isAdmin && adminPassword) {
+      const res = await fetch('/api/admin/qr-test', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminPass: adminPassword, sumaOverride: 3.00, sprava: 'Poplatok za predlzenie objednavok' })
+      });
+      const data = await res.json();
+      qr = data.ok ? data.qr : null;
+    } else {
+      const res = await fetch('/api/easter-qr');
+      const data = await res.json();
+      qr = data.ok ? data.qr : null;
+    }
+    if (qr) document.getElementById('easter-qr-image').src = qr;
+  } catch(e) {}
+
+  document.getElementById('easter-qr-loading').style.display = 'none';
+  document.getElementById('easter-qr-content').style.display = 'block';
+}
+
+function countdownClick() {
+  if (!orderingOpen || isAdmin) return;
+  showEasterModal(false);
+}
+
+async function adminSetDeadline() {
+  const input = document.getElementById('deadline-time-input');
+  const deadline = input?.value;
+  if (!deadline) { showToast('Zadaj čas uzávierky', 'error'); return; }
+
+  // Easter egg: predlzenie uzavierky = poplatok 3€
+  const [curH, curM] = (config_deadline || '10:00').split(':').map(Number);
+  const [newH, newM] = deadline.split(':').map(Number);
+  const curMins = curH * 60 + curM;
+  const newMins = newH * 60 + newM;
+  if (newMins > curMins) {
+    easterPendingDeadline = deadline;
+    await showEasterModal(true);
+    return;
+  }
+
+  await doSetDeadline(deadline);
+}
+
+function easterEggClose() {
+  document.getElementById('easter-modal').classList.remove('open');
+  easterPendingDeadline = null;
+}
+
+async function easterEggProceed() {
+  document.getElementById('easter-modal').classList.remove('open');
+  if (easterPendingDeadline) await doSetDeadline(easterPendingDeadline);
+  easterPendingDeadline = null;
+  showToast('💸 Ďakujeme za platbu! Uzávierka predĺžená.', 'success');
+}
+
+async function doSetDeadline(deadline) {
+  try {
+    const res = await fetch('/api/admin/set-deadline', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPass: adminPassword, deadline })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      config_deadline = deadline;
+      showToast('✅ Uzávierka nastavená na ' + deadline, 'success');
+      updateCountdown(deadline);
+    } else { showToast('❌ ' + data.error, 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab-btn').forEach((btn, i) => {
+    const tabs = ['dnes','historia','pouzivatelia'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
+  document.getElementById(`admin-tab-${tab}`)?.classList.add('active');
+  if (tab === 'historia') loadLongHistory();
+  if (tab === 'pouzivatelia') loadRegisteredUsers();
+}
+
+function renderAdminOrders(orders, history = []) {
+  const entries = Object.values(orders);
+
+  // Stats
+  document.getElementById('stat-total').textContent = entries.length;
+  document.getElementById('stat-polievky').textContent = entries.filter(o=>o.polievka).length;
+  document.getElementById('stat-jedla').textContent = entries.filter(o=>o.jedlo).length;
+  document.getElementById('stat-upravy').textContent = history.filter(h=>h.akcia==='UPRAVA').length;
+  document.getElementById('admin-last-refresh').textContent = 'Aktualizácia: ' + new Date().toLocaleTimeString('sk-SK');
+
+  const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c'];
+
+  // Polievky
+  const polievkyMap = {};
+  entries.forEach(o => { if(o.polievka) polievkyMap[o.polievka]=(polievkyMap[o.polievka]||0)+1; });
+  const maxP = Math.max(1,...Object.values(polievkyMap));
+  const polEl = document.getElementById('admin-polievky-list');
+  polEl.innerHTML = !Object.keys(polievkyMap).length ? '<div class="empty-state">Žiadne</div>' :
+    Object.entries(polievkyMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
+      const m=nazov.match(/č\.(\d+)/); const num=m?m[1]:'?';
+      const skrat=nazov.replace(/^č\.\d+\s*/,'');
+      const pct=Math.round(pocet/maxP*100);
+      return `<div class="admin-item-row"><span class="admin-num-badge" style="background:#1565c0">${num}</span>
+        <div class="admin-item-bar-wrap"><div class="admin-item-name">${skrat}</div>
+        <div class="admin-item-bar-bg"><div class="admin-item-bar-fill" style="width:${pct}%;background:#2980b9"></div></div></div>
+        <span class="admin-item-cnt" style="background:#1565c0">${pocet}</span></div>`;
+    }).join('');
+
+  // Jedla
+  const jedlaMap = {};
+  entries.forEach(o => { if(o.jedlo) jedlaMap[o.jedlo]=(jedlaMap[o.jedlo]||0)+1; });
+  const maxJ = Math.max(1,...Object.values(jedlaMap));
+  const jedEl = document.getElementById('admin-jedla-list');
+  jedEl.innerHTML = !Object.keys(jedlaMap).length ? '<div class="empty-state">Žiadne</div>' :
+    Object.entries(jedlaMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
+      const m=nazov.match(/č\.(\d+)/); const num=m?m[1]:'?';
+      const isPizza=nazov.toLowerCase().includes('pizza');
+      const isTop=topJedlo&&nazov===topJedlo;
+      const skrat=nazov.replace(/^č\.\d+\s*/,'');
+      const pct=Math.round(pocet/maxJ*100);
+      const color=isPizza?'#e67e22':'#c0392b';
+      return `<div class="admin-item-row" style="${isTop?'background:#fffbeb;border-radius:6px;padding:4px 6px;':''}">
+        <span class="admin-num-badge" style="background:${color}">${num}</span>
+        <div class="admin-item-bar-wrap"><div class="admin-item-name">${isTop?'🔥 ':''}<strong>${isTop?'':''}</strong>${skrat}</div>
+        <div class="admin-item-bar-bg"><div class="admin-item-bar-fill" style="width:${pct}%;background:${color}"></div></div></div>
+        <span class="admin-item-cnt" style="background:${color}">${pocet}</span></div>`;
+    }).join('');
+
+  // Ludia dnes
+  const usrEl = document.getElementById('admin-users-today');
+  usrEl.innerHTML = !entries.length ? '<div class="empty-state">Žiadni</div>' :
+    entries.map(o => {
+      const initials=o.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const color=colors[o.meno.charCodeAt(0)%colors.length];
+      const editBadge=o.editCount>0?`<span style="background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;font-size:11px;margin-left:4px">upravené ${o.editCount}x</span>`:'';
+      const jSkrat=o.jedlo?o.jedlo.replace(/^č\.\d+\s*/,''):'-';
+      const pSkrat=o.polievka?o.polievka.replace(/^č\.\d+\s*/,''):'-';
+      return `<div class="admin-user-row">
+        <div class="admin-user-avatar" style="background:${color}">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${o.meno}${editBadge}</div>
+          <div class="admin-user-detail">🍲 ${pSkrat}</div>
+          <div class="admin-user-detail">🍽️ ${jSkrat}</div>
+          ${o.poznamka?`<div class="admin-user-detail" style="color:var(--orange)">📝 ${o.poznamka}</div>`:''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${o.cas||''}</div>
+          <button class="admin-delete-btn" onclick="adminDeleteOrder('${o.meno}')">🗑️ Zmazať</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  // Detail tabulka
+  const tblEl = document.getElementById('admin-orders-content');
+  tblEl.innerHTML = !entries.length ? '<div class="empty-state">Žiadne objednávky</div>' :
+    `<div style="overflow-x:auto"><table class="admin-table"><thead><tr>
+      <th>#</th><th>Meno</th><th>č. Polievka</th><th>č. Jedlo</th><th>Poznámka</th><th>Čas</th><th>Úpravy</th><th></th>
+    </tr></thead><tbody>
+    ${entries.map((o,i) => {
+      const pNum=(o.polievka?.match(/č\.(\d+)/)||[])[1]||'';
+      const jNum=(o.jedlo?.match(/č\.(\d+)/)||[])[1]||'';
+      const pNazov=o.polievka?o.polievka.replace(/^č\.\d+\s*/,''):'-';
+      const jNazov=o.jedlo?o.jedlo.replace(/^č\.\d+\s*/,''):'-';
+      return `<tr><td style="color:var(--muted);font-size:12px">${i+1}</td>
+        <td><strong>${o.meno}</strong></td>
+        <td>${pNum?`<span class="admin-num-badge" style="background:#1565c0;display:inline-flex">${pNum}</span>`:''}<span style="font-size:13px">${pNazov}</span></td>
+        <td>${jNum?`<span class="admin-num-badge" style="background:#c0392b;display:inline-flex">${jNum}</span>`:''}<span style="font-size:13px">${jNazov}</span></td>
+        <td style="color:var(--orange);font-size:13px">${o.poznamka||''}</td>
+        <td style="color:var(--muted);font-size:12px;white-space:nowrap">${o.cas||''}</td>
+        <td style="text-align:center">${o.editCount>0?`<span style="background:#fff3cd;color:#856404;border-radius:4px;padding:2px 6px;font-size:12px">${o.editCount}×</span>`:'—'}</td>
+        <td><button class="admin-delete-btn" onclick="adminDeleteOrder('${o.meno}')">🗑️</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+
+  // Historia zmien
+  const histEl = document.getElementById('admin-history-content');
+  if (!history?.length) { histEl.innerHTML = '<div class="empty-state">Žiadne zmeny</div>'; return; }
+  histEl.innerHTML = `<div style="overflow-x:auto"><table class="admin-table"><thead><tr>
+    <th>Čas</th><th>Meno</th><th>Akcia</th><th>Pred</th><th>Po</th></tr></thead><tbody>
+    ${[...history].reverse().map(h => {
+      const badge = h.akcia==='NOVA'
+        ? `<span style="background:#d4edda;color:#155724;border-radius:4px;padding:2px 8px;font-size:12px">✨ Nová</span>`
+        : h.akcia==='ZRUSENIE'
+        ? `<span style="background:#f8d7da;color:#721c24;border-radius:4px;padding:2px 8px;font-size:12px">🗑️ Zrušenie</span>`
+        : `<span style="background:#fff3cd;color:#856404;border-radius:4px;padding:2px 8px;font-size:12px">✏️ Úprava</span>`;
+      const fmt = x => x ? (x.polievka||'-') + '<br><em>' + (x.jedlo||'-') + '</em>' + (x.poznamka ? '<br>📝 '+x.poznamka : '') : '—';
+      return `<tr><td style="color:var(--muted);font-size:12px;white-space:nowrap">${h.cas}</td>
+        <td><strong>${h.meno}</strong></td><td>${badge}</td>
+        <td style="font-size:12px;color:var(--muted)">${h.predtym?`${h.predtym.polievka||'-'}<br><em>${h.predtym.jedlo||'-'}</em>`:'—'}</td>
+        <td style="font-size:12px">${h.potom?`${h.potom.polievka||'-'}<br><em>${h.potom.jedlo||'-'}</em>`:'—'}</td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+// ── Dlhodoba historia ──────────────────────────────────────────────────────
+async function loadLongHistory() {
+  const el = document.getElementById('long-history-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Načítavam...</div>';
+  try {
+    const res = await fetch(`/api/long-history?adminPass=${adminPassword}`);
+    const data = await res.json();
+    if (!data.ok) { el.innerHTML = '<div class="empty-state">Chyba načítania</div>'; return; }
+    const history = data.history.slice(-30).reverse(); // poslednych 30 dni
+    if (!history.length) { el.innerHTML = '<div class="empty-state">Zatiaľ žiadna história</div>'; return; }
+    const maxPocet = Math.max(...history.map(h=>h.pocet), 1);
+    const celkovo = history.reduce((s,h)=>s+h.celkovaCena,0);
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:var(--brand)">${history.length}</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600">DNÍ SO ZÁKAZNÍKMI</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:var(--accent)">${history.reduce((s,h)=>s+h.pocet,0)}</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600">CELKOM OBEDOV</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:var(--green)">${celkovo.toFixed(2)} €</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600">CELKOVÁ SUMA</div>
+        </div>
+      </div>
+      ${history.map(h => {
+        const pct = Math.round(h.pocet/maxPocet*100);
+        const d = new Date(h.datum);
+        const datumStr = d.toLocaleDateString('sk-SK',{weekday:'short',day:'2-digit',month:'2-digit'});
+        return `<div class="history-bar-row">
+          <div class="history-date">${datumStr}</div>
+          <div class="history-bar-wrap">
+            <div class="history-bar" style="width:${Math.max(pct,8)}%">${h.pocet}x</div>
+          </div>
+          <div class="history-price">${h.celkovaCena.toFixed(2)} €</div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) { el.innerHTML = '<div class="empty-state">Chyba načítania</div>'; }
+}
+
+// ── Registrovani pouzivatelia (admin) ──────────────────────────────────────
+async function loadRegisteredUsers() {
+  const el = document.getElementById('admin-registered-users');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Načítavam...</div>';
+  try {
+    const res = await fetch(`/api/users?adminPass=${adminPassword}`);
+    const data = await res.json();
+    if (!data.ok) { el.innerHTML = '<div class="empty-state">Chyba</div>'; return; }
+    const users = Object.values(data.users);
+    const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12'];
+    if (!users.length) { el.innerHTML = '<div class="empty-state">Žiadni registrovaní</div>'; return; }
+    el.innerHTML = `<table class="admin-table"><thead><tr><th>Meno</th><th>Email</th><th>Registrovaný</th><th>Posledný login</th><th></th></tr></thead><tbody>
+      ${users.map((u,i) => {
+        const initials=u.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+        const color=colors[u.meno.charCodeAt(0)%colors.length];
+        const reg=u.registrovany?new Date(u.registrovany).toLocaleDateString('sk-SK'):'-';
+        const login=u.poslednyLogin?new Date(u.poslednyLogin).toLocaleDateString('sk-SK'):'-';
+        return `<tr><td><div style="display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:50%;background:${color};color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${initials}</div>
+          <strong>${u.meno}</strong></div></td>
+          <td style="color:var(--muted);font-size:13px">${u.email||'—'}</td>
+          <td style="color:var(--muted);font-size:12px">${reg}</td>
+          <td style="color:var(--muted);font-size:12px">${login}</td>
+          <td><button class="admin-delete-btn" onclick="adminDeleteUser('${u.meno}')">🗑️</button></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  } catch(e) { el.innerHTML = '<div class="empty-state">Chyba</div>'; }
+}
+
+async function adminDeleteUser(meno) {
+  if (!confirm(`Zmazať používateľa: ${meno}?`)) return;
+  try {
+    const res = await fetch(`/api/users/${encodeURIComponent(meno)}?adminPass=${adminPassword}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Používateľ zmazaný', 'success'); loadRegisteredUsers(); }
+  } catch(e) { showToast('❌ Chyba', 'error'); }
+}
+
+async function adminDeleteOrder(meno) {
+  if (!confirm(`Zmazať objednávku: ${meno}?`)) return;
+  try {
+    const res = await fetch(`/api/orders/${encodeURIComponent(meno)}?adminPass=${adminPassword}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Zmazané', 'success'); await loadOrders(); }
+  } catch(e) { showToast('❌ Chyba', 'error'); }
+}
+
+async function adminClearOrders() {
+  if (!confirm('Zmazať všetky objednávky?')) return;
+  try {
+    const res = await fetch('/api/clear-orders', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({adminPass:adminPassword}) });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Vymazané', 'success'); await loadOrders(); }
+  } catch(e) { showToast('❌ Chyba', 'error'); }
+}
+
+async function loadAdminConfigInfo() {
+  try {
+    const res = await fetch(`/api/admin/config-info?adminPass=${adminPassword}`);
+    const data = await res.json();
+    if (!data.ok) return;
+    const el = document.getElementById('admin-config-content');
+    const box = document.getElementById('admin-config-info');
+    if (!el || !box) return;
+    el.innerHTML = [
+      ['📧 Email príjemca', data.emailRecipient],
+      ['📤 Odosielateľ', data.emailSender],
+      ['🖥️ SMTP server', data.smtpHost + ' (user: ' + data.smtpUser + ')'],
+      ['🔔 ntfy téma', data.ntfyUrl + '/' + data.ntfyTopic],
+      ['⏰ Uzávierka', data.orderDeadline],
+    ].map(([k,v]) => `<div style="color:var(--muted);font-weight:600">${k}</div><div style="font-weight:500;word-break:break-all">${v}</div>`).join('');
+    box.style.display = 'block';
+  } catch(e) {}
+}
+
+async function adminSendEmail() {
+  if (!confirm('Odoslať email so súhrnom objednávok?')) return;
+  try {
+    const res = await fetch('/api/send-email', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({adminPass:adminPassword}) });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('✅ Email odoslaný!', 'success');
+    } else {
+      const msg = data.error || 'Neznáma chyba';
+      alert('❌ Email sa nepodarilo odoslať:\n\n' + msg + '\n\nSkontroluj SMTP nastavenia v config.json (server musí byť reštartovaný po zmene).');
+    }
+  } catch(e) { showToast('❌ Chyba spojenia so serverom', 'error'); }
+}
+
+async function adminTestPush() {
+  try {
+    const res = await fetch('/api/test-push', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({adminPass:adminPassword}) });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('🔔 Push odoslaný! Skontroluj ntfy appku.', 'success');
+    } else {
+      const msg = data.error || 'Neznáma chyba';
+      alert('❌ Push notifikácia zlyhala:\n\n' + msg + '\n\nSkontroluj ntfyTopic v config.json a či máš stiahnutú appku ntfy.');
+    }
+  } catch(e) { showToast('❌ Chyba spojenia so serverom', 'error'); }
+}
+
+function validateIBAN(raw) {
+  const iban = raw.replace(/\s/g, '').toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) return null; // prilis kratky/zly format
+  const rearranged = iban.slice(4) + iban.slice(0, 4);
+  const numeric = rearranged.split('').map(c => isNaN(c) ? (c.charCodeAt(0) - 55) : c).join('');
+  let rem = 0;
+  for (const ch of numeric) rem = (rem * 10 + parseInt(ch)) % 97;
+  return rem === 1;
+}
+
+function ibanCorrectCheckDigits(raw) {
+  const iban = raw.replace(/\s/g, '').toUpperCase();
+  if (iban.length < 5) return null;
+  const country = iban.slice(0, 2);
+  const bban = iban.slice(4);
+  const rearranged = bban + country + '00';
+  const numeric = rearranged.split('').map(c => isNaN(c) ? (c.charCodeAt(0) - 55) : c).join('');
+  let rem = 0;
+  for (const ch of numeric) rem = (rem * 10 + parseInt(ch)) % 97;
+  const check = String(98 - rem).padStart(2, '0');
+  return country + check + bban;
+}
+
+function qrtIbanStatus(val) {
+  if (!val.trim()) return 'var(--border)';
+  const ok = validateIBAN(val);
+  return ok ? '#27ae60' : '#e74c3c';
+}
+
+function qrtIbanInput(el) {
+  // Auto-formát: medzery každé 4 znaky
+  let raw = el.value.replace(/\s/g, '').toUpperCase();
+  const cursor = el.selectionStart;
+  const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw;
+  el.value = formatted;
+
+  // Status
+  const statusEl = document.getElementById('qrt-iban-status');
+  if (!raw) { statusEl.innerHTML = ''; el.style.borderColor = 'var(--border)'; return; }
+  const ok = validateIBAN(raw);
+  if (ok) {
+    statusEl.innerHTML = '<span style="color:#27ae60;font-weight:700">✅ IBAN je platný</span>';
+    el.style.borderColor = '#27ae60';
+  } else {
+    const corrected = ibanCorrectCheckDigits(raw);
+    const hint = corrected ? ` — správny by bol <strong style="font-family:monospace">${corrected.match(/.{1,4}/g).join(' ')}</strong>` : '';
+    statusEl.innerHTML = `<span style="color:#e74c3c;font-weight:700">❌ Neplatný IBAN checksum${hint}</span>`;
+    el.style.borderColor = '#e74c3c';
+  }
+}
+
+async function adminQRTest() {
+  const polievka = document.getElementById('qrt-polievka').value.trim() || null;
+  const jedlo    = document.getElementById('qrt-jedlo').value.trim()    || null;
+  const pizza    = document.getElementById('qrt-pizza').value.trim()    || null;
+  const dezert   = document.getElementById('qrt-dezert').value.trim()   || null;
+  const sumaRaw  = document.getElementById('qrt-suma').value.trim();
+  const ibanRaw  = document.getElementById('qrt-iban').value.trim()     || null;
+  const bicRaw   = document.getElementById('qrt-bic').value.trim()      || null;
+  const sprava   = document.getElementById('qrt-sprava').value.trim()   || null;
+
+  // IBAN warning
+  if (ibanRaw && validateIBAN(ibanRaw) === false) {
+    const corrected = ibanCorrectCheckDigits(ibanRaw);
+    const hint = corrected ? `\n\nSprávny IBAN: ${corrected}` : '';
+    if (!confirm(`⚠️ IBAN má neplatný checksum — bankové appky ho odmietnu.${hint}\n\nPokračovať aj tak (QR sa vygeneruje, ale nebude fungovať)?`)) return;
+  }
+
+  const loadingEl = document.getElementById('qrt-loading');
+  const errorEl   = document.getElementById('qrt-error');
+  const resultEl  = document.getElementById('qrt-result');
+  const emptyEl   = document.getElementById('qrt-empty');
+
+  loadingEl.style.display = 'block';
+  errorEl.style.display   = 'none';
+  resultEl.style.display  = 'none';
+  emptyEl.style.display   = 'none';
+
+  try {
+    const body = { adminPass: adminPassword, polievka, jedlo, pizza, dezert };
+    if (sumaRaw) body.sumaOverride = parseFloat(sumaRaw);
+    if (ibanRaw) body.ibanOverride = ibanRaw;
+    if (bicRaw)  body.bicOverride  = bicRaw;
+    if (sprava)  body.sprava = sprava;
+
+    const res  = await fetch('/api/admin/qr-test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await res.json();
+    loadingEl.style.display = 'none';
+
+    document.getElementById('qrt-raw').textContent = JSON.stringify(data, null, 2);
+
+    if (!data.ok) {
+      errorEl.textContent = '❌ ' + (data.error || 'Neznáma chyba');
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    document.getElementById('qrt-suma-val').textContent   = data.suma.toFixed(2) + ' €';
+    document.getElementById('qrt-detail-val').innerHTML   = data.detail.join(' · ');
+    document.getElementById('qrt-iban-val').textContent   = 'IBAN: ' + data.iban + (data.bic && data.bic !== '(žiadny)' ? '  ·  BIC: ' + data.bic : '');
+    document.getElementById('qrt-qr-img').src             = data.qr;
+    resultEl.style.display = 'block';
+  } catch(e) {
+    loadingEl.style.display = 'none';
+    errorEl.textContent = '❌ Chyba spojenia: ' + e.message;
+    errorEl.style.display = 'block';
+  }
+}
+
+async function adminTestDeadline() {
+  if (!confirm('Manuálne spustí email + ntfy súhrn podľa aktuálnych objednávok. Pokračovať?')) return;
+  try {
+    const res = await fetch('/api/admin/test-deadline', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({adminPass:adminPassword}) });
+    const data = await res.json();
+    if (data.skipped) { showToast('ℹ️ Žiadne objednávky — nič sa neposlalo.', 'success'); return; }
+    const emailOk = data.emailResult?.ok;
+    const pushOk  = data.pushResult?.ok !== false;
+    if (emailOk && pushOk) showToast('✅ Email aj push odoslaný!', 'success');
+    else if (emailOk)  showToast('⚠️ Email OK, push zlyhal: ' + data.pushResult?.error, 'error');
+    else if (pushOk)   showToast('⚠️ Push OK, email zlyhal: ' + data.emailResult?.error, 'error');
+    else showToast('❌ Email aj push zlyhali', 'error');
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+function showManualMenuForm() { document.getElementById('manual-menu-form').style.display = 'block'; }
+function hideManualMenuForm() { document.getElementById('manual-menu-form').style.display = 'none'; }
+
+async function saveManualMenu() {
+  try {
+    const menu = JSON.parse(document.getElementById('manual-menu-json').value);
+    const res = await fetch('/api/manual-menu', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({adminPass:adminPassword,menu}) });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Menu uložené', 'success'); hideManualMenuForm(); menuData=menu; renderMenu(menu); }
+  } catch(e) { showToast('❌ Neplatný JSON', 'error'); }
+}
+
+// ── QR ────────────────────────────────────────────────────────────────────
+let currentQROrder = null;
+
+async function showQR() {
+  const polievkaEl = document.querySelector('input[name="polievka"]:checked');
+  const jedloEl    = document.querySelector('input[name="jedlo"]:checked');
+  const pizzaEl    = document.querySelector('input[name="pizza"]:checked');
+
+  if (polievkaEl || jedloEl || pizzaEl) {
+    const dezertEl = document.querySelector('input[name="dezert"]:checked');
+    const noteEmojis = { jedlo: '🍽️', pizza: '🍕' };
+    const noteParts = [];
+    [['jedlo',jedloEl],['pizza',pizzaEl]].forEach(([g,el]) => {
+      if (!el) return;
+      const n = document.getElementById('note_'+el.id);
+      if (n?.value.trim()) noteParts.push(noteEmojis[g] + ' ' + n.value.trim());
+    });
+    currentQROrder = {
+      polievka: polievkaEl?.value||null,
+      jedlo: jedloEl?.value||null,
+      pizza: pizzaEl?.value||null,
+      dezert: dezertEl?.value||null,
+      poznamka: noteParts.join(' | ')
+    };
+  } else if (!currentQROrder || (!currentQROrder.polievka && !currentQROrder.jedlo && !currentQROrder.pizza)) {
+    showToast('Vyber jedlo pre QR platbu', 'error');
+    return;
+  }
+
+  const modal = document.getElementById('qr-modal');
+  modal.classList.add('open');
+  document.getElementById('qr-modal-loading').style.display = 'block';
+  document.getElementById('qr-modal-content').style.display = 'none';
+  document.getElementById('qr-modal-error').style.display = 'none';
+  const emailStatus = document.getElementById('qr-email-status');
+  if (emailStatus) emailStatus.style.display = 'none';
+  const emailInput = document.getElementById('qr-email-input');
+  if (emailInput) emailInput.value = currentEmail || getCookie('fantozzi_email') || '';
+  try {
+    const res = await fetch('/api/qr', { method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ polievka: currentQROrder.polievka, jedlo: currentQROrder.jedlo, pizza: currentQROrder.pizza, dezert: currentQROrder.dezert }) });
+    const data = await res.json();
+    document.getElementById('qr-modal-loading').style.display = 'none';
+    if (!data.ok) { document.getElementById('qr-modal-error').style.display = 'block'; return; }
+    document.getElementById('qr-image').src = data.qr;
+    document.getElementById('qr-suma').textContent = data.suma.toFixed(2) + ' €';
+    document.getElementById('qr-detail').innerHTML = data.detail.join('<br>');
+    document.getElementById('qr-iban').textContent = 'IBAN: ' + data.iban;
+    document.getElementById('qr-modal-content').style.display = 'block';
+  } catch(e) {
+    document.getElementById('qr-modal-loading').style.display = 'none';
+    document.getElementById('qr-modal-error').style.display = 'block';
+  }
+}
+
+async function sendQREmail() {
+  const email = document.getElementById('qr-email-input')?.value?.trim();
+  const statusEl = document.getElementById('qr-email-status');
+  if (!email || !email.includes('@')) {
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--accent)'; statusEl.textContent = '❌ Zadaj platný email'; }
+    return;
+  }
+  if (!currentQROrder) return;
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--muted)'; statusEl.textContent = '⏳ Odosielam...'; }
+  try {
+    const res = await fetch('/api/send-qr-email', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, meno: currentUser || '', ...currentQROrder })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setCookie('fantozzi_email', email, 365);
+      try { localStorage.setItem('fantozzi_email', email); } catch(e) {}
+      if (statusEl) { statusEl.style.color = '#27ae60'; statusEl.textContent = '✅ Email odoslaný na ' + email; }
+    } else {
+      if (statusEl) { statusEl.style.color = 'var(--accent)'; statusEl.textContent = '❌ ' + (data.error || 'Chyba odosielania'); }
+    }
+  } catch(e) {
+    if (statusEl) { statusEl.style.color = 'var(--accent)'; statusEl.textContent = '❌ Chyba spojenia'; }
+  }
+}
+
+function hideQR() { document.getElementById('qr-modal').classList.remove('open'); }
+document.getElementById('qr-modal').addEventListener('click', function(e) { if(e.target===this) hideQR(); });
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `show ${type}`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { el.className = ''; }, 3500);
+}
+
+// ── Floating order bar ────────────────────────────────────────────────────
+function updateFloatingBar() {
+  const bar = document.getElementById('floating-order-bar');
+  if (!bar) return;
+  const polievka = document.querySelector('input[name="polievka"]:checked')?.value || null;
+  const jedlo    = document.querySelector('input[name="jedlo"]:checked')?.value    || null;
+  const pizza    = document.querySelector('input[name="pizza"]:checked')?.value    || null;
+  const dezert   = document.querySelector('input[name="dezert"]:checked')?.value   || null;
+  const hasAny   = polievka || jedlo || pizza || dezert;
+  const confirmed = document.getElementById('order-confirmed')?.style.display !== 'none';
+  if (!hasAny && !confirmed) { bar.classList.remove('visible'); document.body.classList.remove('fob-open'); return; }
+
+  const chips = [];
+  const shorten = s => s ? s.replace(/^č\.\d+\s*/, '').substring(0, 28) + (s.replace(/^č\.\d+\s*/, '').length > 28 ? '…' : '') : null;
+  if (polievka) chips.push(`<span class="fob-chip">🍲 ${shorten(polievka)}</span>`);
+  if (jedlo)    chips.push(`<span class="fob-chip main">🍽️ ${shorten(jedlo)}</span>`);
+  if (pizza)    chips.push(`<span class="fob-chip main">🍕 ${shorten(pizza)}</span>`);
+  if (dezert)   chips.push(`<span class="fob-chip">🍮 ${shorten(dezert)}</span>`);
+
+  // Price from #price-total or currentQROrder
+  const priceEl = document.getElementById('price-total');
+  const priceText = (priceEl && priceEl.textContent) ? priceEl.textContent : '';
+
+  document.getElementById('fob-items').innerHTML = chips.join('') || (confirmed ? '<span class="fob-chip main">✅ Objednávka potvrdená</span>' : '');
+  document.getElementById('fob-price').textContent = priceText;
+  bar.classList.add('visible');
+  document.body.classList.add('fob-open');
+}
+</script>
+
+<!-- Floating order bar -->
+<div id="floating-order-bar">
+  <div class="fob-inner">
+    <div class="fob-items" id="fob-items"></div>
+    <div class="fob-price" id="fob-price"></div>
+  </div>
+</div>
+</body>
+</html>
