@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const config = require('./config.json');
+const config = require('./config');
 
 // Cache: ukladame menu aby sme nerobili request pri kazdom nacitani stranky
 let cache = {
