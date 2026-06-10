@@ -1,0 +1,72 @@
+{
+  "datum": "2026-04-28",
+  "orders": {
+    "Marek Múčka": {
+      "meno": "Marek Múčka",
+      "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+      "jedlo": "č.3 Pečené kuracie stehno240g, prírodná omáčka, ryža, kyslé uhorky",
+      "poznamka": "",
+      "cas": "8:39:34",
+      "locked": true,
+      "editCount": 2
+    },
+    "ferko mrkva": {
+      "meno": "ferko mrkva",
+      "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+      "jedlo": "č.2 Kuracie plátky na slanine,  dusená ryža, čalamáda",
+      "poznamka": "",
+      "cas": "8:32:37"
+    },
+    "ferko": {
+      "meno": "ferko",
+      "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+      "jedlo": "č.1 Ryžovo-mäsové guľky, paradajková omáčka, domáca parená knedla",
+      "poznamka": "",
+      "cas": "8:40:20",
+      "locked": true,
+      "editCount": 0
+    }
+  },
+  "history": [
+    {
+      "meno": "Marek Múčka",
+      "cas": "8:39:15",
+      "akcia": "UPRAVA",
+      "predtym": {
+        "polievka": "č.2 Hrachová s opečeným krutónom",
+        "jedlo": "č.6 Zapekané smotanovo-špenátové penne s kuracím mäsom, syr",
+        "poznamka": ""
+      },
+      "potom": {
+        "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+        "jedlo": null,
+        "poznamka": ""
+      }
+    },
+    {
+      "meno": "Marek Múčka",
+      "cas": "8:39:34",
+      "akcia": "UPRAVA",
+      "predtym": {
+        "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+        "jedlo": null,
+        "poznamka": ""
+      },
+      "potom": {
+        "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+        "jedlo": "č.3 Pečené kuracie stehno240g, prírodná omáčka, ryža, kyslé uhorky",
+        "poznamka": ""
+      }
+    },
+    {
+      "meno": "ferko",
+      "cas": "8:40:20",
+      "akcia": "NOVA",
+      "potom": {
+        "polievka": "č.1 Slepačia s mäsom, zeleninou a rezancami",
+        "jedlo": "č.1 Ryžovo-mäsové guľky, paradajková omáčka, domáca parená knedla",
+        "poznamka": ""
+      }
+    }
+  ]
+}

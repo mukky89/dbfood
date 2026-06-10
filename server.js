@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cron = require('node-cron');
-const config = require('./config.json');
+const config = require('./config');
 const { fetchMenu, setManualMenu, clearCache } = require('./scraper');
 const { sendEmail, createTransporter } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
@@ -28,6 +28,29 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+const blokovaneObdobieSchema = new mongoose.Schema({
+  od:        { type: String, required: true },
+  do:        { type: String, required: true },
+  dovod:     { type: String, default: 'Neprítomnosť' },
+  vytvorene: { type: String, default: () => new Date().toISOString() }
+});
+const BlokovaneObdobie = mongoose.model('BlokovaneObdobie', blokovaneObdobieSchema);
+
+const easterEggTriggerSchema = new mongoose.Schema({
+  egg:  { type: String, required: true },
+  meno: { type: String, default: 'Neznámy' },
+  cas:  { type: String }
+});
+const EasterEggTrigger = mongoose.model('EasterEggTrigger', easterEggTriggerSchema);
+
+const nastaveniaPlatbySchema = new mongoose.Schema({
+  iban: { type: String, default: '' },
+  bic:  { type: String, default: '' },
+  meno: { type: String, default: '' },
+  vs:   { type: String, default: '' }
+});
+const NastaveniaPlatby = mongoose.model('NastaveniaPlatby', nastaveniaPlatbySchema);
+
 mongoose.connect(config.mongoUri)
   .then(() => console.log('[DB] Pripojeny na MongoDB'))
   .catch(err => { console.error('[DB] Chyba pripojenia:', err.message); process.exit(1); });
@@ -45,6 +68,43 @@ function isOrderingOpen() {
   deadline.setHours(hh, mm, 0, 0);
   return nowSK < deadline;
 }
+
+function getTodaySK() {
+  const sk = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Bratislava' }));
+  return `${sk.getFullYear()}-${String(sk.getMonth()+1).padStart(2,'0')}-${String(sk.getDate()).padStart(2,'0')}`;
+}
+
+async function isTodayBlocked() {
+  try {
+    const dnes = getTodaySK();
+    const found = await BlokovaneObdobie.findOne({ od: { $lte: dnes }, do: { $gte: dnes } });
+    return found ? { blocked: true, dovod: found.dovod } : { blocked: false };
+  } catch(e) { return { blocked: false }; }
+}
+
+// ── Nastavenia platby (DB override cez env vars) ──────────────────────────
+let _platbaCache = null;
+async function getPlatba() {
+  if (_platbaCache) return _platbaCache;
+  try {
+    const doc = await NastaveniaPlatby.findOne({});
+    _platbaCache = {
+      iban: ((doc?.iban || config.platbaIban || '')).replace(/\s/g, ''),
+      bic:  ((doc?.bic  || config.platbaBic  || '')).replace(/\s/g, ''),
+      meno:  doc?.meno || config.platbaMeno  || 'Fantozzi',
+      vs:    doc?.vs   || config.platbaVS    || ''
+    };
+  } catch(e) {
+    _platbaCache = {
+      iban: (config.platbaIban || '').replace(/\s/g, ''),
+      bic:  (config.platbaBic  || '').replace(/\s/g, ''),
+      meno:  config.platbaMeno || 'Fantozzi',
+      vs:    config.platbaVS   || ''
+    };
+  }
+  return _platbaCache;
+}
+function clearPlatbaCache() { _platbaCache = null; }
 
 async function loadOrders() {
   const dnes = new Date().toDateString();
@@ -100,8 +160,14 @@ async function archiveAndClearOrders() {
 // ── API ───────────────────────────────────────────────────────────────────────
 
 // GET /api/status
-app.get('/api/status', (req, res) => {
-  res.json({ open: isOrderingOpen(), deadline: config.orderDeadline });
+app.get('/api/status', async (req, res) => {
+  const blok = await isTodayBlocked();
+  res.json({
+    open: blok.blocked ? false : isOrderingOpen(),
+    deadline: config.orderDeadline,
+    blocked: blok.blocked,
+    blokovanyDovod: blok.dovod || null
+  });
 });
 
 // GET /api/menu
@@ -124,6 +190,8 @@ app.get('/api/orders', async (req, res) => {
 
 // POST /api/orders
 app.post('/api/orders', async (req, res) => {
+  const blok = await isTodayBlocked();
+  if (blok.blocked) return res.status(403).json({ ok: false, error: `Objednávanie je zablokované: ${blok.dovod}` });
   if (!isOrderingOpen()) return res.status(403).json({ ok: false, error: 'Objednavanie je uzavrete (po 10:00)' });
 
   const { meno, polievka, jedlo, pizza, dezert, poznamka, porcie, editMode } = req.body;
@@ -404,29 +472,31 @@ app.post('/api/clear-orders', async (req, res) => {
 // POST /api/qr
 app.post('/api/qr', async (req, res) => {
   const { polievka, jedlo, pizza, dezert } = req.body;
-  if (!config.platbaIban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastaveny' });
+  const platba = await getPlatba();
+  if (!platba.iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený — nastav ho v Admin → Platba' });
   try {
     const menu = await fetchMenu();
     const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu);
     if (!cena) return res.status(400).json({ ok: false, error: 'Nepodarilo sa vypocitat cenu' });
     const sprava = `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
     const qrBase64 = await generatePayBySquareQR({
-      iban: config.platbaIban, bic: config.platbaBic || '',
+      iban: platba.iban, bic: platba.bic,
       suma: cena.celkom, sprava,
-      meno: config.platbaMeno || 'Fantozzi', variabilnySymbol: config.platbaVS || ''
+      meno: platba.meno, variabilnySymbol: platba.vs
     });
-    res.json({ ok: true, qr: qrBase64, suma: cena.celkom, detail: cena.detail, iban: config.platbaIban, sprava });
+    res.json({ ok: true, qr: qrBase64, suma: cena.celkom, detail: cena.detail, iban: platba.iban, sprava });
   } catch(err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
 // GET /api/easter-qr
 app.get('/api/easter-qr', async (req, res) => {
-  if (!config.platbaIban) return res.status(400).json({ ok: false });
+  const platba = await getPlatba();
+  if (!platba.iban) return res.status(400).json({ ok: false });
   try {
     const qr = await generatePayBySquareQR({
-      iban: config.platbaIban, bic: config.platbaBic || '',
+      iban: platba.iban, bic: platba.bic,
       suma: 3.00, sprava: 'Poplatok za predlzenie objednavok',
-      meno: config.platbaMeno || 'Fantozzi', variabilnySymbol: ''
+      meno: platba.meno, variabilnySymbol: ''
     });
     res.json({ ok: true, qr });
   } catch(err) { res.status(500).json({ ok: false, error: err.message }); }
@@ -438,7 +508,8 @@ app.post('/api/send-qr-email', async (req, res) => {
   if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return res.status(400).json({ ok: false, error: 'Neplatný email' });
   }
-  if (!config.platbaIban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený' });
+  const platba = await getPlatba();
+  if (!platba.iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený — nastav ho v Admin → Platba' });
 
   try {
     const menu = await fetchMenu();
@@ -447,9 +518,9 @@ app.post('/api/send-qr-email', async (req, res) => {
 
     const sprava = `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
     const qrBase64 = await generatePayBySquareQR({
-      iban: config.platbaIban, bic: config.platbaBic || '',
+      iban: platba.iban, bic: platba.bic,
       suma: cena.celkom, sprava,
-      meno: config.platbaMeno || 'Fantozzi', variabilnySymbol: config.platbaVS || ''
+      meno: platba.meno, variabilnySymbol: platba.vs
     });
 
     const transporter = createTransporter();
@@ -474,7 +545,7 @@ app.post('/api/send-qr-email', async (req, res) => {
     <div style="text-align:center;margin:16px 0">
       <img src="cid:qrcode" alt="QR platba" style="width:220px;height:220px;border:3px solid #ddd;border-radius:10px">
       <div style="font-size:32px;font-weight:900;color:#e74c3c;margin:10px 0">${cena.celkom.toFixed(2)} €</div>
-      <div style="font-size:12px;color:#999;font-family:monospace;background:#f5f5f5;padding:6px 12px;border-radius:6px;display:inline-block">IBAN: ${config.platbaIban}</div>
+      <div style="font-size:12px;color:#999;font-family:monospace;background:#f5f5f5;padding:6px 12px;border-radius:6px;display:inline-block">IBAN: ${platba.iban}</div>
     </div>
     <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-top:16px">
       <div style="font-size:12px;font-weight:700;color:#999;text-transform:uppercase;margin-bottom:8px">Objednávka</div>
@@ -527,9 +598,10 @@ app.post('/api/admin/qr-test', async (req, res) => {
   const { adminPass, polievka, jedlo, pizza, dezert, sumaOverride, ibanOverride, bicOverride, sprava } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
 
-  const iban = (ibanOverride || config.platbaIban || '').replace(/\s/g, '');
-  if (!iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený' });
-  const bic = (bicOverride !== undefined ? bicOverride : config.platbaBic || '').replace(/\s/g, '');
+  const platba = await getPlatba();
+  const iban = (ibanOverride || platba.iban || '').replace(/\s/g, '');
+  if (!iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený — nastav ho v Admin → Platba' });
+  const bic = (bicOverride !== undefined ? bicOverride : platba.bic || '').replace(/\s/g, '');
 
   try {
     const menu = await fetchMenu();
@@ -548,8 +620,8 @@ app.post('/api/admin/qr-test', async (req, res) => {
     const spravaText = sprava || `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
     const qrBase64   = await generatePayBySquareQR({
       iban, bic, suma, sprava: spravaText,
-      meno: config.platbaMeno || 'Fantozzi',
-      variabilnySymbol: config.platbaVS || ''
+      meno: platba.meno || 'Fantozzi',
+      variabilnySymbol: platba.vs || ''
     }, { validate: false });
 
     res.json({ ok: true, qr: qrBase64, suma, detail, iban, bic: bic || '(žiadny)', sprava: spravaText });
@@ -619,6 +691,124 @@ app.get('/api/history/:datum', async (req, res) => {
 // GET /admin
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ── Nastavenia platby ─────────────────────────────────────────────────────────
+
+// GET /api/admin/platba-config
+app.get('/api/admin/platba-config', async (req, res) => {
+  const { adminPass } = req.query;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    const doc = await NastaveniaPlatby.findOne({});
+    // Separate DB values from env values so UI can show source
+    const dbIban = doc?.iban || '';
+    const dbBic  = doc?.bic  || '';
+    const dbMeno = doc?.meno || '';
+    const dbVs   = doc?.vs   || '';
+    const platba = await getPlatba();
+    res.json({
+      ok: true,
+      // Current DB-saved values (what's in the edit form)
+      iban: dbIban, bic: dbBic, meno: dbMeno, vs: dbVs,
+      // Env var fallbacks (shown as hints)
+      envIban: config.platbaIban || '', envBic: config.platbaBic || '',
+      envMeno: config.platbaMeno || '', envVs:  config.platbaVS  || '',
+      // Effective merged values
+      effective: platba
+    });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// POST /api/admin/platba-config
+app.post('/api/admin/platba-config', async (req, res) => {
+  const { adminPass, iban, bic, meno, vs } = req.body;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    await NastaveniaPlatby.findOneAndUpdate(
+      {},
+      { $set: {
+        iban: (iban || '').replace(/\s/g, '').toUpperCase(),
+        bic:  (bic  || '').replace(/\s/g, '').toUpperCase(),
+        meno: (meno || '').trim(),
+        vs:   (vs   || '').trim()
+      }},
+      { upsert: true, new: true }
+    );
+    clearPlatbaCache();
+    const platba = await getPlatba(); // Re-cache immediately
+    res.json({ ok: true, effective: platba });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// ── Blokované obdobia ─────────────────────────────────────────────────────────
+
+// GET /api/admin/blokovane-obdobia
+app.get('/api/admin/blokovane-obdobia', async (req, res) => {
+  const { adminPass } = req.query;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    const docs = await BlokovaneObdobie.find({}).sort({ od: 1 });
+    res.json({ ok: true, obdobia: docs });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// POST /api/admin/blokovane-obdobia
+app.post('/api/admin/blokovane-obdobia', async (req, res) => {
+  const { adminPass, od, do: do_, dovod } = req.body;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  if (!od || !do_) return res.status(400).json({ ok: false, error: 'Chýba dátum od/do' });
+  if (od > do_) return res.status(400).json({ ok: false, error: 'Dátum "od" musí byť pred dátumom "do"' });
+  try {
+    const doc = await BlokovaneObdobie.create({
+      od, do: do_,
+      dovod: (dovod || 'Neprítomnosť Filipa Švolíka').trim(),
+      vytvorene: new Date().toISOString()
+    });
+    res.json({ ok: true, obdobie: doc });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// DELETE /api/admin/blokovane-obdobia/:id
+app.delete('/api/admin/blokovane-obdobia/:id', async (req, res) => {
+  const { adminPass } = req.query;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    await BlokovaneObdobie.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// ── Easter Egg Counters ───────────────────────────────────────────────────────
+
+// POST /api/easter-trigger
+app.post('/api/easter-trigger', async (req, res) => {
+  const { egg, meno } = req.body;
+  if (!egg) return res.status(400).json({ ok: false });
+  try {
+    await EasterEggTrigger.create({
+      egg:  egg.trim(),
+      meno: (meno || 'Neznámy').trim(),
+      cas:  new Date().toISOString()
+    });
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// GET /api/easter-stats
+app.get('/api/easter-stats', async (req, res) => {
+  try {
+    const agg = await EasterEggTrigger.aggregate([
+      { $group: { _id: { egg: '$egg', meno: '$meno' }, count: { $sum: 1 } } },
+      { $group: { _id: '$_id.egg', total: { $sum: '$count' },
+          users: { $push: { meno: '$_id.meno', count: '$count' } } } }
+    ]);
+    const stats = {};
+    agg.forEach(e => {
+      stats[e._id] = { total: e.total, users: e.users.sort((a, b) => b.count - a.count) };
+    });
+    res.json({ ok: true, stats });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
 // ── Cron ──────────────────────────────────────────────────────────────────────

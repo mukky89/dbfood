@@ -1,5 +1,5 @@
 const axios  = require('axios');
-const config = require('./config.json');
+const config = require('./config');
 
 const NTFY_URL   = config.ntfyUrl   || 'https://ntfy.sh';
 const NTFY_TOPIC = config.ntfyTopic || null;
