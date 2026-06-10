@@ -4,7 +4,7 @@ const path = require('path');
 const cron = require('node-cron');
 const config = require('./config');
 const { fetchMenu, setManualMenu, clearCache } = require('./scraper');
-const { sendEmail, createTransporter } = require('./mailer');
+const { sendEmail, sendMail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 
@@ -269,8 +269,6 @@ function generateOTP() {
 }
 
 async function sendOTPEmail(email, meno, otp) {
-  const transporter = createTransporter();
-
   const html = `
     <!DOCTYPE html><html><head><meta charset="utf-8"></head>
     <body style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;color:#333">
@@ -285,13 +283,13 @@ async function sendOTPEmail(email, meno, otp) {
       </div>
     </body></html>`;
 
-  await transporter.sendMail({
-    from: `"Fantozzi Objednávky" <${config.emailSender}>`,
+  const result = await sendMail({
     to: email,
     subject: `${otp} — tvoj prihlasovací kód do Fantozzi`,
     text: `Tvoj prihlasovací kód: ${otp}\nKód je platný 10 minút.`,
     html
   });
+  if (!result.ok) throw new Error(result.error || 'Odoslanie OTP zlyhalo');
 }
 
 // POST /api/auth/request-otp
@@ -431,6 +429,8 @@ app.get('/api/admin/config-info', (req, res) => {
     ok: true,
     emailRecipient: config.emailRecipient || '(nenastavené)',
     emailSender: config.emailSender || '(nenastavené)',
+    odosielanie: config.brevoApiKey ? 'Brevo HTTP API' : 'SMTP',
+    brevoApiKey: config.brevoApiKey ? '(nastavený)' : '(nenastavený)',
     smtpHost: config.smtpHost || 'Gmail fallback',
     smtpUser: config.smtpUser || config.emailSender || '(nenastavené)',
     ntfyTopic: config.ntfyTopic || '(vypnuté)',
@@ -523,7 +523,6 @@ app.post('/api/send-qr-email', async (req, res) => {
       meno: platba.meno, variabilnySymbol: platba.vs
     });
 
-    const transporter = createTransporter();
     const datumStr = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
     const items = [
       polievka ? `🍲 ${polievka}` : null,
@@ -543,8 +542,8 @@ app.post('/api/send-qr-email', async (req, res) => {
   <div style="border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;padding:24px">
     ${meno ? `<p style="font-size:15px;margin-top:0">Ahoj <strong>${meno}</strong>! Tu je tvoj QR kód pre platbu obeda.</p>` : ''}
     <div style="text-align:center;margin:16px 0">
-      <img src="cid:qrcode" alt="QR platba" style="width:220px;height:220px;border:3px solid #ddd;border-radius:10px">
       <div style="font-size:32px;font-weight:900;color:#e74c3c;margin:10px 0">${cena.celkom.toFixed(2)} €</div>
+      <div style="font-size:13px;color:#666;margin:8px 0">📎 QR kód pre platbu nájdeš v prílohe (<strong>qr-platba.png</strong>)</div>
       <div style="font-size:12px;color:#999;font-family:monospace;background:#f5f5f5;padding:6px 12px;border-radius:6px;display:inline-block">IBAN: ${platba.iban}</div>
     </div>
     <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-top:16px">
@@ -556,13 +555,13 @@ app.post('/api/send-qr-email', async (req, res) => {
   </div>
 </body></html>`;
 
-    await transporter.sendMail({
-      from: `"Fantozzi Objednávky" <${config.emailSender}>`,
+    const result = await sendMail({
       to: email.trim(),
       subject: `QR platba Fantozzi — ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`,
       html,
       attachments: [{ filename: 'qr-platba.png', content: base64Data, encoding: 'base64', cid: 'qrcode' }]
     });
+    if (!result.ok) throw new Error(result.error || 'Odoslanie zlyhalo');
 
     console.log(`[QR Email] Odoslany na ${email}`);
     res.json({ ok: true });
