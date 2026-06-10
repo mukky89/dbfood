@@ -144,14 +144,30 @@ function formatEmail(orders, menu) {
   };
 }
 
+// Brevo/nodemailer ocakava prijemcov ako pole alebo ciarkou oddeleny zoznam.
+// Config moze obsahovat oddelovac ';' aj ',' (a medzery) - znormalizujeme.
+function parseRecipients(value) {
+  if (!value) return [];
+  return String(value)
+    .split(/[;,]/)
+    .map(e => e.trim())
+    .filter(Boolean);
+}
+
 async function sendEmail(orders, menu) {
   const transporter = createTransporter();
   const { subject, text, html } = formatEmail(orders, menu);
 
+  const recipients = parseRecipients(config.emailRecipient);
+  if (recipients.length === 0) {
+    console.error('[Mailer] Ziadny prijemca - EMAIL_RECIPIENT nie je nastaveny');
+    return { ok: false, error: 'EMAIL_RECIPIENT nie je nastaveny' };
+  }
+
   try {
     const info = await transporter.sendMail({
       from: `"Fantozzi Objednavky" <${config.emailSender}>`,
-      to: config.emailRecipient,
+      to: recipients,
       subject,
       text,
       html
