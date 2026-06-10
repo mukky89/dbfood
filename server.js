@@ -9,6 +9,18 @@ const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 
 const app = express();
+
+// Presmerovanie zo starej EvenNode domeny na Railway (trvale, 301).
+// Zachova cestu aj query (napr. /admin -> .../admin).
+const REDIRECT_TARGET = process.env.REDIRECT_TARGET || 'https://dbfood-production.up.railway.app';
+app.use((req, res, next) => {
+  const host = (req.headers.host || '').toLowerCase();
+  if (host.includes('evennode.com')) {
+    return res.redirect(301, REDIRECT_TARGET + req.originalUrl);
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
