@@ -355,6 +355,187 @@
     .easter-hdr-btn:hover { opacity:.9; transform:scale(1.25) rotate(20deg); }
     @keyframes pizzaFall { 0%{transform:translateY(-60px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:.7} }
     .pizza-drop { position:fixed; top:0; pointer-events:none; z-index:9999; animation:pizzaFall linear forwards; user-select:none; }
+
+    /* Blokovaný deň */
+    #countdown-bar.blok { background: #f8d7da; color: #721c24; cursor: default; }
+    #countdown-bar.blok .cd-inner { background: linear-gradient(135deg,#f8d7da,#f5c2c7); color: #721c24; }
+    #countdown-bar.blok .cd-progress-fill { background: #e74c3c; width: 100% !important; }
+
+    /* Blokované obdobia - admin tab */
+    .blok-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; border:1px solid var(--border); margin-bottom:8px; background:white; transition:box-shadow .15s; }
+    .blok-item:hover { box-shadow:0 2px 10px rgba(0,0,0,.08); }
+    .blok-item.active-blok { border-color:#e74c3c; background:#fff5f5; }
+    .blok-badge-active { background:#e74c3c; color:white; font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; white-space:nowrap; }
+    .blok-badge-future { background:#f39c12; color:white; font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; white-space:nowrap; }
+    .blok-badge-past { background:#95a5a6; color:white; font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; white-space:nowrap; }
+
+    /* Konami easter egg overlay */
+    @keyframes konami-in { from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+    @keyframes rainbow-text { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+    .konami-overlay { position:fixed; inset:0; background:rgba(0,0,0,.96); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; animation:konami-in .35s cubic-bezier(.34,1.56,.64,1) both; }
+    .konami-overlay.out { animation:konami-in .25s cubic-bezier(.36,.07,.19,.97) reverse both; }
+
+    /* Pizza typing easter egg toast */
+    #pizza-typing-toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:#2c3e50; color:white; border-radius:14px; padding:14px 22px; font-size:15px; font-weight:600; z-index:9998; opacity:0; pointer-events:none; transition:all .4s cubic-bezier(.34,1.56,.64,1); white-space:nowrap; box-shadow:0 8px 30px rgba(0,0,0,.35); }
+    #pizza-typing-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* Header Secrets tlačidlo */
+    .secrets-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:20px; padding:5px 11px; font-size:16px; color:white; cursor:pointer; transition:background .2s,transform .2s; line-height:1; }
+    .secrets-btn:hover { background:rgba(255,255,255,.25); transform:scale(1.1) rotate(-10deg); }
+
+    /* Secrets modal */
+    .secrets-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:5000; display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:opacity .25s; }
+    .secrets-overlay.open { opacity:1; pointer-events:all; }
+    .secrets-modal { background:white; border-radius:18px; max-width:560px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 24px 80px rgba(0,0,0,.4); animation:dropIn .25s ease; }
+    .secrets-modal-hdr { background:linear-gradient(135deg,#1a2637,#2c3e50); color:white; padding:22px 24px 18px; border-radius:18px 18px 0 0; position:sticky; top:0; z-index:1; }
+    .ee-card { padding:14px 20px; border-bottom:1px solid #f0f0f0; display:flex; gap:14px; align-items:flex-start; transition:background .15s; }
+    .ee-card:last-child { border-bottom:none; }
+    .ee-card:hover { background:#fafafa; }
+    .ee-emoji { font-size:28px; flex-shrink:0; margin-top:2px; }
+    .ee-body { flex:1; }
+    .ee-name { font-weight:800; font-size:15px; color:#2c3e50; margin-bottom:3px; }
+    .ee-trigger { font-size:12px; background:#f0f4ff; color:#3a5bbd; border-radius:8px; padding:4px 10px; display:inline-block; margin-bottom:5px; font-family:monospace; font-weight:600; }
+    .ee-effect { font-size:13px; color:#555; line-height:1.4; }
+    .ee-diff { font-size:10px; font-weight:700; border-radius:10px; padding:2px 8px; margin-left:8px; vertical-align:middle; }
+    .ee-diff.easy { background:#d4edda; color:#155724; }
+    .ee-diff.med  { background:#fff3cd; color:#856404; }
+    .ee-diff.hard { background:#f8d7da; color:#721c24; }
+    .ee-stats { margin-top:8px; display:flex; flex-wrap:wrap; gap:5px; align-items:center; min-height:22px; }
+    .ee-count { font-size:11px; font-weight:700; color:#e74c3c; background:#fff5f5; border-radius:6px; padding:2px 8px; border:1px solid #fcc; }
+    .ee-count.zero { color:#bbb; background:#f8f8f8; border-color:#eee; }
+    .ee-user-badge { font-size:11px; font-weight:700; color:white; border-radius:10px; padding:2px 9px; }
+
+    /* Easter egg 3 — Rozbité hodiny */
+    @keyframes clockWobble { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-8deg) scale(1.1)} 40%{transform:rotate(8deg) scale(1.15)} 60%{transform:rotate(-5deg)} 80%{transform:rotate(4deg)} }
+    .cd-clock-broken { animation:clockWobble .4s ease-in-out 3; color:#e74c3c !important; font-size:28px !important; }
+
+    /* Easter egg 4 — Obed banner */
+    @keyframes obedPop { 0%{transform:translateX(-50%) scale(.5);opacity:0} 60%{transform:translateX(-50%) scale(1.15)} 100%{transform:translateX(-50%) scale(1);opacity:1} }
+    @keyframes obedFade { 0%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(-30px)} }
+    #obed-banner { position:fixed; top:80px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,#e74c3c,#c0392b); color:white; border-radius:20px; padding:18px 36px; font-size:28px; font-weight:900; z-index:9997; pointer-events:none; box-shadow:0 12px 40px rgba(231,76,60,.5); display:none; white-space:nowrap; text-align:center; }
+    #obed-banner.show { display:block; animation:obedPop .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+    #obed-banner.hide { animation:obedFade .6s ease forwards; }
+
+    /* Easter egg 5 — Italia banner */
+    @keyframes italiaBanner { 0%{transform:translateX(-50%) translateY(-80px);opacity:0} 60%{transform:translateX(-50%) translateY(8px)} 100%{transform:translateX(-50%) translateY(0);opacity:1} }
+    @keyframes italiaOut   { 0%{opacity:1;transform:translateX(-50%)} 100%{opacity:0;transform:translateX(-50%) translateY(-60px)} }
+    #italia-banner { position:fixed; top:74px; left:50%; transform:translateX(-50%); background:white; color:#1a1a1a; border:3px solid #009246; border-radius:16px; padding:14px 32px; font-size:22px; font-weight:900; z-index:9996; pointer-events:none; box-shadow:0 12px 40px rgba(0,0,0,.3); display:none; white-space:nowrap; text-align:center; }
+    #italia-banner.show { display:block; animation:italiaBanner .6s cubic-bezier(.34,1.56,.64,1) forwards; }
+    #italia-banner.hide { animation:italiaOut .5s ease forwards; }
+
+    /* Easter egg 6 — AI overlay */
+    #ai-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9995; display:none; align-items:center; justify-content:center; }
+    .ai-card { background:white; border-radius:18px; padding:28px 32px; max-width:360px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.4); text-align:center; }
+    .ai-bar-bg { background:#eee; border-radius:99px; height:10px; margin:14px 0 8px; overflow:hidden; }
+    .ai-bar-fill { background:linear-gradient(90deg,#3498db,#9b59b6); height:100%; border-radius:99px; width:0%; transition:width .35s ease; }
+    #ai-result { display:none; }
+    @keyframes robotBob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+
+    /* Easter egg 7 — Závrať overlay */
+    @keyframes dizzyIn  { 0%{opacity:0;transform:scale(2) rotate(20deg)} 100%{opacity:1;transform:scale(1) rotate(0)} }
+    #dizzy-overlay { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:9994; display:none; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
+    @keyframes spin360 { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    /* Easter egg 5 — Fantozzi Italian overlay (fix: full overlay namiesto CSS header hack) */
+    #fantozzi-overlay { position:fixed; inset:0; z-index:10002; display:none; align-items:center; justify-content:center; flex-direction:column; background:linear-gradient(90deg,#009246 0% 33%,#ffffff 33% 66%,#ce2b37 66% 100%); animation:konami-in .35s cubic-bezier(.34,1.56,.64,1) both; }
+
+    /* EE8: CLI Terminal */
+    #cli-overlay { position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:10001; display:none; align-items:center; justify-content:center; padding:16px; }
+    .cli-win { background:#0d1117; border:1px solid #30363d; border-radius:12px; width:100%; max-width:500px; box-shadow:0 24px 80px rgba(0,0,0,.7); overflow:hidden; }
+    .cli-titlebar { background:#1c2128; padding:10px 16px; display:flex; align-items:center; gap:8px; }
+    .cli-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .cli-body { padding:18px 20px; font-family:'Courier New',monospace; font-size:13px; line-height:1.6; min-height:200px; }
+    .cli-prompt { color:#3fb950; }
+    .cli-cmd    { color:#e6edf3; }
+    .cli-out    { color:#8b949e; }
+    .cli-hi     { color:#58a6ff; }
+    .cli-ok     { color:#3fb950; }
+    .cli-err    { color:#f85149; }
+
+    /* EE9: Hlad — uses #pizza-typing-toast style */
+
+    /* EE10: Heart rain */
+    .heart-drop { position:fixed; top:0; pointer-events:none; z-index:9990; animation:pizzaFall linear forwards; user-select:none; }
+
+    /* EE11: Matrix rain */
+    .matrix-char { position:fixed; top:-30px; pointer-events:none; z-index:9989; font-family:monospace; font-weight:700; color:#00ff41; text-shadow:0 0 8px #00ff41; animation:pizzaFall linear forwards; opacity:.85; }
+
+    /* EE12: Disco */
+    @keyframes discoBeat { 0%,100%{filter:none} 14%{filter:hue-rotate(51deg) saturate(3) brightness(1.2)} 28%{filter:hue-rotate(102deg) saturate(3) brightness(1.1)} 42%{filter:hue-rotate(180deg) saturate(3)} 57%{filter:hue-rotate(240deg) saturate(3) brightness(1.2)} 71%{filter:hue-rotate(300deg) saturate(3)} 85%{filter:hue-rotate(330deg) saturate(2)} }
+    body.disco-mode { animation:discoBeat .45s linear 7; }
+    @keyframes discoFlash { 0%{background:rgba(255,0,150,.22)} 14%{background:rgba(0,200,255,.22)} 28%{background:rgba(255,200,0,.22)} 42%{background:rgba(0,255,100,.22)} 57%{background:rgba(200,0,255,.22)} 71%{background:rgba(255,100,0,.22)} 85%{background:rgba(0,150,255,.22)} 100%{background:rgba(255,0,150,.22)} }
+    @keyframes discoBounce { 0%,100%{transform:scale(1) rotate(-8deg)} 50%{transform:scale(1.35) rotate(8deg)} }
+    #disco-overlay { position:fixed; inset:0; z-index:9995; display:none; align-items:center; justify-content:center; pointer-events:none; animation:discoFlash .45s linear infinite; }
+    #disco-overlay-inner { font-size:72px; text-align:center; animation:discoBounce .45s ease-in-out infinite; line-height:1.1; }
+
+    /* EE20: Filmový Trailer */
+    #trailer-overlay { position:fixed; inset:0; z-index:10010; background:#000; display:none; align-items:center; justify-content:center; flex-direction:column; font-family:'Segoe UI',Arial,sans-serif; overflow:hidden; }
+    .trl-frame { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; opacity:0; transition:opacity .45s; padding:80px 40px; text-align:center; pointer-events:none; }
+    .trl-frame.vis { opacity:1; pointer-events:auto; }
+    @keyframes trlGlow { 0%,100%{text-shadow:0 0 30px #f39c12,0 0 60px #e74c3c} 50%{text-shadow:0 0 70px #ffd93d,0 0 130px #ff6b6b,0 0 200px #ff6b6b} }
+    @keyframes trlPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    @keyframes trlFlashAnim { 0%,100%{opacity:0} 20%{opacity:1} }
+    #trl-flash { position:absolute; inset:0; background:white; pointer-events:none; opacity:0; z-index:10011; }
+    #trl-flash.go { animation:trlFlashAnim .15s ease forwards; }
+    .trl-studio { font-size:12px; font-weight:900; letter-spacing:8px; color:#666; text-transform:uppercase; margin-bottom:20px; }
+    .trl-tagline { font-size:18px; color:rgba(255,255,255,.85); line-height:1.6; max-width:520px; }
+    .trl-cut { font-size:52px; font-weight:900; color:white; letter-spacing:6px; text-transform:uppercase; }
+    .trl-title-big { font-size:76px; font-weight:900; color:#f39c12; animation:trlGlow 1.5s ease-in-out infinite, trlPulse 1.5s ease-in-out infinite; letter-spacing:8px; line-height:1; margin-bottom:8px; }
+    .trl-subtitle { font-size:24px; color:#ffd93d; font-weight:700; letter-spacing:4px; margin-top:6px; }
+    .trl-year { font-size:58px; font-weight:900; color:white; letter-spacing:14px; }
+    .trl-review { font-size:15px; color:#bbb; font-style:italic; margin-bottom:18px; line-height:1.6; }
+    .trl-cta { background:linear-gradient(135deg,#e74c3c,#c0392b); color:white; border:none; border-radius:14px; padding:15px 40px; font-size:19px; font-weight:900; cursor:pointer; animation:trlPulse 1s ease-in-out infinite; letter-spacing:1px; box-shadow:0 6px 28px rgba(231,76,60,.6); transition:transform .15s; }
+    .trl-cta:hover { transform:scale(1.06); }
+    .trl-close { position:absolute; top:20px; right:26px; color:rgba(255,255,255,.3); font-size:13px; cursor:pointer; font-weight:700; letter-spacing:1px; transition:color .2s; z-index:10012; }
+    .trl-close:hover { color:rgba(255,255,255,.8); }
+    .trl-bar { position:absolute; bottom:0; left:0; height:4px; background:linear-gradient(90deg,#e74c3c,#f39c12,#ffd93d); width:0; }
+    .trl-letterbox { position:absolute; left:0; right:0; height:56px; background:#000; z-index:10013; }
+    .trl-letterbox.top { top:0; } .trl-letterbox.bottom { bottom:0; }
+    .trl-foodemoji { font-size:44px; margin:4px; }
+
+    /* EE13: Nočný mód overlay */
+    #nocna-overlay { position:fixed; inset:0; background:rgba(4,8,20,.95); z-index:10000; display:none; align-items:center; justify-content:center; flex-direction:column; pointer-events:none; }
+
+    /* EE14: Super achievement */
+    #super-popup { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); background:linear-gradient(135deg,#f39c12,#e74c3c); color:white; border-radius:22px; padding:28px 40px; z-index:9988; pointer-events:none; box-shadow:0 20px 60px rgba(231,76,60,.5); text-align:center; transition:transform .45s cubic-bezier(.34,1.56,.64,1); }
+    #super-popup.show { transform:translate(-50%,-50%) scale(1); }
+
+    /* EE15: Esc popup */
+    #escape-popup { position:fixed; bottom:24px; right:24px; background:#9b59b6; color:white; border-radius:16px; padding:16px 22px; font-size:15px; font-weight:700; z-index:9987; pointer-events:none; box-shadow:0 8px 32px rgba(155,89,182,.55); opacity:0; transform:translateY(16px); transition:all .4s cubic-bezier(.34,1.56,.64,1); }
+    #escape-popup.show { opacity:1; transform:translateY(0); }
+
+    /* EE16: Star rain upward */
+    @keyframes starFloat { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-110vh) rotate(-720deg);opacity:.4} }
+    .star-drop { position:fixed; bottom:0; pointer-events:none; z-index:9986; animation:starFloat linear forwards; user-select:none; }
+
+    /* EE17: Name randomizer */
+    .name-randomizing { animation:nameBlink .12s linear infinite !important; }
+    @keyframes nameBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* 🐛 Easter Egg Debug Panel */
+    #ee-debug-panel { position:fixed; bottom:76px; left:10px; width:310px; background:#0d1117; color:#c9d1d9; border-radius:12px; z-index:99998; font-family:'Consolas','Courier New',monospace; font-size:11.5px; display:none; box-shadow:0 8px 40px rgba(0,0,0,.75); border:1px solid #30363d; }
+    #ee-dbg-header { background:#161b22; padding:8px 12px; font-size:12px; font-weight:700; color:#58a6ff; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #30363d; border-radius:12px 12px 0 0; user-select:none; }
+    #ee-dbg-header span { cursor:default; }
+    #ee-dbg-close { background:none; border:none; color:#8b949e; cursor:pointer; font-size:15px; line-height:1; padding:0 2px; transition:color .15s; }
+    #ee-dbg-close:hover { color:#c9d1d9; }
+    .ee-dbg-section { padding:7px 12px; border-bottom:1px solid #21262d; }
+    .ee-dbg-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
+    .ee-dbg-row:last-child { margin-bottom:0; }
+    .ee-dbg-key { color:#8b949e; font-size:10.5px; flex-shrink:0; }
+    .ee-dbg-val { color:#e6edf3; font-weight:700; max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+    .ee-dbg-val.ok  { color:#3fb950; }
+    .ee-dbg-val.warn { color:#f0883e; }
+    .ee-dbg-val.err { color:#f85149; }
+    #ee-dbg-log-wrap { max-height:110px; overflow-y:auto; padding:5px 10px 6px; }
+    .ee-dbg-log-entry { color:#8b949e; font-size:10.5px; padding:2px 0; border-bottom:1px solid #161b22; }
+    .ee-dbg-log-entry.ok   { color:#3fb950; }
+    .ee-dbg-log-entry.warn { color:#f0883e; }
+    .ee-dbg-log-entry.err  { color:#f85149; }
+    .ee-dbg-log-entry.match { color:#79c0ff; }
+    #ee-dbg-btns { display:flex; flex-wrap:wrap; gap:4px; padding:7px 10px 8px; }
+    .ee-dbg-btn { background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:6px; padding:3px 7px; font-size:10px; cursor:pointer; font-family:monospace; transition:background .15s, border-color .15s; white-space:nowrap; }
+    .ee-dbg-btn:hover { background:#388bfd22; border-color:#58a6ff; color:#79c0ff; }
+    #ee-dbg-hint { padding:3px 12px 7px; font-size:10px; color:#3d444d; text-align:center; }
   </style>
 </head>
 <body>
@@ -367,7 +548,7 @@
       <span class="hdr-sep">|</span>
       <span class="hdr-sub">Objednávky</span>
     </a>
-    <button class="easter-hdr-btn" onclick="easterHdrClick()" title="">⭐</button>
+    <button class="easter-hdr-btn" onclick="easterHdrClick(event)" title="">⭐</button>
   </h1>
   <div class="header-right">
     <div class="phone-wrap">
@@ -390,7 +571,8 @@
         <div class="contact-card-sub">Discord · mimosvk</div>
       </div>
     </a>
-    <span id="user-badge" onclick="changeUser()" title="Klikni pre zmenu">👤 <span id="username-display">...</span></span>
+    <button class="secrets-btn" onclick="openSecrets()" title="Tajné Easter Eggy 🥚">🥚</button>
+    <span id="user-badge" onclick="userBadgeClick()" title="Klikni pre zmenu · 2× rýchlo = Kríza Identity 👤">👤 <span id="username-display">...</span></span>
     <a href="/admin" class="nav-link">Admin</a>
   </div>
 </header>
@@ -399,7 +581,7 @@
   <div class="cd-inner">
     <div id="cd-datetime" style="display:flex;flex-direction:column;align-items:center;min-width:120px;opacity:.75;border-right:1px solid rgba(0,0,0,.12);padding-right:16px;margin-right:4px">
       <span id="cd-date" style="font-size:12px;font-weight:700;letter-spacing:.3px"></span>
-      <span id="cd-clock" style="font-size:22px;font-weight:900;letter-spacing:-0.5px;line-height:1.1"></span>
+      <span id="cd-clock" style="font-size:22px;font-weight:900;letter-spacing:-0.5px;line-height:1.1;cursor:pointer;user-select:none" onclick="clockEasterClick(event)" title=""></span>
     </div>
     <span class="cd-label" id="cd-label">⏳ Načítavam...</span>
     <div class="cd-time" id="cd-time" style="display:none">
@@ -576,6 +758,8 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('historia')">📅 História</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('pouzivatelia')">👥 Používatelia</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('qrtest')">🧪 QR testovač</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('blokovane')" id="blokovane-tab-btn">🚫 Neprítomnosť</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('platba')">💳 Platba</button>
     </div>
 
     <!-- Tab: dnesne -->
@@ -651,7 +835,7 @@
 
             <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start">
               <div>
-                <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">IBAN (prázdne = z config)</label>
+                <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">IBAN (prázdne = z nastavení)</label>
                 <input id="qrt-iban" type="text" placeholder="SK00 0000 0000 0000 0000 0000" autocomplete="off" spellcheck="false"
                   style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;outline:none;letter-spacing:.5px"
                   oninput="qrtIbanInput(this)" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=qrtIbanStatus(this.value)">
@@ -659,7 +843,7 @@
               </div>
               <div>
                 <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">BIC/SWIFT</label>
-                <input id="qrt-bic" type="text" placeholder="z config" autocomplete="off" spellcheck="false"
+                <input id="qrt-bic" type="text" placeholder="z nastavení" autocomplete="off" spellcheck="false"
                   style="width:110px;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:monospace;outline:none;letter-spacing:.5px;text-transform:uppercase"
                   oninput="this.value=this.value.toUpperCase()"
                   onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
@@ -711,6 +895,103 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Tab: blokovane -->
+    <div id="admin-tab-blokovane" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">🚫 Blokovanie objednávania — Neprítomnosť</div>
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#856404">
+          <strong>ℹ️ Ako to funguje?</strong> Nastav časové obdobie, počas ktorého <strong>nebude možné zadávať objednávky</strong> — napríklad keď je Filip Švolík na dovolenke alebo práceneschopný. V zablokované dni sa objednávkový formulár automaticky deaktivuje.
+        </div>
+
+        <!-- Formulár pre pridanie blokovania -->
+        <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:12px">➕ Pridať nové blokovanie</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:10px;align-items:end">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Od</label>
+              <input type="date" id="blok-od" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Do</label>
+              <input type="date" id="blok-do" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Dôvod (voliteľný)</label>
+              <input type="text" id="blok-dovod" placeholder="napr. Dovolenka Filipa Švolíka" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <button class="btn btn-primary" style="width:auto;margin-bottom:0;white-space:nowrap" onclick="addBlokovaneObdobie()">+ Pridať</button>
+          </div>
+        </div>
+
+        <!-- Zoznam blokovaní -->
+        <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:10px">📋 Zoznam blokovaní</div>
+        <div id="blokovane-list"><div class="loading">Načítavam...</div></div>
+      </div>
+    </div>
+
+    <!-- Tab: platba -->
+    <div id="admin-tab-platba" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">💳 Nastavenia platby / QR kód</div>
+        <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2e7d32">
+          <strong>ℹ️ Databázové nastavenia</strong> majú prednosť pred premennými prostredia (<code>ENV</code>). Ak necháš pole prázdne, použije sa hodnota z ENV premennej (ak je nastavená).
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+          <div style="grid-column:1/-1">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">IBAN</label>
+            <input id="platba-iban" type="text" autocomplete="off" spellcheck="false"
+              placeholder="SK00 0000 0000 0000 0000 0000"
+              style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;outline:none;letter-spacing:.8px;text-transform:uppercase"
+              oninput="platbaIbanInput(this)"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <div id="platba-iban-status" style="font-size:12px;margin-top:4px;min-height:18px"></div>
+            <div id="platba-iban-hint" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+          </div>
+
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">BIC / SWIFT</label>
+            <input id="platba-bic" type="text" autocomplete="off" spellcheck="false"
+              placeholder="napr. TATRSKBX"
+              style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;outline:none;text-transform:uppercase"
+              oninput="this.value=this.value.toUpperCase()"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <div id="platba-bic-hint" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
+
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Meno príjemcu</label>
+            <input id="platba-meno" type="text" autocomplete="off"
+              placeholder="napr. Fantozzi Restaurant"
+              style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <div id="platba-meno-hint" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
+
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Variabilný symbol <span style="font-weight:400;text-transform:none">(nepovinné)</span></label>
+            <input id="platba-vs" type="text" autocomplete="off"
+              placeholder="napr. 2025"
+              style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;outline:none"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="savePlatbaAdminConfig()">💾 Uložiť nastavenia</button>
+          <button class="btn" onclick="loadPlatbaAdminConfig()">↺ Znovu načítať</button>
+          <span id="platba-save-status" style="font-size:13px"></span>
+        </div>
+      </div>
+
+      <!-- Aktuálne efektívne hodnoty -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">🔍 Aktuálne efektívne nastavenia</div>
+        <div id="platba-effective-preview" style="color:var(--muted);font-size:13px">Načítavam...</div>
       </div>
     </div>
   </div>
@@ -1029,15 +1310,21 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Status / Countdown ────────────────────────────────────────────────────
+let statusBlocked = false;
+let statusBlockedDovod = null;
+
 async function checkStatus() {
   try {
     const res = await fetch('/api/status');
     const data = await res.json();
     orderingOpen = data.open;
     config_deadline = data.deadline;
+    statusBlocked = data.blocked || false;
+    statusBlockedDovod = data.blokovanyDovod || null;
     updateClock();
     updateCountdown(data.deadline);
     setInterval(() => { updateClock(); updateCountdown(data.deadline); }, 1000);
+    if (statusBlocked) disableForm();
   } catch(e) {}
 }
 
@@ -1147,6 +1434,21 @@ function updateCdInfo() {
 let _cdDeadlineTotal = null;
 function updateCountdown(deadline) {
   const bar = document.getElementById('countdown-bar');
+  const timeEl  = document.getElementById('cd-time');
+  const labelEl = document.getElementById('cd-label');
+  const fillEl  = document.getElementById('cd-progress-fill');
+
+  if (statusBlocked) {
+    orderingOpen = false;
+    bar.className = 'blok';
+    bar.style.cursor = 'default';
+    const msg = statusBlockedDovod ? `🚫 Objednávanie zablokované — ${statusBlockedDovod}` : '🚫 Objednávanie je dočasne zablokované';
+    labelEl.textContent = msg;
+    if (timeEl) timeEl.style.display = 'none';
+    if (fillEl) fillEl.style.width = '100%';
+    return;
+  }
+
   const [hh, mm] = deadline.split(':').map(Number);
   const now = new Date();
   const target = new Date();
@@ -1157,10 +1459,6 @@ function updateCountdown(deadline) {
     const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
     _cdDeadlineTotal = target - startOfDay;
   }
-
-  const timeEl  = document.getElementById('cd-time');
-  const labelEl = document.getElementById('cd-label');
-  const fillEl  = document.getElementById('cd-progress-fill');
 
   if (diff <= 0) {
     orderingOpen = false;
@@ -1677,6 +1975,24 @@ async function histNav(delta) {
 }
 
 // ── Easter egg (hlavicka) ─────────────────────────────────────────────────
+// ── Easter egg 16: Shift+klik na ⭐ → Hviezdny dážď nahor ────────────────
+function starRain() {
+  const stars = ['⭐','🌟','✨','💫','🌠','⚡'];
+  for (let i = 0; i < 35; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'star-drop';
+      el.textContent = stars[Math.floor(Math.random() * stars.length)];
+      el.style.left = (Math.random() * 96) + 'vw';
+      el.style.fontSize = (14 + Math.random() * 20) + 'px';
+      el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 60);
+  }
+  showToast('⭐ Hviezdny dážď! Shift+klik aktivovaný!', 'success');
+}
+
 let easterHdrClicks = 0;
 let easterHdrTimeout;
 
@@ -1690,14 +2006,12 @@ document.addEventListener('click', e => {
   }
 });
 
-function easterHdrClick() {
+function easterHdrClick(event) {
+  if (event?.shiftKey) { recordEggTrigger('starrain'); starRain(); return; }
   easterHdrClicks++;
   clearTimeout(easterHdrTimeout);
   easterHdrTimeout = setTimeout(() => { easterHdrClicks = 0; }, 2000);
-  if (easterHdrClicks >= 5) {
-    easterHdrClicks = 0;
-    pizzaRain();
-  }
+  if (easterHdrClicks >= 5) { easterHdrClicks = 0; recordEggTrigger('star'); pizzaRain(); }
 }
 
 function pizzaRain() {
@@ -1901,6 +2215,7 @@ async function showEasterModal(isAdmin) {
 
 function countdownClick() {
   if (!orderingOpen || isAdmin) return;
+  recordEggTrigger('deadline');
   showEasterModal(false);
 }
 
@@ -1952,13 +2267,15 @@ async function doSetDeadline(deadline) {
 
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab-btn').forEach((btn, i) => {
-    const tabs = ['dnes','historia','pouzivatelia'];
+    const tabs = ['dnes','historia','pouzivatelia','qrtest','blokovane','platba'];
     btn.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
   document.getElementById(`admin-tab-${tab}`)?.classList.add('active');
   if (tab === 'historia') loadLongHistory();
   if (tab === 'pouzivatelia') loadRegisteredUsers();
+  if (tab === 'blokovane') loadBlokovaneObdobia();
+  if (tab === 'platba') loadPlatbaAdminConfig();
 }
 
 function renderAdminOrders(orders, history = []) {
@@ -2451,6 +2768,869 @@ function showToast(msg, type='success') {
   toastTimeout = setTimeout(() => { el.className = ''; }, 3500);
 }
 
+// ── Blokované obdobia (admin) ─────────────────────────────────────────────
+async function loadBlokovaneObdobia() {
+  const listEl = document.getElementById('blokovane-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="loading">Načítavam...</div>';
+  try {
+    const res = await fetch(`/api/admin/blokovane-obdobia?adminPass=${encodeURIComponent(adminPassword)}`);
+    const data = await res.json();
+    if (!data.ok) { listEl.innerHTML = '<div class="empty-state">Chyba načítania</div>'; return; }
+    renderBlokovaneObdobia(data.obdobia);
+  } catch(e) { listEl.innerHTML = '<div class="empty-state">Chyba spojenia</div>'; }
+}
+
+function renderBlokovaneObdobia(obdobia) {
+  const listEl = document.getElementById('blokovane-list');
+  if (!obdobia.length) {
+    listEl.innerHTML = '<div class="empty-state" style="padding:24px 0;text-align:center"><div style="font-size:32px;margin-bottom:8px">🎉</div>Žiadne blokovania — objednávanie je aktívne</div>';
+    return;
+  }
+  const dnes = new Date().toISOString().slice(0, 10);
+  const fmt = d => {
+    const [y,m,day] = d.split('-');
+    return `${day}.${m}.${y}`;
+  };
+  listEl.innerHTML = obdobia.map(o => {
+    const isActive = o.od <= dnes && o.do >= dnes;
+    const isPast   = o.do < dnes;
+    const badge    = isActive
+      ? `<span class="blok-badge-active">● AKTÍVNE</span>`
+      : isPast
+        ? `<span class="blok-badge-past">Ukončené</span>`
+        : `<span class="blok-badge-future">Nadchádzajúce</span>`;
+    const days = Math.round((new Date(o.do) - new Date(o.od)) / 86400000) + 1;
+    return `
+      <div class="blok-item${isActive ? ' active-blok' : ''}">
+        <div style="font-size:28px">${isActive ? '🚫' : isPast ? '✅' : '📅'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:15px;margin-bottom:2px">${fmt(o.od)} — ${fmt(o.do)} <span style="font-size:12px;color:var(--muted);font-weight:400">(${days} ${days===1?'deň':'dní'})</span></div>
+          <div style="font-size:13px;color:var(--muted)">${o.dovod || 'Neprítomnosť'}</div>
+        </div>
+        ${badge}
+        <button onclick="deleteBlokovaneObdobie('${o._id}')" style="background:#f8d7da;color:#721c24;border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0" title="Odstrániť">🗑️</button>
+      </div>`;
+  }).join('');
+}
+
+async function addBlokovaneObdobie() {
+  const od    = document.getElementById('blok-od').value;
+  const do_   = document.getElementById('blok-do').value;
+  const dovod = document.getElementById('blok-dovod').value.trim();
+  if (!od || !do_) { showToast('❌ Zadaj dátum od aj do', 'error'); return; }
+  if (od > do_) { showToast('❌ Dátum "od" musí byť skôr ako "do"', 'error'); return; }
+  try {
+    const res = await fetch('/api/admin/blokovane-obdobia', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ adminPass: adminPassword, od, do: do_, dovod: dovod || 'Neprítomnosť Filipa Švolíka' })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('✅ Blokovanie pridané', 'success');
+      document.getElementById('blok-od').value = '';
+      document.getElementById('blok-do').value = '';
+      document.getElementById('blok-dovod').value = '';
+      await loadBlokovaneObdobia();
+    } else { showToast('❌ ' + (data.error || 'Chyba'), 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+async function deleteBlokovaneObdobie(id) {
+  if (!confirm('Odstrániť toto blokovanie?')) return;
+  try {
+    const res = await fetch(`/api/admin/blokovane-obdobia/${id}?adminPass=${encodeURIComponent(adminPassword)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Blokovanie odstránené', 'success'); await loadBlokovaneObdobia(); }
+    else { showToast('❌ Chyba', 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+// ── Platba / IBAN nastavenia (admin) ─────────────────────────────────────
+async function loadPlatbaAdminConfig() {
+  const previewEl = document.getElementById('platba-effective-preview');
+  if (previewEl) previewEl.innerHTML = '<span style="color:var(--muted)">Načítavam...</span>';
+  try {
+    const res  = await fetch(`/api/admin/platba-config?adminPass=${encodeURIComponent(adminPassword)}`);
+    const data = await res.json();
+    if (!data.ok) { showToast('❌ Chyba načítania platobných nastavení', 'error'); return; }
+
+    // Fill form fields with DB values
+    const fmtIban = v => v ? v.match(/.{1,4}/g)?.join(' ') || v : '';
+    document.getElementById('platba-iban').value = fmtIban(data.iban);
+    document.getElementById('platba-bic').value  = data.bic  || '';
+    document.getElementById('platba-meno').value = data.meno || '';
+    document.getElementById('platba-vs').value   = data.vs   || '';
+
+    // Show ENV hints
+    const hint = (envVal, label) =>
+      envVal ? `<span style="color:#1565c0">ENV: <code>${envVal}</code></span>` : `<span style="color:#bbb">${label} z ENV nie je nastavené</span>`;
+    const hI = document.getElementById('platba-iban-hint');
+    const hB = document.getElementById('platba-bic-hint');
+    const hM = document.getElementById('platba-meno-hint');
+    if (hI) hI.innerHTML = hint(fmtIban(data.envIban), 'IBAN');
+    if (hB) hB.innerHTML = hint(data.envBic,  'BIC');
+    if (hM) hM.innerHTML = hint(data.envMeno, 'Meno');
+
+    // Effective preview
+    const eff = data.effective;
+    if (previewEl) {
+      const srcTag = (dbVal, envVal) => dbVal
+        ? `<span style="background:#e8f5e9;color:#2e7d32;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">DB</span>`
+        : envVal
+        ? `<span style="background:#e3f2fd;color:#1565c0;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">ENV</span>`
+        : `<span style="background:#f5f5f5;color:#aaa;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:700;margin-left:6px">DEFAULT</span>`;
+
+      if (!eff.iban) {
+        previewEl.innerHTML = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 16px;color:#856404;font-size:13px">⚠️ <strong>IBAN nie je nastavený!</strong> QR platby nebudú fungovať. Zadaj IBAN do formulára vyššie.</div>';
+      } else {
+        previewEl.innerHTML = `
+          <table style="border-collapse:collapse;width:100%">
+            <tr><td style="padding:7px 4px;font-weight:700;width:140px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">IBAN</td>
+                <td style="padding:7px 4px;font-family:monospace;font-size:14px;font-weight:700">${(eff.iban.match(/.{1,4}/g)||[]).join(' ')}${srcTag(data.iban, data.envIban)}</td></tr>
+            <tr style="background:var(--bg)"><td style="padding:7px 4px;font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">BIC/SWIFT</td>
+                <td style="padding:7px 4px;font-family:monospace;font-size:14px">${eff.bic || '<em style="color:#aaa">neuvedené</em>'}${eff.bic ? srcTag(data.bic, data.envBic) : ''}</td></tr>
+            <tr><td style="padding:7px 4px;font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">Meno príjemcu</td>
+                <td style="padding:7px 4px;font-size:14px">${eff.meno}${srcTag(data.meno, data.envMeno)}</td></tr>
+            <tr style="background:var(--bg)"><td style="padding:7px 4px;font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">Var. symbol</td>
+                <td style="padding:7px 4px;font-family:monospace;font-size:14px">${eff.vs || '<em style="color:#aaa">neuvedený</em>'}</td></tr>
+          </table>`;
+      }
+    }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
+}
+
+async function savePlatbaAdminConfig() {
+  const ibanRaw = document.getElementById('platba-iban').value.replace(/\s/g, '');
+  const bic     = document.getElementById('platba-bic').value.trim();
+  const meno    = document.getElementById('platba-meno').value.trim();
+  const vs      = document.getElementById('platba-vs').value.trim();
+  const statusEl = document.getElementById('platba-save-status');
+
+  // Warn on invalid IBAN (non-empty)
+  if (ibanRaw && typeof validateIBAN === 'function' && !validateIBAN(ibanRaw)) {
+    if (!confirm('⚠️ IBAN má neplatný checksum — bankové appky ho odmietnu. Uložiť aj tak?')) return;
+  }
+
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--muted)">Ukladám...</span>';
+  try {
+    const res = await fetch('/api/admin/platba-config', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPass: adminPassword, iban: ibanRaw, bic, meno, vs })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showToast('✅ Platobné nastavenia uložené', 'success');
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✅ Uložené</span>';
+      setTimeout(() => { if (statusEl) statusEl.innerHTML = ''; }, 3000);
+      await loadPlatbaAdminConfig(); // Refresh preview
+    } else {
+      showToast('❌ ' + (data.error || 'Chyba ukladania'), 'error');
+      if (statusEl) statusEl.innerHTML = '';
+    }
+  } catch(e) {
+    showToast('❌ Chyba spojenia', 'error');
+    if (statusEl) statusEl.innerHTML = '';
+  }
+}
+
+function platbaIbanInput(el) {
+  let raw = el.value.replace(/\s/g, '').toUpperCase();
+  const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw;
+  el.value = formatted;
+  const statusEl = document.getElementById('platba-iban-status');
+  if (!raw) { if (statusEl) statusEl.innerHTML = ''; el.style.borderColor = 'var(--border)'; return; }
+  const ok = typeof validateIBAN === 'function' ? validateIBAN(raw) : null;
+  if (ok === true) {
+    if (statusEl) statusEl.innerHTML = '<span style="color:#27ae60;font-weight:700">✅ IBAN je platný</span>';
+    el.style.borderColor = '#27ae60';
+  } else if (ok === false) {
+    const corrected = typeof ibanCorrectCheckDigits === 'function' ? ibanCorrectCheckDigits(raw) : null;
+    const hint = corrected ? ` — správny by bol <strong style="font-family:monospace">${corrected.match(/.{1,4}/g).join(' ')}</strong>` : '';
+    if (statusEl) statusEl.innerHTML = `<span style="color:#e74c3c;font-weight:700">❌ Neplatný IBAN checksum${hint}</span>`;
+    el.style.borderColor = '#e74c3c';
+  }
+}
+
+// ── Easter egg metadata ───────────────────────────────────────────────────
+const EGGS_INFO = [
+  { id:'star',     emoji:'⭐',  name:'Pizza Dážď',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Klikni 5× rýchlo na ⭐ v hlavičke',                            effect:'Spustí dážď jedla zo stropu stránky 🍕🍝🍜' },
+  { id:'deadline', emoji:'💸',  name:'Poplatok za Predĺženie', diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Klikni na countdown bar keď je uzávierka ZATVORENÁ',            effect:'Zobrazí falošnú platbu 3 € za „predĺženie objednávania" 😂' },
+  { id:'konami',   emoji:'🎮',  name:'Ultra Pizza Mode',       diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'↑ ↑ ↓ ↓ ← → ← → B A',                                        effect:'Fullscreen Konami kód s dúhovým textom + mega dážď jedla 🌈' },
+  { id:'pizza',    emoji:'🍕',  name:'Pizza Detekcia',         diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  p-i-z-z-a  na klávesnici (mimo políčok)',                effect:'Objaví sa toast správa s pizza múdrosťami 🤌' },
+  { id:'clock',    emoji:'⏰',  name:'Rozbité Hodiny',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Klikni 3× rýchlo na zobrazený ČAS v countdown bare',           effect:'Čas sa rozbije a ukáže 🍕:🍕:🍕 na 3 sekundy ⏱️' },
+  { id:'obed',     emoji:'🍽️', name:'Obed Alarm',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  o-b-e-d  na klávesnici (mimo políčok)',                  effect:'Spustí obed alarm s confetti jedlom 🔔🍽️' },
+  { id:'fantozzi', emoji:'🇮🇹', name:'Taliansky Mode',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  f-a-n-t-o-z-z-i  na klávesnici (mimo políčok)',          effect:'Fullscreen talianská vlajka + "Benvenuti a Fantozzi! 🤌"' },
+  { id:'ai',       emoji:'🤖',  name:'AI Analýza',             diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Podrž tlačidlo „Potvrdiť objednávku" 3 sekundy bez pustenia',  effect:'FantozziGPT analyzuje objednávku a výsledok je vždy rovnaký 🍕' },
+  { id:'scroll',   emoji:'🌀',  name:'Závrať',                 diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Roluj kolieskom myši rýchlo hore-dole 3× za 2.5 sekundy',      effect:'Závrať detekovaná! Spinning overlay 😵' },
+  { id:'help',     emoji:'💻',  name:'CLI Terminál',           diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  h-e-l-p  (mimo políčok)',                               effect:'Otvorí falošný Fantozzi CLI terminál s príkazmi 😄' },
+  { id:'hlad',     emoji:'🤤',  name:'Hlad Alarm',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  h-l-a-d  (mimo políčok)',                               effect:'Toast správa o hladu — objednaj si niečo! 🍽️' },
+  { id:'srdce',    emoji:'❤️',  name:'Srdce Dážď',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  s-r-d-c-e  (mimo políčok)',                             effect:'Farebný dážď sŕdc zo stropu stránky 💕' },
+  { id:'matrix',   emoji:'🟢',  name:'Food Matrix',            diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  m-a-t-r-i-x  (mimo políčok)',                          effect:'Matrix-style zelený dážď jedla + binárnych znakov 🍕01' },
+  { id:'disco',    emoji:'🪩',  name:'Disco Mode',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  d-i-s-c-o  (mimo políčok)',                             effect:'Stránka na 3 sekundy prejde do disco farebného módu 🕺' },
+  { id:'nocna',    emoji:'🌙',  name:'Nočný Mód',              diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  n-o-c-n-a  (mimo políčok)',                             effect:'4-sekundový nočný mód overlay 😴' },
+  { id:'super',    emoji:'🏆',  name:'Super Objednávač',       diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  s-u-p-e-r  (mimo políčok)',                             effect:'Achievement popup + pizza dážď 🎖️' },
+  { id:'escape',   emoji:'🥺',  name:'Neopúšťaj Nás',          diff:'med',  diffLabel:'STREDNÝ', trigger:'Stlač Esc 5× rýchlo (mimo políčok)',                           effect:'Popup "Neopúšťaj nás! Ešte si nenaobedoval/a!" 🥺' },
+  { id:'starrain', emoji:'🌠',  name:'Hviezdny Dážď',          diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Drž Shift + klikni na ⭐ v hlavičke',                          effect:'Hviezdy letia NAHOR namiesto nadol 🌠✨' },
+  { id:'namerand', emoji:'👤',  name:'Kríza Identity',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Dvojklikni rýchlo na svoje meno (👤 badge v hlavičke)',        effect:'Tvoje meno sa na 2.5 sekundy randomizuje cez vtipné mená 😂' },
+  { id:'trailer',  emoji:'🎬',  name:'Filmový Trailer',        diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Napíš  t-r-a-i-l-e-r  na klávesnici (mimo políčok)',          effect:'Fantozzi Studios uvádza: epický filmový trailer na motivy objednávania obedov 🍿' },
+];
+
+// Farby pre user badges (deterministic by meno)
+const EGG_USER_COLORS = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c','#e67e22','#e91e63','#00bcd4','#795548'];
+function eggUserColor(meno) {
+  let h = 0;
+  for (let i = 0; i < meno.length; i++) h = (h * 31 + meno.charCodeAt(i)) & 0xffff;
+  return EGG_USER_COLORS[h % EGG_USER_COLORS.length];
+}
+
+// ── Secrets menu ─────────────────────────────────────────────────────────
+async function openSecrets() {
+  const overlay = document.getElementById('secrets-overlay');
+  overlay.classList.add('open');
+  // Reset to loading state
+  document.getElementById('secrets-modal-content').innerHTML =
+    '<div style="padding:40px;text-align:center;color:#bbb;font-size:14px">⏳ Načítavam štatistiky...</div>';
+  try {
+    const res = await fetch('/api/easter-stats');
+    const data = await res.json();
+    renderSecretsModal(data.ok ? data.stats : {});
+  } catch(e) {
+    renderSecretsModal({});
+  }
+}
+function closeSecrets() {
+  document.getElementById('secrets-overlay').classList.remove('open');
+}
+
+function renderSecretsModal(stats) {
+  const found = EGGS_INFO.filter(e => stats[e.id] && stats[e.id].total > 0).length;
+  let html = '';
+  for (const egg of EGGS_INFO) {
+    const s = stats[egg.id];
+    const total = s ? s.total : 0;
+    const users = s ? s.users : [];
+    const countHtml = total > 0
+      ? `<span class="ee-count">🔥 ${total}×</span>`
+      : `<span class="ee-count zero">ešte neobjavený</span>`;
+    const badgesHtml = users.map(u =>
+      `<span class="ee-user-badge" style="background:${eggUserColor(u.meno)}">${u.meno} ×${u.count}</span>`
+    ).join('');
+    html += `<div class="ee-card">
+      <div class="ee-emoji">${egg.emoji}</div>
+      <div class="ee-body">
+        <div class="ee-name">${egg.name} <span class="ee-diff ${egg.diff}">${egg.diffLabel}</span></div>
+        <div class="ee-trigger">${egg.trigger}</div>
+        <div class="ee-effect">${egg.effect}</div>
+        <div class="ee-stats">${countHtml}${badgesHtml}</div>
+      </div>
+    </div>`;
+  }
+  html += `<div style="padding:14px 20px;text-align:center;font-size:12px;color:#aaa;border-top:1px solid #f0f0f0">
+    Fantozzi Objednávky · ${EGGS_INFO.length} easter eggs — objavených: <strong>${found}/${EGGS_INFO.length}</strong> 🏆
+  </div>`;
+  document.getElementById('secrets-modal-content').innerHTML = html;
+}
+
+// ── Easter egg recording ──────────────────────────────────────────────────
+function recordEggTrigger(eggId) {
+  fetch('/api/easter-trigger', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ egg: eggId, meno: currentUser || 'Neznámy' })
+  }).catch(() => {});
+}
+
+// ── 🐛 Easter Egg Debug Panel ─────────────────────────────────────────────
+let _debugVisible = false, _debugInterval = null;
+let _debugLog = [];
+let _btickCount = 0, _btickTimer;
+
+function toggleDebugPanel() {
+  _debugVisible = !_debugVisible;
+  const panel = document.getElementById('ee-debug-panel');
+  if (!panel) return;
+  panel.style.display = _debugVisible ? 'block' : 'none';
+  if (_debugVisible) {
+    _buildDebugButtons();
+    clearInterval(_debugInterval);
+    _debugInterval = setInterval(_updateDebugPanel, 300);
+    _updateDebugPanel();
+    eeDebugLog('✅ Debug panel otvorený', 'ok');
+  } else {
+    clearInterval(_debugInterval); _debugInterval = null;
+  }
+}
+
+function eeDebugLog(msg, type) {
+  if (!_debugVisible && type !== 'force') return;
+  const time = new Date().toTimeString().slice(0, 8);
+  _debugLog.unshift({ time, msg, type: type || '' });
+  if (_debugLog.length > 15) _debugLog.pop();
+  if (_debugVisible) _updateDebugPanel();
+}
+
+function _updateDebugPanel() {
+  const activeEl = document.activeElement;
+  const activeTag = activeEl?.tagName || 'BODY';
+  const activeId  = activeEl?.id ? '#' + activeEl.id : (activeEl?.className ? '.' + String(activeEl.className).split(' ')[0] : '');
+  const activeType = (activeEl?.type || '').toLowerCase();
+  const NON_TEXT = ['radio','checkbox','button','submit','reset','range','color','file','image'];
+  const inInput = (activeTag === 'TEXTAREA') || (activeTag === 'SELECT')
+    || (activeTag === 'INPUT' && !NON_TEXT.includes(activeType));
+
+  const set = (id, text, cls) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    if (cls !== undefined) { el.className = 'ee-dbg-val' + (cls ? ' ' + cls : ''); }
+  };
+
+  set('ee-dbg-buffer',  wordBuffer || '(prázdny)');
+  set('ee-dbg-input',   inInput ? 'ÁNO ⛔ — blokuje' : 'nie ✓',  inInput ? 'err' : 'ok');
+  set('ee-dbg-active',  activeTag.toLowerCase() + activeId);
+  set('ee-dbg-wheel',   `${_wheelDirChanges}/4  (${_wheelLastDir || '—'})`);
+  set('ee-dbg-konami',  `${konamiBuffer.length}/10  [${konamiBuffer.slice(-3).join(' ')||'…'}]`);
+  set('ee-dbg-esc',     `${escCount}/5`);
+
+  const logEl = document.getElementById('ee-dbg-log');
+  if (logEl) {
+    logEl.innerHTML = _debugLog.length
+      ? _debugLog.map(e => `<div class="ee-dbg-log-entry ${e.type}">[${e.time}] ${e.msg}</div>`).join('')
+      : '<div class="ee-dbg-log-entry" style="color:#3d444d">— zatiaľ nič —</div>';
+  }
+}
+
+function _buildDebugButtons() {
+  const container = document.getElementById('ee-dbg-btns');
+  if (!container || container.dataset.built) return;
+  container.dataset.built = '1';
+
+  const EGG_FNS = {
+    star:     () => { recordEggTrigger('star');     pizzaRain(); },
+    deadline: () => { recordEggTrigger('deadline'); showEasterModal(false); },
+    konami:   () => activateKonami(),
+    pizza:    () => showPizzaTypingToast(),
+    clock:    () => activateClockEgg(),
+    obed:     () => activateObedEgg(),
+    fantozzi: () => activateFantozziEgg(),
+    ai:       () => activateAIEgg(),
+    scroll:   () => activateScrollEgg(),
+    help:     () => activateCLIEgg(),
+    hlad:     () => activateHladEgg(),
+    srdce:    () => activateSrdceEgg(),
+    matrix:   () => activateMatrixEgg(),
+    disco:    () => activateDiscoEgg(),
+    nocna:    () => activateNocnaEgg(),
+    super:    () => activateSuperEgg(),
+    escape:   () => activateEscapeEgg(),
+    starrain: () => { recordEggTrigger('starrain'); starRain(); },
+    namerand: () => activateNameRandomizer(null),
+    trailer:  () => activateTrailerEgg(),
+  };
+
+  for (const egg of EGGS_INFO) {
+    const fn = EGG_FNS[egg.id];
+    if (!fn) continue;
+    const btn = document.createElement('button');
+    btn.className = 'ee-dbg-btn';
+    btn.textContent = egg.emoji + ' ' + egg.id;
+    btn.title = egg.name;
+    btn.onclick = () => {
+      try {
+        fn();
+        eeDebugLog(`🧪 TEST spustený: ${egg.name}`, 'ok');
+      } catch(err) {
+        eeDebugLog(`❌ TEST chyba (${egg.id}): ${err.message}`, 'err');
+      }
+    };
+    container.appendChild(btn);
+  }
+}
+
+// ── Easter egg 3: Trojklik na hodiny (cd-clock) ───────────────────────────
+let clockClickCount = 0;
+let clockClickTimeout;
+let clockBroken = false;
+
+function clockEasterClick(e) {
+  e.stopPropagation();
+  if (clockBroken) return;
+  clockClickCount++;
+  clearTimeout(clockClickTimeout);
+  clockClickTimeout = setTimeout(() => { clockClickCount = 0; }, 1000);
+  if (clockClickCount >= 3) {
+    clockClickCount = 0;
+    activateClockEgg();
+  }
+}
+
+function activateClockEgg() {
+  if (clockBroken) return;
+  clockBroken = true;
+  recordEggTrigger('clock');
+  const clockEl = document.getElementById('cd-clock');
+  if (!clockEl) return;
+  const original = clockEl.textContent;
+  clockEl.classList.add('cd-clock-broken');
+  clockEl.textContent = '🍕:🍕:🍕';
+  showToast('⏰ Čas je len pizza 🍕', 'success');
+  setTimeout(() => {
+    clockEl.classList.remove('cd-clock-broken');
+    clockEl.textContent = original;
+    clockBroken = false;
+  }, 3000);
+}
+
+// ── Easter egg 4: Napíš "obed" ───────────────────────────────────────────
+let obedBannerTimeout;
+function activateObedEgg() {
+  recordEggTrigger('obed');
+  const banner = document.getElementById('obed-banner');
+  banner.classList.remove('hide');
+  banner.classList.add('show');
+  pizzaRain();
+  clearTimeout(obedBannerTimeout);
+  obedBannerTimeout = setTimeout(() => {
+    banner.classList.remove('show');
+    banner.classList.add('hide');
+    setTimeout(() => banner.classList.remove('hide'), 700);
+  }, 3500);
+}
+
+// ── Unified keyboard easter egg listener ─────────────────────────────────
+const KONAMI_SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiBuffer = [];
+let wordBuffer   = '';
+// MAX_WORD = max dlžka slov, ktoré detekujeme
+const MAX_WORD   = 8;
+
+// Escape counter (egg 15)
+let escCount = 0, escTimer;
+
+document.addEventListener('keydown', e => {
+  // inTextInput = TRUE len pre skutočné textové polia (nie radio/checkbox/button!)
+  // Radio buttony (výber jedla) by nemali blokovať typing eggs
+  const activeEl  = document.activeElement;
+  const activeTag = activeEl?.tagName || '';
+  const activeType = (activeEl?.type || '').toLowerCase();
+  const NON_TEXT_INPUTS = ['radio','checkbox','button','submit','reset','range','color','file','image'];
+  const inTextInput = (activeTag === 'TEXTAREA') || (activeTag === 'SELECT')
+    || (activeTag === 'INPUT' && !NON_TEXT_INPUTS.includes(activeType));
+
+  // Backtick ×3 → toggle debug panel (funguje aj v inputoch)
+  if (e.key === '`') {
+    _btickCount++;
+    clearTimeout(_btickTimer);
+    _btickTimer = setTimeout(() => { _btickCount = 0; }, 1000);
+    if (_btickCount >= 3) { _btickCount = 0; toggleDebugPanel(); }
+  }
+
+  // Esc z textového inputu → blur políčka (aby typing eggs fungovali aj po kliknutí do poľa)
+  if (e.key === 'Escape' && inTextInput) {
+    eeDebugLog(`⌨️ Esc → blur <${activeEl.tagName.toLowerCase()}>`, 'warn');
+    activeEl.blur();
+    return;
+  }
+
+  // Esc×5 mimo textových inputov
+  if (e.key === 'Escape' && !inTextInput) {
+    escCount++;
+    clearTimeout(escTimer);
+    escTimer = setTimeout(() => { escCount = 0; }, 2000);
+    if (escCount >= 5) { escCount = 0; activateEscapeEgg(); }
+    return;
+  }
+
+  if (inTextInput) {
+    eeDebugLog(`⛔ textInput blokuje — <${activeTag.toLowerCase()}${activeEl?.id ? '#'+activeEl.id : ''} type="${activeType}">`, 'warn');
+    return;
+  }
+
+  // — Konami kód —
+  konamiBuffer.push(e.key);
+  if (konamiBuffer.length > KONAMI_SEQ.length) konamiBuffer.shift();
+  if (konamiBuffer.join('|') === KONAMI_SEQ.join('|')) { konamiBuffer = []; activateKonami(); return; }
+
+  // — Word typing (tlačiteľné znaky) —
+  if (e.key.length === 1) {
+    wordBuffer += e.key.toLowerCase();
+    if (wordBuffer.length > MAX_WORD) wordBuffer = wordBuffer.slice(-MAX_WORD);
+    eeDebugLog(`⌨️ "${e.key}"  buf→ "${wordBuffer}"`, '');
+    // Lazy init — funkcie sú hoisted, bezpečné na referenciu tu
+    const eggs = {
+      pizza: showPizzaTypingToast,
+      obed: activateObedEgg,
+      fantozzi: activateFantozziEgg,
+      help: activateCLIEgg,
+      hlad: activateHladEgg,
+      srdce: activateSrdceEgg,
+      matrix: activateMatrixEgg,
+      disco: activateDiscoEgg,
+      nocna: activateNocnaEgg,
+      super: activateSuperEgg,
+      trailer: activateTrailerEgg,
+    };
+    for (const [word, fn] of Object.entries(eggs)) {
+      if (wordBuffer.endsWith(word)) {
+        eeDebugLog(`✅ MATCH: "${word}" → ${fn.name}()`, 'match');
+        wordBuffer = ''; fn(); break;
+      }
+    }
+  }
+});
+
+// ── Easter egg 1: Konami kód ──────────────────────────────────────────────
+function activateKonami() {
+  recordEggTrigger('konami');
+  const el = document.getElementById('konami-overlay');
+  el.style.display = 'flex';
+  el.classList.remove('out');
+  pizzaRain(); pizzaRain();
+}
+function closeKonami() {
+  const el = document.getElementById('konami-overlay');
+  el.classList.add('out');
+  setTimeout(() => { el.style.display = 'none'; el.classList.remove('out'); }, 280);
+}
+document.getElementById('konami-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeKonami();
+});
+
+// ── Easter egg 2: Napíš "pizza" ───────────────────────────────────────────
+let pizzaToastTimeout;
+function showPizzaTypingToast() {
+  recordEggTrigger('pizza');
+  const msgs = [
+    '🍕 Hm, taktiež myslíme na pizzu...',
+    '🍕 Pizza detekovaná! Objednaj si obed 😄',
+    '🍕 Fantozzi pizza mode: ON',
+    '🍕 Správna voľba, pizza je vždy dobrá!',
+    '🤌 Mamma mia! Pizza!',
+    '🫡 Rozkaz prijatý. Objednávam pizzu.',
+  ];
+  const toast = document.getElementById('pizza-typing-toast');
+  toast.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  toast.classList.add('show');
+  clearTimeout(pizzaToastTimeout);
+  pizzaToastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ── Easter egg 5: Napíš "fantozzi" → Taliansky fullscreen ────────────────
+let fantozziBusy = false;
+function activateFantozziEgg() {
+  if (fantozziBusy) return;
+  fantozziBusy = true;
+  recordEggTrigger('fantozzi');
+  const el = document.getElementById('fantozzi-overlay');
+  el.style.display = 'flex';
+  pizzaRain();
+  setTimeout(() => { el.style.display = 'none'; fantozziBusy = false; }, 7000);
+}
+
+// ── Easter egg 6: Podrž tlačidlo "Potvrdiť" 3 sekundy → AI analýza ───────
+let longPressTimer;
+let aiOverlayActive = false;
+
+document.addEventListener('mousedown', e => {
+  if (e.target?.id !== 'submit-btn') return;
+  if (e.target.disabled) return;
+  startLongPress();
+});
+document.addEventListener('touchstart', e => {
+  if (e.target?.id !== 'submit-btn') return;
+  if (e.target.disabled) return;
+  startLongPress();
+}, { passive: true });
+document.addEventListener('mouseup',    cancelLongPress);
+document.addEventListener('mouseleave', cancelLongPress);
+document.addEventListener('touchend',   cancelLongPress);
+document.addEventListener('touchcancel',cancelLongPress);
+
+function startLongPress() {
+  clearTimeout(longPressTimer);
+  longPressTimer = setTimeout(activateAIEgg, 3000);
+}
+function cancelLongPress() { clearTimeout(longPressTimer); }
+
+function activateAIEgg() {
+  if (aiOverlayActive) return;
+  aiOverlayActive = true;
+  recordEggTrigger('ai');
+  const overlay = document.getElementById('ai-overlay');
+  const bar     = document.getElementById('ai-bar-fill');
+  const status  = document.getElementById('ai-status');
+  const steps = ['Skenujem menu...','Analyzujem kalórie...','Porovnávam s históriou...','Konzultujem s kuchárom...','Finalizujem výsledok...'];
+  overlay.style.display = 'flex';
+  let step = 0;
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 22 + 8, 100);
+    bar.style.width = pct + '%';
+    if (step < steps.length) { status.textContent = steps[step++]; }
+    if (pct >= 100) {
+      clearInterval(iv);
+      status.textContent = '✅ Analýza dokončená';
+      setTimeout(() => {
+        document.getElementById('ai-result').style.display = 'block';
+        document.getElementById('ai-loading').style.display = 'none';
+      }, 400);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        document.getElementById('ai-result').style.display = 'none';
+        document.getElementById('ai-loading').style.display = 'block';
+        bar.style.width = '0%'; status.textContent = steps[0]; step = 0; pct = 0;
+        aiOverlayActive = false;
+      }, 5000);
+    }
+  }, 380);
+}
+
+// ── Easter egg 7: Závrať — 4 zmeny smeru wheel do 2 sekúnd ──────────────
+let _wheelLastDir = null, _wheelDirChanges = 0, _wheelTimer, _wheelCooldown = false;
+window.addEventListener('wheel', (e) => {
+  if (_wheelCooldown) return;
+  const dir = e.deltaY > 0 ? 'dn' : e.deltaY < 0 ? 'up' : null;
+  if (!dir || dir === _wheelLastDir) return;
+  _wheelLastDir = dir;
+  _wheelDirChanges++;
+  eeDebugLog(`🌀 wheel ${dir === 'dn' ? '↓' : '↑'}  →  ${_wheelDirChanges}/3`, '');
+  clearTimeout(_wheelTimer);
+  _wheelTimer = setTimeout(() => { _wheelDirChanges = 0; _wheelLastDir = null; }, 2500);
+  if (_wheelDirChanges >= 3) {
+    _wheelDirChanges = 0; _wheelLastDir = null; _wheelCooldown = true;
+    eeDebugLog('✅ MATCH: závrať aktivovaná!', 'match');
+    activateScrollEgg();
+    setTimeout(() => { _wheelCooldown = false; }, 4000);
+  }
+}, { passive: true });
+
+function activateScrollEgg() {
+  recordEggTrigger('scroll');
+  const el = document.getElementById('dizzy-overlay');
+  el.style.display = 'flex';
+  el.style.animation = 'none';
+  el.offsetHeight; // reflow
+  el.style.animation = '';
+  setTimeout(() => { el.style.display = 'none'; }, 2800);
+}
+
+// ── Easter egg 8: Napíš "help" → CLI Terminal ─────────────────────────────
+function activateCLIEgg() {
+  recordEggTrigger('help');
+  const el = document.getElementById('cli-overlay');
+  el.style.display = 'flex';
+  // Blikajúci cursor
+  const cursor = document.getElementById('cli-cursor');
+  let vis = true;
+  const iv = setInterval(() => { if(cursor){cursor.style.opacity=(vis=!vis)?'1':'0';} }, 530);
+  setTimeout(() => { clearInterval(iv); el.style.display = 'none'; }, 12000);
+}
+
+// ── Easter egg 9: Napíš "hlad" → Hunger alarm ────────────────────────────
+let hladTimeout;
+function activateHladEgg() {
+  recordEggTrigger('hlad');
+  const toast = document.getElementById('pizza-typing-toast');
+  const msgs = ['🤤 Hlad detekovaný! Objednaj si niečo!','🫃 Žalúdok hovorí NIE...','😤 Hladný/á? OBJEDNAJ!','🍽️ Alert: Prázdny žalúdok!'];
+  toast.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+  toast.classList.add('show');
+  clearTimeout(hladTimeout);
+  hladTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ── Easter egg 10: Napíš "srdce" → Srdce dážď ───────────────────────────
+function activateSrdceEgg() {
+  recordEggTrigger('srdce');
+  const hearts = ['❤️','🧡','💛','💚','💙','💜','🩷','🤍','💕','💖'];
+  for (let i = 0; i < 35; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'heart-drop';
+      el.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+      el.style.left  = (Math.random()*96)+'vw';
+      el.style.fontSize = (16+Math.random()*18)+'px';
+      el.style.animationDuration = (1.8+Math.random()*2)+'s';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, i*65);
+  }
+  showToast('❤️ Love is in the air!', 'success');
+}
+
+// ── Easter egg 11: Napíš "matrix" → Jedlo Matrix ─────────────────────────
+function activateMatrixEgg() {
+  recordEggTrigger('matrix');
+  const chars = ['🍕','🍝','🥩','🧀','🌮','🥗','🍖','01','10','//'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'matrix-char';
+      el.textContent = chars[Math.floor(Math.random()*chars.length)];
+      el.style.left  = (Math.random()*98)+'vw';
+      el.style.fontSize = (10+Math.random()*10)+'px';
+      el.style.animationDuration = (1.2+Math.random()*2.5)+'s';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i*40);
+  }
+  showToast('🟢 Matrix jedla aktivovaný...', 'success');
+}
+
+// ── Easter egg 12: Napíš "disco" → Disco mode ────────────────────────────
+let discoBusy = false;
+function activateDiscoEgg() {
+  if (discoBusy) return;
+  discoBusy = true;
+  recordEggTrigger('disco');
+  document.body.classList.add('disco-mode');
+  const overlay = document.getElementById('disco-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  showToast('🪩 DISCO MODE! 🕺', 'success');
+  setTimeout(() => {
+    document.body.classList.remove('disco-mode');
+    if (overlay) overlay.style.display = 'none';
+    discoBusy = false;
+  }, 3200);
+}
+
+// ── Easter egg 13: Napíš "nocna" → Nočný mód 4s ─────────────────────────
+let nocnaBusy = false;
+function activateNocnaEgg() {
+  if (nocnaBusy) return;
+  nocnaBusy = true;
+  recordEggTrigger('nocna');
+  const el = document.getElementById('nocna-overlay');
+  el.style.display = 'flex';
+  setTimeout(() => { el.style.display = 'none'; nocnaBusy = false; }, 4000);
+}
+
+// ── Easter egg 14: Napíš "super" → Super achievement ─────────────────────
+let superBusy = false;
+function activateSuperEgg() {
+  if (superBusy) return;
+  superBusy = true;
+  recordEggTrigger('super');
+  const el = document.getElementById('super-popup');
+  el.classList.add('show');
+  pizzaRain();
+  setTimeout(() => { el.classList.remove('show'); setTimeout(()=>{ superBusy=false; },450); }, 4000);
+}
+
+// ── Easter egg 15: Esc×5 → "Neopúšťaj nás" popup ────────────────────────
+let escapePopupTimeout;
+function activateEscapeEgg() {
+  recordEggTrigger('escape');
+  const el = document.getElementById('escape-popup');
+  el.classList.add('show');
+  clearTimeout(escapePopupTimeout);
+  escapePopupTimeout = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Easter egg 20: Napíš "trailer" → Filmový Trailer ────────────────────
+let _trailerTimers = [], _trailerRunning = false;
+function activateTrailerEgg() {
+  if (_trailerRunning) return;
+  _trailerRunning = true;
+  recordEggTrigger('trailer');
+  const overlay = document.getElementById('trailer-overlay');
+  if (!overlay) { _trailerRunning = false; console.error('trailer-overlay element nenájdený!'); return; }
+  overlay.style.display = 'flex';
+  // skryť všetky framy
+  for (let i = 0; i <= 6; i++) {
+    const f = document.getElementById('trl-f' + i);
+    if (f) f.classList.remove('vis');
+  }
+  // progress bar
+  const bar = document.getElementById('trl-bar');
+  if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; }
+  setTimeout(() => { if (bar) { bar.style.transition = 'width 17.5s linear'; bar.style.width = '100%'; } }, 80);
+
+  function trlFlash() {
+    const fl = document.getElementById('trl-flash');
+    if (!fl) return;
+    fl.classList.remove('go');
+    void fl.offsetWidth;
+    fl.classList.add('go');
+    setTimeout(() => fl.classList.remove('go'), 200);
+  }
+  function trlShow(frameIdx) {
+    for (let i = 0; i <= 6; i++) {
+      const el = document.getElementById('trl-f' + i);
+      if (el) el.classList.toggle('vis', i === frameIdx);
+    }
+  }
+
+  const schedule = [
+    [0,     () => trlShow(0)],
+    [600,   () => { trlFlash(); trlShow(1); }],
+    [2900,  () => { trlFlash(); trlShow(2); }],
+    [4300,  () => { trlFlash(); trlShow(3); }],
+    [5200,  () => { trlFlash(); trlShow(2); }],
+    [5800,  () => { trlFlash(); trlShow(3); }],
+    [6500,  () => { trlFlash(); trlShow(4); }],
+    [8800,  () => { trlFlash(); trlShow(5); }],
+    [10800, () => { trlFlash(); trlShow(6); }],
+    [17500, () => closeTrailerEgg()],
+  ];
+  _trailerTimers = schedule.map(([delay, fn]) => setTimeout(fn, delay));
+}
+function closeTrailerEgg() {
+  _trailerTimers.forEach(t => clearTimeout(t));
+  _trailerTimers = [];
+  _trailerRunning = false;
+  const overlay = document.getElementById('trailer-overlay');
+  if (overlay) overlay.style.display = 'none';
+  for (let i = 0; i <= 6; i++) {
+    const f = document.getElementById('trl-f' + i);
+    if (f) f.classList.remove('vis');
+  }
+  const bar = document.getElementById('trl-bar');
+  if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; }
+}
+
+// ── Easter egg 17: 2× klik na user badge → Random mená ──────────────────
+// Vlastný click counter — nespoliehame sa na dblclick event (timing sa líši podľa systému)
+let _userBadgeTimer = null;
+let _userBadgeClicks = 0;
+function userBadgeClick() {
+  _userBadgeClicks++;
+  clearTimeout(_userBadgeTimer);
+  // Druhý (alebo viac) klik do 400ms → egg
+  if (_userBadgeClicks >= 2) {
+    _userBadgeClicks = 0;
+    _userBadgeTimer = null;
+    activateNameRandomizer(null);
+    return;
+  }
+  // Prvý klik: čakáme 400ms, ak nepríde druhý → changeUser
+  _userBadgeTimer = setTimeout(() => {
+    _userBadgeClicks = 0;
+    _userBadgeTimer = null;
+    changeUser();
+  }, 400);
+}
+const funnyNames = ['Hungry Human','Pizza Ghost','Obedový Ninja','Tajný Foodie','Filip Švolík','Master Orderer','Večný Hladný','VIP Zákazník'];
+let nameRandomizerIv;
+function activateNameRandomizer(event) {
+  event?.stopPropagation();
+  clearTimeout(_userBadgeTimer); _userBadgeTimer = null;
+  const nameEl = document.getElementById('username-display');
+  if (!nameEl || !currentUser) return;
+  recordEggTrigger('namerand');
+  const origName = currentUser;
+  nameEl.classList.add('name-randomizing');
+  let count = 0;
+  nameRandomizerIv = setInterval(() => {
+    nameEl.textContent = funnyNames[Math.floor(Math.random()*funnyNames.length)];
+    if (++count >= 18) {
+      clearInterval(nameRandomizerIv);
+      nameEl.textContent = origName;
+      nameEl.classList.remove('name-randomizing');
+    }
+  }, 140);
+}
+
 // ── Floating order bar ────────────────────────────────────────────────────
 function updateFloatingBar() {
   const bar = document.getElementById('floating-order-bar');
@@ -2480,6 +3660,228 @@ function updateFloatingBar() {
   document.body.classList.add('fob-open');
 }
 </script>
+
+<!-- Secrets menu overlay -->
+<div class="secrets-overlay" id="secrets-overlay" onclick="if(event.target===this)closeSecrets()">
+  <div class="secrets-modal">
+    <div class="secrets-modal-hdr">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:24px;font-weight:900">🥚 Easter Eggy</div>
+          <div style="font-size:13px;opacity:.7;margin-top:2px">Tajomstvá skryté v aplikácii — objavuj!</div>
+        </div>
+        <button onclick="closeSecrets()" style="background:rgba(255,255,255,.15);border:none;color:white;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+      </div>
+    </div>
+
+    <div id="secrets-modal-content">
+      <div style="padding:40px;text-align:center;color:#bbb;font-size:14px">⏳ Načítavam štatistiky...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Easter egg 4: Obed banner -->
+<div id="obed-banner">🍽️ OBED ČAS! 🔔</div>
+
+<!-- Easter egg 5: Fantozzi fullscreen overlay (REWRITE) -->
+<div id="fantozzi-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div style="text-align:center;padding:24px;max-width:440px">
+    <div style="font-size:90px;margin-bottom:10px">🇮🇹</div>
+    <div style="font-size:44px;font-weight:900;color:#1a1a1a;text-shadow:2px 2px 0 rgba(255,255,255,.5);margin-bottom:4px">BENVENUTI!</div>
+    <div style="font-size:22px;font-weight:700;color:#009246;margin-bottom:4px">a Fantozzi</div>
+    <div style="font-size:18px;color:#ce2b37;font-weight:700;margin-bottom:24px">Mamma mia! 🤌</div>
+    <button onclick="document.getElementById('fantozzi-overlay').style.display='none'" style="background:#009246;color:white;border:none;border-radius:14px;padding:13px 36px;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(0,146,70,.4)">Grazie! 🍕</button>
+  </div>
+</div>
+
+<!-- Easter egg 8: CLI Terminal -->
+<div id="cli-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="cli-win">
+    <div class="cli-titlebar">
+      <div class="cli-dot" style="background:#ff5f57"></div>
+      <div class="cli-dot" style="background:#febc2e"></div>
+      <div class="cli-dot" style="background:#28c840"></div>
+      <span style="color:#6e7681;font-size:12px;margin-left:8px;font-family:monospace">fantozzi@server:~$</span>
+    </div>
+    <div class="cli-body">
+      <div><span class="cli-prompt">fantozzi@server:~$</span> <span class="cli-cmd">help</span></div>
+      <div class="cli-out" style="margin:8px 0 12px">Fantozzi Ordering System v2.1 — dostupné príkazy:</div>
+      <div><span class="cli-hi">fantozzi order</span>   <span class="cli-out">— objednaj si obed</span></div>
+      <div><span class="cli-hi">fantozzi pay</span>     <span class="cli-out">— vygeneruj QR platbu</span></div>
+      <div><span class="cli-hi">fantozzi status</span>  <span class="cli-out">— zisti stav objednávok</span></div>
+      <div><span class="cli-hi">fantozzi pizza</span>   <span class="cli-out">— objednaj iba pizzu</span></div>
+      <div><span class="cli-hi">sudo rm -rf /</span>    <span class="cli-err">— Permission denied 😤</span></div>
+      <div style="margin-top:12px"><span class="cli-prompt">fantozzi@server:~$</span> <span class="cli-cmd">fantozzi status</span></div>
+      <div class="cli-ok" style="margin-top:4px">✓ Objednávky: OTVORENÉ | Ľudia: pripravení | Pizza: VŽDY dostupná</div>
+      <div style="margin-top:12px"><span class="cli-prompt">fantozzi@server:~$</span> <span class="cli-cmd" id="cli-cursor">▋</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Easter egg 13: Nočný mód overlay -->
+<div id="nocna-overlay">
+  <div style="text-align:center;color:white">
+    <div style="font-size:72px;margin-bottom:10px">🌙</div>
+    <div style="font-size:26px;font-weight:900;margin-bottom:6px">Nočný mód</div>
+    <div style="font-size:15px;opacity:.6">Zbohom svetlo... 😴</div>
+  </div>
+</div>
+
+<!-- Easter egg 14: Super achievement -->
+<div id="super-popup">
+  <div style="font-size:52px;margin-bottom:8px">🏆</div>
+  <div style="font-size:22px;font-weight:900;margin-bottom:4px">SUPER OBJEDNÁVAČ!</div>
+  <div style="font-size:13px;opacity:.85">Tajný achievement odomknutý 🎖️</div>
+</div>
+
+<!-- Easter egg 15: Escape popup -->
+<div id="escape-popup">🥺 Neopúšťaj nás! Ešte si nenaobedoval/a!</div>
+
+<!-- Easter egg 6: AI analýza overlay -->
+<div id="ai-overlay">
+  <div class="ai-card">
+    <div style="font-size:52px;animation:robotBob 1s ease-in-out infinite;margin-bottom:8px">🤖</div>
+    <div style="font-size:18px;font-weight:900;color:#2c3e50;margin-bottom:4px">AI Analýza objednávky</div>
+    <div id="ai-loading">
+      <div id="ai-status" style="font-size:13px;color:#7f8c8d;margin-bottom:2px">Skenujem menu...</div>
+      <div class="ai-bar-bg"><div class="ai-bar-fill" id="ai-bar-fill"></div></div>
+      <div style="font-size:11px;color:#bbb">Powered by FantozziGPT v4.2</div>
+    </div>
+    <div id="ai-result" style="margin-top:12px">
+      <div style="font-size:32px;margin-bottom:6px">🍕</div>
+      <div style="font-size:16px;font-weight:800;color:#e74c3c">Výsledok: PIZZA!</div>
+      <div style="font-size:13px;color:#555;margin-top:4px">AI s istotou 99.9% odporúča pizzu.<br>Iné možnosti neboli zvažované.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Easter egg 7: Závrať overlay -->
+<div id="dizzy-overlay">
+  <div style="text-align:center;color:white;animation:dizzyIn .5s ease">
+    <div style="font-size:80px;animation:spin360 1.5s linear infinite">🌀</div>
+    <div style="font-size:28px;font-weight:900;margin:12px 0 6px">Závrať detekovaná!</div>
+    <div style="font-size:16px;opacity:.75">Príliš rýchle rolovanie... 😵</div>
+  </div>
+</div>
+
+<!-- Easter egg 1: Konami code overlay -->
+<div class="konami-overlay" id="konami-overlay" style="display:none">
+  <div style="text-align:center;padding:20px;max-width:480px" id="konami-inner">
+    <div style="font-size:90px;margin-bottom:12px;animation:pizzaBob 1s ease-in-out infinite">🍕</div>
+    <div style="font-size:36px;font-weight:900;animation:rainbow-text 2s linear infinite;margin-bottom:8px;background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcbff,#a8ff78,#ff6b6b);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">ULTRA PIZZA MODE!</div>
+    <div style="font-size:18px;color:rgba(255,255,255,.85);margin-bottom:6px">Tajný Konami kód zadaný! 🎮</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:28px">Dostal si... absolútne nič. Ale aspoň vieš zadávať cheaty 😂</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.3);font-family:monospace;margin-bottom:24px">↑ ↑ ↓ ↓ ← → ← → B A</div>
+    <button onclick="closeKonami()" style="background:#e74c3c;color:white;border:none;border-radius:12px;padding:12px 36px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">😭 Zavrieť</button>
+  </div>
+</div>
+
+<!-- Easter egg 2: Pizza typing toast -->
+<div id="pizza-typing-toast">🍕 Hm, taktiež myslíme na pizzu...</div>
+
+<!-- Easter egg 12: Disco overlay -->
+<div id="disco-overlay">
+  <div id="disco-overlay-inner">🪩<br>🕺💃<br>🎵🎶🎵</div>
+</div>
+
+<!-- Easter egg 20: Filmový Trailer -->
+<div id="trailer-overlay">
+  <div class="trl-letterbox top"></div>
+  <div class="trl-letterbox bottom"></div>
+  <span class="trl-close" onclick="closeTrailerEgg()">✕ ZAVRIEŤ</span>
+  <div id="trl-flash"></div>
+  <!-- Frame 0: Studio logo -->
+  <div class="trl-frame" id="trl-f0">
+    <div class="trl-studio">Fantozzi Studios</div>
+    <div style="font-size:64px">🎬</div>
+    <div style="font-size:12px;color:#555;margin-top:16px;letter-spacing:4px">PRESENTS</div>
+  </div>
+  <!-- Frame 1: Setup -->
+  <div class="trl-frame" id="trl-f1">
+    <div style="font-size:12px;color:#888;letter-spacing:5px;margin-bottom:28px;text-transform:uppercase">V jednom svete...</div>
+    <div class="trl-tagline">...kde sa obed objednáva do <span style="color:#f39c12;font-weight:900">10:00 ráno</span></div>
+    <div class="trl-tagline" style="margin-top:14px;font-size:15px;color:#666">...a každý deň je boj o prežitie 🍽️</div>
+  </div>
+  <!-- Frame 2: Systém -->
+  <div class="trl-frame" id="trl-f2">
+    <div class="trl-cut">JEDEN SYSTÉM</div>
+    <div style="font-size:22px;color:#666;margin-top:12px;letter-spacing:3px">NEKONEČNÉ MOŽNOSTI</div>
+  </div>
+  <!-- Frame 3: Rýchly rez – jedlá -->
+  <div class="trl-frame" id="trl-f3">
+    <div>
+      <span class="trl-foodemoji">🍕</span><span class="trl-foodemoji">🍝</span><span class="trl-foodemoji">🍜</span><span class="trl-foodemoji">🥗</span><span class="trl-foodemoji">🍲</span>
+    </div>
+    <div style="font-size:15px;color:#888;margin-top:14px;letter-spacing:3px;text-transform:uppercase">Každý deň. Bez výnimky.</div>
+  </div>
+  <!-- Frame 4: Hlavný titul -->
+  <div class="trl-frame" id="trl-f4">
+    <div class="trl-title-big">FANTOZZI</div>
+    <div class="trl-subtitle">OBED: UNLEASHED</div>
+  </div>
+  <!-- Frame 5: Rok -->
+  <div class="trl-frame" id="trl-f5">
+    <div class="trl-year">LETO 2025</div>
+    <div style="font-size:12px;color:#555;margin-top:16px;letter-spacing:3px;text-transform:uppercase">V kinách a na vašej obrazovke</div>
+  </div>
+  <!-- Frame 6: Review + CTA -->
+  <div class="trl-frame" id="trl-f6">
+    <div class="trl-review">
+      "Najlepší objednávací systém, aký som kedy použil."<br>
+      <span style="font-size:12px;color:#666">— Neznámy Recenzent, Bratislava Daily, 2025</span>
+    </div>
+    <div style="font-size:30px;margin-bottom:18px">⭐⭐⭐⭐⭐</div>
+    <button class="trl-cta" onclick="closeTrailerEgg()">🍕 OBJEDNAJ TERAZ</button>
+    <div style="font-size:11px;color:#444;margin-top:16px;letter-spacing:1px">Uzávierka o 10:00. Neprichádzaj neskoro.</div>
+  </div>
+  <div class="trl-bar" id="trl-bar"></div>
+</div>
+
+<!-- 🐛 Easter Egg Debug Panel (toggle: backtick ×3) -->
+<div id="ee-debug-panel">
+  <div id="ee-dbg-header">
+    <span>🐛 Easter Egg Debug</span>
+    <button id="ee-dbg-close" onclick="toggleDebugPanel()" title="Zavrieť">✕</button>
+  </div>
+  <div class="ee-dbg-section">
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">wordBuffer:</span>
+      <span class="ee-dbg-val" id="ee-dbg-buffer">(prázdny)</span>
+    </div>
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">Vstup blokuje (inInput):</span>
+      <span class="ee-dbg-val ok" id="ee-dbg-input">nie ✓</span>
+    </div>
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">Aktívny element:</span>
+      <span class="ee-dbg-val" id="ee-dbg-active">—</span>
+    </div>
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">Wheel zmeny (Závrať):</span>
+      <span class="ee-dbg-val" id="ee-dbg-wheel">0/4</span>
+    </div>
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">Konami postup:</span>
+      <span class="ee-dbg-val" id="ee-dbg-konami">0/10</span>
+    </div>
+    <div class="ee-dbg-row">
+      <span class="ee-dbg-key">Esc counter:</span>
+      <span class="ee-dbg-val" id="ee-dbg-esc">0/5</span>
+    </div>
+  </div>
+  <div class="ee-dbg-section" style="padding-bottom:4px">
+    <div style="color:#8b949e;font-size:10.5px;margin-bottom:4px">📋 Udalosti (posledných 12):</div>
+    <div id="ee-dbg-log-wrap">
+      <div id="ee-dbg-log"><div class="ee-dbg-log-entry" style="color:#3d444d">— zatiaľ nič —</div></div>
+    </div>
+  </div>
+  <div class="ee-dbg-section" style="padding:5px 12px 2px">
+    <div style="color:#8b949e;font-size:10.5px;margin-bottom:4px">🧪 Priamy test (obíde detekciu vstupu):</div>
+    <div id="ee-dbg-btns"><!-- generované JS --></div>
+  </div>
+  <div id="ee-dbg-hint">Otvoriť / zavrieť: ` (backtick) ×3 za sekundu</div>
+</div>
 
 <!-- Floating order bar -->
 <div id="floating-order-bar">

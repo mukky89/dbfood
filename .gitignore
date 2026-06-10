@@ -1,4 +1,5 @@
-config.json
-evennode/config.json
 node_modules/
+config.json
+orders.json
+package-lock.json
 .env

@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const config = require('./config.json');
+const config = require('./config');
 
 function createTransporter() {
   // Ak je v config nastaveny vlastny SMTP (napr. Brevo), pouzi ho
