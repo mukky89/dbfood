@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const config = require('./config');
 
 function createTransporter() {
@@ -148,36 +149,82 @@ function formatEmail(orders, menu) {
 // Config moze obsahovat oddelovac ';' aj ',' (a medzery) - znormalizujeme.
 function parseRecipients(value) {
   if (!value) return [];
-  return String(value)
-    .split(/[;,]/)
-    .map(e => e.trim())
-    .filter(Boolean);
+  const arr = Array.isArray(value) ? value : String(value).split(/[;,]/);
+  return arr.map(e => String(e).trim()).filter(Boolean);
 }
 
-async function sendEmail(orders, menu) {
-  const transporter = createTransporter();
-  const { subject, text, html } = formatEmail(orders, menu);
+// Odoslanie cez Brevo HTTP API (HTTPS/443) - funguje aj tam, kde je SMTP blokovany (napr. Railway).
+async function sendViaBrevoApi({ to, subject, html, text, attachments }) {
+  const payload = {
+    sender: { name: 'Fantozzi Objednavky', email: config.emailSender },
+    to: to.map(email => ({ email })),
+    subject
+  };
+  if (html) payload.htmlContent = html;
+  if (text) payload.textContent = text;
+  // Brevo API nepodporuje inline (cid) obrazky - posielaju sa ako bezne prilohy.
+  if (attachments && attachments.length) {
+    payload.attachment = attachments.map(a => ({
+      name: a.filename || a.name,
+      content: a.content
+    }));
+  }
+  const res = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+    headers: {
+      'api-key': config.brevoApiKey,
+      'Content-Type': 'application/json',
+      accept: 'application/json'
+    },
+    timeout: 20000
+  });
+  return { ok: true, messageId: res.data && res.data.messageId };
+}
 
-  const recipients = parseRecipients(config.emailRecipient);
+// Zjednotene odoslanie mailu: ak je nastaveny BREVO_API_KEY, pouzije HTTP API,
+// inak fallback na SMTP cez nodemailer.
+async function sendMail({ to, subject, html, text, attachments }) {
+  const recipients = parseRecipients(to);
   if (recipients.length === 0) {
-    console.error('[Mailer] Ziadny prijemca - EMAIL_RECIPIENT nie je nastaveny');
-    return { ok: false, error: 'EMAIL_RECIPIENT nie je nastaveny' };
+    console.error('[Mailer] Ziadny prijemca - EMAIL_RECIPIENT/to nie je nastaveny');
+    return { ok: false, error: 'Ziadny prijemca' };
   }
 
+  if (config.brevoApiKey) {
+    try {
+      const r = await sendViaBrevoApi({ to: recipients, subject, html, text, attachments });
+      console.log('[Mailer] Email odoslany cez Brevo API:', r.messageId);
+      return r;
+    } catch (err) {
+      const detail = err.response && err.response.data
+        ? JSON.stringify(err.response.data)
+        : err.message;
+      console.error('[Mailer] Brevo API chyba:', detail);
+      return { ok: false, error: detail };
+    }
+  }
+
+  // Fallback: SMTP
   try {
+    const transporter = createTransporter();
     const info = await transporter.sendMail({
       from: `"Fantozzi Objednavky" <${config.emailSender}>`,
       to: recipients,
       subject,
       text,
-      html
+      html,
+      attachments
     });
-    console.log('[Mailer] Email uspesne odoslany:', info.messageId);
+    console.log('[Mailer] Email odoslany cez SMTP:', info.messageId);
     return { ok: true, messageId: info.messageId };
   } catch (err) {
-    console.error('[Mailer] Chyba pri odosielani emailu:', err.message);
+    console.error('[Mailer] SMTP chyba:', err.message);
     return { ok: false, error: err.message };
   }
 }
 
-module.exports = { sendEmail, createTransporter };
+async function sendEmail(orders, menu) {
+  const { subject, text, html } = formatEmail(orders, menu);
+  return sendMail({ to: config.emailRecipient, subject, text, html });
+}
+
+module.exports = { sendEmail, sendMail, createTransporter };

@@ -14,6 +14,7 @@ module.exports = {
   smtpHost: process.env.SMTP_HOST || "smtp-relay.brevo.com",
   smtpPort: parseInt(process.env.SMTP_PORT) || 587,
   smtpUser: process.env.SMTP_USER,
+  brevoApiKey: process.env.BREVO_API_KEY,
   ntfyTopic: process.env.NTFY_TOPIC,
   ntfyUrl: process.env.NTFY_URL || "https://ntfy.sh",
   allowedEmails: process.env.ALLOWED_EMAILS ? process.env.ALLOWED_EMAILS.split(',').map(e => e.trim()) : []
