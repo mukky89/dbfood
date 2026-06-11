@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🍕 Fantozzi Objednávky</title>
+  <script>
+    // Prepnutie futuristickej temy co najskor (z cache), potom potvrdenie zo servera
+    (function(){
+      try { if (localStorage.getItem('fob_theme') === 'futuristic') document.documentElement.classList.add('theme-futuristic'); } catch(e){}
+      fetch('/api/design').then(r=>r.json()).then(d=>{
+        if (!d || !d.ok) return;
+        const on = !!d.futuristic;
+        document.documentElement.classList.toggle('theme-futuristic', on);
+        try { localStorage.setItem('fob_theme', on ? 'futuristic' : 'classic'); } catch(e){}
+      }).catch(()=>{});
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -536,6 +548,136 @@
     .ee-dbg-btn { background:#21262d; border:1px solid #30363d; color:#c9d1d9; border-radius:6px; padding:3px 7px; font-size:10px; cursor:pointer; font-family:monospace; transition:background .15s, border-color .15s; white-space:nowrap; }
     .ee-dbg-btn:hover { background:#388bfd22; border-color:#58a6ff; color:#79c0ff; }
     #ee-dbg-hint { padding:3px 12px 7px; font-size:10px; color:#3d444d; text-align:center; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       FUTURISTICKÝ DIZAJN — "Neon Cyber" (prepínateľný v Admin → Vzhľad)
+       Aktivuje sa pridaním triedy .theme-futuristic na <html>.
+       Funguje cez override CSS premenných + glassmorphism komponentov.
+       ════════════════════════════════════════════════════════════════════ */
+    html.theme-futuristic {
+      --brand:#7df9ff; --accent:#ff2e9a; --green:#15f5a3; --orange:#ffb454;
+      --bg:#0a1226; --card:rgba(18,26,52,.55); --border:rgba(125,180,255,.18);
+      --text:#e8f0ff; --muted:#93a6cc; --radius:16px;
+    }
+    html.theme-futuristic body { background:#05070f; color:var(--text); }
+
+    /* Animovaná aurora + mriežka na pozadí */
+    html.theme-futuristic body::before {
+      content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
+      background:
+        radial-gradient(60% 50% at 15% 8%, rgba(255,46,154,.18), transparent 60%),
+        radial-gradient(55% 45% at 85% 4%, rgba(0,229,255,.18), transparent 60%),
+        radial-gradient(65% 60% at 50% 105%, rgba(124,58,237,.22), transparent 60%),
+        #05070f;
+      animation: fxAurora 16s ease-in-out infinite alternate;
+    }
+    html.theme-futuristic body::after {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4;
+      background-image:
+        linear-gradient(rgba(125,180,255,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125,180,255,.06) 1px, transparent 1px);
+      background-size:42px 42px;
+      -webkit-mask-image: radial-gradient(circle at 50% 25%, #000 0%, transparent 78%);
+      mask-image: radial-gradient(circle at 50% 25%, #000 0%, transparent 78%);
+    }
+    @keyframes fxAurora { 0% { filter:hue-rotate(0deg); } 100% { filter:hue-rotate(38deg); } }
+
+    /* Header */
+    html.theme-futuristic header {
+      background:linear-gradient(135deg, rgba(10,16,38,.88), rgba(22,12,48,.88));
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(125,200,255,.25);
+      box-shadow:0 0 30px rgba(0,180,255,.22), inset 0 -1px 0 rgba(125,200,255,.2);
+    }
+    html.theme-futuristic .hdr-sub { color:#9fe9ff; }
+    html.theme-futuristic .phone-dropdown { background:rgba(16,22,44,.92); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); border:1px solid rgba(125,180,255,.22); box-shadow:0 12px 40px rgba(0,0,0,.5), 0 0 24px rgba(0,160,255,.15); }
+    html.theme-futuristic .phone-item { color:var(--text); }
+    html.theme-futuristic .phone-item:hover { background:rgba(255,46,154,.12); color:#ff8fc6; }
+
+    /* Karty — glassmorphism + neónový horný okraj */
+    html.theme-futuristic .card {
+      background:var(--card); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+      border:1px solid var(--border); position:relative; overflow:hidden;
+      box-shadow:0 8px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    html.theme-futuristic .card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,229,255,.7), rgba(255,46,154,.7), transparent);
+    }
+    html.theme-futuristic .card-title {
+      color:#8ff3ff; border-bottom:1px solid rgba(125,180,255,.16);
+      text-shadow:0 0 14px rgba(0,229,255,.45); letter-spacing:.3px;
+    }
+
+    /* Položky menu + formuláre */
+    html.theme-futuristic .menu-item { background:rgba(125,180,255,.05); border:2px solid rgba(125,180,255,.10); }
+    html.theme-futuristic .menu-item:hover,
+    html.theme-futuristic .menu-item.selected { border-color:var(--accent); background:rgba(255,46,154,.10); box-shadow:0 0 18px rgba(255,46,154,.22); }
+    html.theme-futuristic .menu-item.hot-dish { border-color:var(--orange) !important; background:linear-gradient(135deg, rgba(255,180,84,.12), rgba(255,46,154,.10)) !important; }
+    html.theme-futuristic .allergen-legend { background:rgba(125,180,255,.05); border-color:var(--border); }
+    html.theme-futuristic textarea,
+    html.theme-futuristic .modal input,
+    html.theme-futuristic input[type=text],
+    html.theme-futuristic input[type=email],
+    html.theme-futuristic input[type=password],
+    html.theme-futuristic input[type=date],
+    html.theme-futuristic input[type=time] {
+      background:rgba(8,14,30,.7); color:var(--text); border:2px solid rgba(125,180,255,.18);
+    }
+    html.theme-futuristic textarea:focus,
+    html.theme-futuristic input:focus { border-color:var(--accent) !important; box-shadow:0 0 16px rgba(255,46,154,.3); }
+
+    /* Tlačidlá — žiariace */
+    html.theme-futuristic .btn-primary { background:linear-gradient(135deg,#ff2e9a,#a23bff); box-shadow:0 0 24px rgba(255,46,154,.4); color:#fff; }
+    html.theme-futuristic .btn-primary:hover { filter:brightness(1.12); background:linear-gradient(135deg,#ff2e9a,#a23bff); }
+    html.theme-futuristic .btn-primary:disabled { background:rgba(125,180,255,.15); box-shadow:none; color:var(--muted); }
+    html.theme-futuristic .btn-qr { background:linear-gradient(135deg,#00b3ff,#0066ff); box-shadow:0 0 22px rgba(0,150,255,.4); }
+    html.theme-futuristic .btn-qr:hover { filter:brightness(1.12); background:linear-gradient(135deg,#00b3ff,#0066ff); }
+    html.theme-futuristic .btn-secondary { background:rgba(125,180,255,.08); color:var(--text); border:1px solid rgba(125,180,255,.25); }
+    html.theme-futuristic .btn-secondary:hover { background:rgba(125,180,255,.18); }
+    html.theme-futuristic .btn-danger { background:rgba(255,46,154,.12); color:#ff7eb6; border:1px solid rgba(255,46,154,.4); }
+
+    /* Kruhové odznaky / avatary — neónový gradient */
+    html.theme-futuristic .order-avatar,
+    html.theme-futuristic .menu-item-num,
+    html.theme-futuristic .summary-num,
+    html.theme-futuristic .admin-num-badge { background:linear-gradient(135deg,#00b3ff,#a23bff) !important; color:#fff; }
+
+    /* Tabuľky */
+    html.theme-futuristic .summary-table th,
+    html.theme-futuristic .admin-table th { background:linear-gradient(135deg, rgba(0,120,200,.5), rgba(120,40,200,.5)); color:#cfeaff; }
+    html.theme-futuristic .summary-table tr:nth-child(even) td,
+    html.theme-futuristic .admin-table tr:nth-child(even) td { background:rgba(125,180,255,.04); }
+    html.theme-futuristic .summary-section-header td { background:rgba(125,180,255,.07) !important; }
+
+    /* Countdown stavy */
+    html.theme-futuristic #countdown-bar.green  { background:rgba(21,245,163,.12); color:#5dffc4; }
+    html.theme-futuristic #countdown-bar.orange { background:rgba(255,180,84,.14); color:#ffce8a; }
+    html.theme-futuristic #countdown-bar.red    { background:rgba(255,46,154,.14); color:#ff8fc6; }
+    html.theme-futuristic #countdown-bar.closed { background:rgba(125,180,255,.10); color:#9fb4d8; }
+
+    /* Modály — sklenené */
+    html.theme-futuristic .modal,
+    html.theme-futuristic .qr-modal {
+      background:rgba(16,22,44,.88); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px);
+      border:1px solid rgba(125,180,255,.22); color:var(--text);
+      box-shadow:0 0 60px rgba(0,160,255,.25);
+    }
+    html.theme-futuristic .modal h2, html.theme-futuristic .qr-modal h2 { color:#8ff3ff; text-shadow:0 0 14px rgba(0,229,255,.4); }
+    html.theme-futuristic .qr-modal img { border-color:rgba(125,180,255,.3); }
+    html.theme-futuristic .modal-tab.active { background:linear-gradient(135deg,#ff2e9a,#a23bff); }
+
+    /* Admin */
+    html.theme-futuristic .admin-stat-card { background:var(--card); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:2px solid rgba(255,46,154,.4); box-shadow:0 0 22px rgba(255,46,154,.15); }
+    html.theme-futuristic .admin-tab-btn.active { color:#8ff3ff; border-bottom-color:#8ff3ff; }
+
+    /* Prepínač (toggle switch) */
+    .fx-switch { position:relative; display:inline-block; width:54px; height:30px; flex-shrink:0; }
+    .fx-switch input { opacity:0; width:0; height:0; }
+    .fx-slider { position:absolute; cursor:pointer; inset:0; background:#cbd2dc; border-radius:30px; transition:.25s; }
+    .fx-slider::before { content:''; position:absolute; height:22px; width:22px; left:4px; bottom:4px; background:#fff; border-radius:50%; transition:.25s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+    .fx-switch input:checked + .fx-slider { background:linear-gradient(135deg,#ff2e9a,#a23bff); box-shadow:0 0 16px rgba(255,46,154,.5); }
+    .fx-switch input:checked + .fx-slider::before { transform:translateX(24px); }
   </style>
 </head>
 <body>
@@ -766,6 +908,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('qrtest')">🧪 QR testovač</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('blokovane')" id="blokovane-tab-btn">🚫 Neprítomnosť</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('platba')">💳 Platba</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('vzhlad')">🎨 Vzhľad</button>
     </div>
 
     <!-- Tab: dnesne -->
@@ -1009,6 +1152,29 @@
         <div id="platba-effective-preview" style="color:var(--muted);font-size:13px">Načítavam...</div>
       </div>
     </div>
+
+    <!-- Tab: vzhlad -->
+    <div id="admin-tab-vzhlad" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">🎨 Vzhľad aplikácie</div>
+        <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2e7d32">
+          <strong>ℹ️ Futuristický dizajn</strong> je nepovinná neónová „Neon Cyber" téma. Nastavenie je <strong>globálne</strong> — prejaví sa všetkým návštevníkom stránky.
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);border-radius:10px;padding:16px 18px">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--text)">🚀 Futuristický dizajn</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:3px" id="vzhlad-state-label">Načítavam…</div>
+          </div>
+          <label class="fx-switch">
+            <input type="checkbox" id="vzhlad-toggle" onchange="saveDesignConfig(this.checked)">
+            <span class="fx-slider"></span>
+          </label>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--muted)">
+          Tip: zmena sa prejaví okamžite. Klasický dizajn obnovíš vypnutím prepínača.
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -1082,6 +1248,17 @@
       <button onclick="hideChangelog()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
     </div>
     <p style="margin:0 0 16px;color:var(--muted);font-size:13px">Aktuálna verzia: <strong id="changelog-version">v…</strong></p>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.2.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Pridané</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li><strong>Futuristický dizajn „Neon Cyber"</strong> — voliteľná neónová téma.</li>
+          <li>Globálne <strong>prepínateľná v Admin → Vzhľad</strong>; klasický dizajn ostáva predvolený.</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="changelog-entry" style="margin-bottom:18px">
       <div style="font-weight:800;color:var(--brand);font-size:15px">v1.1.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
@@ -2334,7 +2511,7 @@ async function doSetDeadline(deadline) {
 
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab-btn').forEach((btn, i) => {
-    const tabs = ['dnes','historia','pouzivatelia','qrtest','blokovane','platba'];
+    const tabs = ['dnes','historia','pouzivatelia','qrtest','blokovane','platba','vzhlad'];
     btn.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
@@ -2343,6 +2520,51 @@ function switchAdminTab(tab) {
   if (tab === 'pouzivatelia') loadRegisteredUsers();
   if (tab === 'blokovane') loadBlokovaneObdobia();
   if (tab === 'platba') loadPlatbaAdminConfig();
+  if (tab === 'vzhlad') loadDesignConfig();
+}
+
+// ── Vzhľad / futuristický dizajn ────────────────────────────────────────────
+function applyFuturisticTheme(on) {
+  document.documentElement.classList.toggle('theme-futuristic', !!on);
+  try { localStorage.setItem('fob_theme', on ? 'futuristic' : 'classic'); } catch(e) {}
+}
+async function loadDesignConfig() {
+  const toggle = document.getElementById('vzhlad-toggle');
+  const label  = document.getElementById('vzhlad-state-label');
+  try {
+    const res = await fetch('/api/design');
+    const data = await res.json();
+    const on = !!(data.ok && data.futuristic);
+    if (toggle) toggle.checked = on;
+    if (label)  label.textContent = on ? 'Zapnutý — neónová téma je aktívna.' : 'Vypnutý — klasický dizajn.';
+    applyFuturisticTheme(on);
+  } catch(e) {
+    if (label) label.textContent = 'Nepodarilo sa načítať stav.';
+  }
+}
+async function saveDesignConfig(on) {
+  const label = document.getElementById('vzhlad-state-label');
+  if (label) label.textContent = 'Ukladám…';
+  // Okamzita lokalna odozva
+  applyFuturisticTheme(on);
+  try {
+    const res = await fetch('/api/admin/design', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPass: adminPassword, futuristic: !!on })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      applyFuturisticTheme(data.futuristic);
+      if (label) label.textContent = data.futuristic ? 'Zapnutý — neónová téma je aktívna.' : 'Vypnutý — klasický dizajn.';
+      showToast(data.futuristic ? '🚀 Futuristický dizajn zapnutý' : '🎨 Klasický dizajn obnovený', 'success');
+    } else {
+      showToast('❌ ' + (data.error || 'Chyba ukladania'), 'error');
+      loadDesignConfig();
+    }
+  } catch(e) {
+    showToast('❌ Chyba spojenia', 'error');
+    loadDesignConfig();
+  }
 }
 
 function renderAdminOrders(orders, history = []) {

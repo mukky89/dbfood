@@ -65,6 +65,13 @@ const nastaveniaPlatbySchema = new mongoose.Schema({
 });
 const NastaveniaPlatby = mongoose.model('NastaveniaPlatby', nastaveniaPlatbySchema);
 
+// Nastavenia vzhladu (prepinanie futuristickeho dizajnu)
+const nastaveniaVzhladSchema = new mongoose.Schema({
+  futuristicky: { type: Boolean, default: false }
+});
+const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
+
+
 mongoose.connect(config.mongoUri)
   .then(() => console.log('[DB] Pripojeny na MongoDB'))
   .catch(err => { console.error('[DB] Chyba pripojenia:', err.message); process.exit(1); });
@@ -121,6 +128,20 @@ async function getPlatba() {
   return _platbaCache;
 }
 function clearPlatbaCache() { _platbaCache = null; }
+
+// ── Nastavenia vzhladu ─────────────────────────────────────────────────────
+let _vzhladCache = null;
+async function getVzhlad() {
+  if (_vzhladCache) return _vzhladCache;
+  try {
+    const doc = await NastaveniaVzhlad.findOne({});
+    _vzhladCache = { futuristicky: !!doc?.futuristicky };
+  } catch(e) {
+    _vzhladCache = { futuristicky: false };
+  }
+  return _vzhladCache;
+}
+function clearVzhladCache() { _vzhladCache = null; }
 
 async function loadOrders() {
   const dnes = new Date().toDateString();
@@ -488,6 +509,26 @@ app.post('/api/clear-orders', async (req, res) => {
 // GET /api/version — verzia aplikacie (z package.json)
 app.get('/api/version', (req, res) => {
   res.json({ ok: true, version: pkg.version });
+});
+
+// GET /api/design — aktualny vzhlad (verejne, pre prepnutie temy)
+app.get('/api/design', async (req, res) => {
+  const vzhlad = await getVzhlad();
+  res.json({ ok: true, futuristic: vzhlad.futuristicky });
+});
+
+// POST /api/admin/design — zapnutie/vypnutie futuristickeho dizajnu
+app.post('/api/admin/design', async (req, res) => {
+  const { adminPass, futuristic } = req.body;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    await NastaveniaVzhlad.findOneAndUpdate(
+      {}, { $set: { futuristicky: !!futuristic } }, { upsert: true, new: true }
+    );
+    clearVzhladCache();
+    const vzhlad = await getVzhlad();
+    res.json({ ok: true, futuristic: vzhlad.futuristicky });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
 // POST /api/qr
