@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -809,6 +809,154 @@
     html.theme-trattoria .admin-stat-num { color:#b23827; }
     html.theme-trattoria .admin-tab-btn.active { color:#b23827; border-bottom-color:#b23827; }
 
+    /* ════════════════════════════════════════════════════════════════════
+       STAR WARS — "Galaxy Far Away" (prepínateľná v Admin → Vzhľad)
+       Hlboký vesmír, hviezdne pole, hyperspace, ikonická SW žltá, hologramové
+       panely a svetelné meče (lightsaber) ako tlačidlá. Trieda .theme-starwars.
+       ════════════════════════════════════════════════════════════════════ */
+    html.theme-starwars {
+      --brand:#ffe81f; --accent:#ffe81f; --green:#3bd16f; --orange:#ff8c1a;
+      --bg:#05070e; --card:rgba(8,14,30,.62); --border:rgba(91,192,235,.22);
+      --text:#dfe9ff; --muted:#8da3c8; --radius:10px;
+    }
+    html.theme-starwars body {
+      background:#02030a; color:var(--text);
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; letter-spacing:.2px;
+    }
+
+    /* Hviezdne pole — tri vrstvy bodiek rôznej veľkosti, jemne plávajú */
+    html.theme-starwars body::before {
+      content:''; position:fixed; inset:-50% -50%; z-index:-2; pointer-events:none;
+      background:
+        radial-gradient(1.4px 1.4px at 20% 30%, #fff, transparent 60%),
+        radial-gradient(1.4px 1.4px at 75% 18%, #fff, transparent 60%),
+        radial-gradient(1.1px 1.1px at 42% 72%, #cfe6ff, transparent 60%),
+        radial-gradient(1.6px 1.6px at 88% 60%, #fff, transparent 60%),
+        radial-gradient(1px 1px at 60% 45%, #bcd4ff, transparent 60%),
+        radial-gradient(1.2px 1.2px at 12% 85%, #fff, transparent 60%),
+        radial-gradient(1.3px 1.3px at 95% 88%, #e6f0ff, transparent 60%),
+        radial-gradient(1px 1px at 33% 12%, #fff, transparent 60%);
+      background-repeat:repeat; background-size:480px 480px;
+      animation: swStars 140s linear infinite;
+      opacity:.9;
+    }
+    /* Galaktická hmlovina + jemný „hyperspace" žiar zhora */
+    html.theme-starwars body::after {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(60% 45% at 80% 12%, rgba(91,150,235,.16), transparent 60%),
+        radial-gradient(55% 50% at 12% 88%, rgba(168,85,247,.14), transparent 60%),
+        radial-gradient(40% 30% at 50% 50%, rgba(255,232,31,.05), transparent 70%);
+    }
+    @keyframes swStars { from { transform:translate3d(0,0,0); } to { transform:translate3d(-480px,-240px,0); } }
+
+    /* Header — temný kokpit s ikonickou žltou a modrým hologramovým okrajom */
+    html.theme-starwars header {
+      background:linear-gradient(180deg, rgba(3,6,16,.96), rgba(6,12,28,.92));
+      -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+      border-bottom:1px solid rgba(91,192,235,.35);
+      box-shadow:0 0 26px rgba(91,150,235,.25), inset 0 -1px 0 rgba(255,232,31,.15);
+    }
+    html.theme-starwars .hdr-brand {
+      background:linear-gradient(90deg, #ffe81f, #fff3a0, #ffd000, #fff3a0, #ffe81f);
+      background-size:300% auto; -webkit-background-clip:text; background-clip:text;
+      text-shadow:0 0 18px rgba(255,232,31,.35); font-style:normal; letter-spacing:1px;
+    }
+    html.theme-starwars .hdr-sub { color:#bcd4ff; text-transform:uppercase; letter-spacing:2px; font-size:15px; }
+    html.theme-starwars .phone-dropdown { background:rgba(8,14,30,.95); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:1px solid rgba(91,192,235,.3); box-shadow:0 12px 40px rgba(0,0,0,.6), 0 0 22px rgba(91,150,235,.2); }
+    html.theme-starwars .phone-item { color:var(--text); }
+    html.theme-starwars .phone-item:hover { background:rgba(91,150,235,.14); color:#9fd0ff; }
+
+    /* Karty — hologramové panely so skenovacím prúžkom navrchu */
+    html.theme-starwars .card {
+      background:var(--card); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+      border:1px solid var(--border); position:relative; overflow:hidden;
+      box-shadow:0 8px 38px rgba(0,0,0,.5), inset 0 0 28px rgba(91,150,235,.06);
+    }
+    html.theme-starwars .card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, transparent, #5bc0eb, #ffe81f, #5bc0eb, transparent);
+      box-shadow:0 0 12px rgba(91,192,235,.6);
+    }
+    html.theme-starwars .card-title {
+      color:#ffe81f; text-shadow:0 0 14px rgba(255,232,31,.4);
+      text-transform:uppercase; letter-spacing:1.5px; font-weight:800;
+      border-bottom:1px solid rgba(91,192,235,.22);
+    }
+
+    /* Menu položky — riadky lodného terminálu */
+    html.theme-starwars .menu-item { background:rgba(91,150,235,.05); border:2px solid rgba(91,192,235,.12); }
+    html.theme-starwars .menu-item:hover,
+    html.theme-starwars .menu-item.selected { border-color:#5bc0eb; background:rgba(91,192,235,.12); box-shadow:0 0 20px rgba(91,192,235,.3); }
+    html.theme-starwars .menu-item.hot-dish { border-color:#ff8c1a !important; background:linear-gradient(135deg, rgba(255,140,26,.12), rgba(255,232,31,.06)) !important; }
+    html.theme-starwars .menu-item input[type=radio],
+    html.theme-starwars .menu-item input[type=checkbox] { accent-color:#5bc0eb; }
+    html.theme-starwars .allergen-legend { background:rgba(91,150,235,.06); border-color:var(--border); }
+
+    /* Polia */
+    html.theme-starwars textarea,
+    html.theme-starwars .modal input,
+    html.theme-starwars input[type=text],
+    html.theme-starwars input[type=email],
+    html.theme-starwars input[type=password],
+    html.theme-starwars input[type=date],
+    html.theme-starwars input[type=time] {
+      background:rgba(4,8,20,.75); color:var(--text); border:2px solid rgba(91,192,235,.22);
+    }
+    html.theme-starwars textarea:focus,
+    html.theme-starwars input:focus { border-color:#5bc0eb !important; box-shadow:0 0 16px rgba(91,192,235,.4); }
+
+    /* Tlačidlá — svetelné meče */
+    html.theme-starwars .btn-primary { background:linear-gradient(135deg,#1a86ff,#0b3fbf); color:#eaf4ff; box-shadow:0 0 22px rgba(26,134,255,.5), inset 0 0 10px rgba(160,210,255,.4); text-shadow:0 0 8px rgba(180,220,255,.6); }
+    html.theme-starwars .btn-primary:hover { filter:brightness(1.18); background:linear-gradient(135deg,#1a86ff,#0b3fbf); }
+    html.theme-starwars .btn-primary:disabled { background:rgba(91,150,235,.18); box-shadow:none; color:var(--muted); text-shadow:none; }
+    html.theme-starwars .btn-qr { background:linear-gradient(135deg,#3bd16f,#127a3a); color:#eafff0; box-shadow:0 0 20px rgba(59,209,111,.45), inset 0 0 10px rgba(170,255,200,.4); }
+    html.theme-starwars .btn-qr:hover { filter:brightness(1.15); background:linear-gradient(135deg,#3bd16f,#127a3a); }
+    html.theme-starwars .btn-secondary { background:rgba(91,150,235,.1); color:var(--text); border:1px solid rgba(91,192,235,.3); }
+    html.theme-starwars .btn-secondary:hover { background:rgba(91,150,235,.2); }
+    html.theme-starwars .btn-danger { background:rgba(255,46,46,.14); color:#ff8a8a; border:1px solid rgba(255,80,80,.45); box-shadow:0 0 14px rgba(255,46,46,.25); }
+
+    /* Avatary a číselné odznaky — žiariaca žltá energia */
+    html.theme-starwars .order-avatar,
+    html.theme-starwars .menu-item-num,
+    html.theme-starwars .summary-num,
+    html.theme-starwars .admin-num-badge { background:linear-gradient(135deg,#1a86ff,#5bc0eb) !important; color:#05070e; font-weight:800; }
+    html.theme-starwars .price-badge { background:#c9a400; color:#1a1400; }
+    html.theme-starwars .hot-badge { background:linear-gradient(135deg,#ff8c1a,#ff3b3b); }
+
+    /* Tabuľky */
+    html.theme-starwars .summary-table th,
+    html.theme-starwars .admin-table th { background:linear-gradient(135deg, rgba(11,63,191,.55), rgba(91,192,235,.4)); color:#eaf4ff; text-transform:uppercase; letter-spacing:.6px; }
+    html.theme-starwars .summary-table tr:nth-child(even) td,
+    html.theme-starwars .admin-table tr:nth-child(even) td { background:rgba(91,150,235,.05); }
+    html.theme-starwars .summary-section-header td { background:rgba(91,150,235,.09) !important; color:#ffe81f; }
+    html.theme-starwars .summary-count { background:#1a86ff; color:#eaf4ff; }
+    html.theme-starwars .history-bar { background:linear-gradient(90deg,#0b3fbf,#5bc0eb); }
+
+    /* Countdown — palubné stavy */
+    html.theme-starwars #countdown-bar.green  { background:rgba(59,209,111,.12); color:#7df0a3; }
+    html.theme-starwars #countdown-bar.orange { background:rgba(255,140,26,.14); color:#ffc079; }
+    html.theme-starwars #countdown-bar.red    { background:rgba(255,59,59,.14); color:#ff9a9a; }
+    html.theme-starwars #countdown-bar.closed { background:rgba(91,150,235,.10); color:#9fb4d8; }
+
+    /* Modály — hologramové projekcie */
+    html.theme-starwars .modal,
+    html.theme-starwars .qr-modal {
+      background:rgba(6,12,28,.92); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+      border:1px solid rgba(91,192,235,.3); color:var(--text);
+      box-shadow:0 0 60px rgba(91,150,235,.3);
+    }
+    html.theme-starwars .modal h2,
+    html.theme-starwars .qr-modal h2 { color:#ffe81f; text-shadow:0 0 14px rgba(255,232,31,.4); text-transform:uppercase; letter-spacing:1px; }
+    html.theme-starwars .qr-modal img { border-color:rgba(91,192,235,.4); }
+    html.theme-starwars .modal-tab { background:rgba(91,150,235,.08); }
+    html.theme-starwars .modal-tab.active { background:linear-gradient(135deg,#1a86ff,#0b3fbf); color:#eaf4ff; }
+
+    /* Admin */
+    html.theme-starwars .admin-stat-card { background:var(--card); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border:2px solid rgba(255,232,31,.4); box-shadow:0 0 22px rgba(255,232,31,.12); }
+    html.theme-starwars .admin-stat-num { color:#ffe81f; text-shadow:0 0 12px rgba(255,232,31,.4); }
+    html.theme-starwars .admin-tab-btn.active { color:#ffe81f; border-bottom-color:#ffe81f; }
+
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
     .theme-option:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
@@ -1324,6 +1472,13 @@
             <div class="t-desc">Stará talianska osteria — kockovaný obrus, krémový papier, serif.</div>
             <div class="theme-dots"><span style="background:#b23827"></span><span style="background:#f3e9d2"></span><span style="background:#5b7a33"></span></div>
           </div>
+          <div class="theme-option" data-theme="starwars" onclick="saveDesignConfig('starwars')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🌌</div>
+            <div class="t-name">Galaxy Far Away</div>
+            <div class="t-desc">Star Wars — hviezdne pole, ikonická žltá, hologramy, svetelné meče.</div>
+            <div class="theme-dots"><span style="background:#05070e"></span><span style="background:#ffe81f"></span><span style="background:#1a86ff"></span></div>
+          </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
       </div>
@@ -1401,6 +1556,17 @@
       <button onclick="hideChangelog()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
     </div>
     <p style="margin:0 0 16px;color:var(--muted);font-size:13px">Aktuálna verzia: <strong id="changelog-version">v…</strong></p>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.4.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Pridané</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li><strong>Téma „Galaxy Far Away"</strong> 🌌 — Star Wars: hviezdne pole, ikonická žltá, hologramy, svetelné meče.</li>
+          <li>Štvrtá voľba v admin výbere tém.</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="changelog-entry" style="margin-bottom:18px">
       <div style="font-weight:800;color:var(--brand);font-size:15px">v1.3.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
@@ -2688,16 +2854,18 @@ function switchAdminTab(tab) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
-  trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' }
+  trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' },
+  starwars:   { name: '🌌 Galaxy Far Away',  toast: '🌌 May the Food be with you!',   state: 'Aktívna téma: Galaxy Far Away — Star Wars.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
   document.documentElement.classList.toggle('theme-futuristic', theme === 'futuristic');
   document.documentElement.classList.toggle('theme-trattoria',  theme === 'trattoria');
+  document.documentElement.classList.toggle('theme-starwars',   theme === 'starwars');
   try { localStorage.setItem('fob_theme', theme); } catch(e) {}
   return theme;
 }
