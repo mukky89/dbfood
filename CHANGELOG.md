@@ -5,6 +5,16 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.3.0] — 2026-06-11
+
+### Pridané
+- **Téma „Retro Trattoria"** 🍝 — stará talianska osteria: kockovaný obrus v hlavičke, krémový papier, paradajková červená, olivová zelená, serifové písmo, karty ako listy jedálneho lístka.
+- Admin záložka **Vzhľad** prerobená z prepínača na **výber z 3 tém** (Klasický / Neon Cyber / Retro Trattoria) s náhľadovými kartami.
+
+### Zmenené
+- Nastavenie vzhľadu sa ukladá ako názov témy (`tema`); pôvodný boolean `futuristicky` ostáva pre spätnú kompatibilitu.
+- `GET /api/design` a `POST /api/admin/design` pracujú s parametrom `theme` (staré `futuristic` stále funguje).
+
 ## [1.2.0] — 2026-06-11
 
 ### Pridané
