@@ -5,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🍕 Fantozzi Objednávky</title>
   <script>
-    // Prepnutie futuristickej temy co najskor (z cache), potom potvrdenie zo servera
+    // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      try { if (localStorage.getItem('fob_theme') === 'futuristic') document.documentElement.classList.add('theme-futuristic'); } catch(e){}
+      var TEMY = ['futuristic', 'trattoria'];
+      function apply(t) {
+        TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
+      }
+      try { var cached = localStorage.getItem('fob_theme'); if (cached) apply(cached); } catch(e){}
       fetch('/api/design').then(r=>r.json()).then(d=>{
         if (!d || !d.ok) return;
-        const on = !!d.futuristic;
-        document.documentElement.classList.toggle('theme-futuristic', on);
-        try { localStorage.setItem('fob_theme', on ? 'futuristic' : 'classic'); } catch(e){}
+        var t = d.theme || (d.futuristic ? 'futuristic' : 'classic');
+        apply(t);
+        try { localStorage.setItem('fob_theme', t); } catch(e){}
       }).catch(()=>{});
     })();
   </script>
@@ -678,6 +682,144 @@
     .fx-slider::before { content:''; position:absolute; height:22px; width:22px; left:4px; bottom:4px; background:#fff; border-radius:50%; transition:.25s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
     .fx-switch input:checked + .fx-slider { background:linear-gradient(135deg,#ff2e9a,#a23bff); box-shadow:0 0 16px rgba(255,46,154,.5); }
     .fx-switch input:checked + .fx-slider::before { transform:translateX(24px); }
+
+    /* ════════════════════════════════════════════════════════════════════
+       RETRO TRATTORIA — "Osteria da Fantozzi" (prepínateľná v Admin → Vzhľad)
+       Stará talianska jedáleň: kockovaný obrus, krémový papier, paradajková
+       červená, olivová zelená, serifové písmo. Trieda .theme-trattoria.
+       ════════════════════════════════════════════════════════════════════ */
+    html.theme-trattoria {
+      --brand:#7c2d12; --accent:#bf3526; --green:#5b7a33; --orange:#c97d1d;
+      --bg:#f3e9d2; --card:#fffaf0; --border:#dcc9a3; --text:#3e2e20; --muted:#8d7b62; --radius:6px;
+    }
+    html.theme-trattoria body { background:#efe3c8; font-family: Georgia, 'Palatino Linotype', 'Times New Roman', serif; }
+
+    /* Papierové pozadie — jemné fľaky a vlákna starého papiera */
+    html.theme-trattoria body::before {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 40% at 18% 12%, rgba(124,45,18,.05), transparent 60%),
+        radial-gradient(ellipse 50% 45% at 85% 80%, rgba(91,122,51,.06), transparent 60%),
+        radial-gradient(ellipse 70% 30% at 55% 45%, rgba(201,125,29,.04), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(120,90,40,.022) 0 2px, transparent 2px 5px);
+    }
+
+    /* Header — kockovaný obrus (dve tmavšie červené, nech je text čitateľný) */
+    html.theme-trattoria header {
+      background: repeating-conic-gradient(#9e2b1e 0% 25%, #b23827 0% 50%) 0 0 / 56px 56px;
+      border-bottom:4px double #5e1a10;
+      box-shadow:0 3px 16px rgba(62,46,32,.45);
+    }
+    html.theme-trattoria .hdr-brand {
+      background:linear-gradient(90deg, #ffe9b0, #fff6da, #ffd98a, #fff6da, #ffe9b0);
+      background-size:300% auto; -webkit-background-clip:text; background-clip:text;
+    }
+    html.theme-trattoria .hdr-sub { color:#ffeccb; text-shadow:0 1px 2px rgba(60,10,0,.5); font-style:italic; }
+    html.theme-trattoria .phone-btn { background:rgba(255,240,210,.16); border-color:rgba(255,240,210,.35); }
+    html.theme-trattoria .phone-dropdown { background:#fffaf0; border:1px solid #dcc9a3; box-shadow:0 12px 40px rgba(62,46,32,.35); }
+    html.theme-trattoria .phone-item:hover { background:#fbeee2; color:#bf3526; }
+    html.theme-trattoria #user-badge { background:rgba(255,240,210,.18); }
+
+    /* Karty — listy menu so stuhou kockovaného obrusu navrchu */
+    html.theme-trattoria .card {
+      background:var(--card);
+      border:1px solid var(--border);
+      box-shadow:0 1px 0 #ead9b6, 0 7px 20px rgba(96,72,40,.18);
+      position:relative; overflow:hidden;
+    }
+    html.theme-trattoria .card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:6px;
+      background:repeating-linear-gradient(45deg, #b23827 0 10px, #f7ecd7 10px 20px);
+      opacity:.9;
+    }
+    html.theme-trattoria .card-title {
+      color:#7c2d12; font-style:italic; letter-spacing:.3px;
+      border-bottom:2px dashed #dcc9a3;
+    }
+
+    /* Menu položky — ako riadky v papierovom jedálnom lístku */
+    html.theme-trattoria .menu-item { background:#fbf3e0; border:2px dashed transparent; }
+    html.theme-trattoria .menu-item:hover,
+    html.theme-trattoria .menu-item.selected { border-color:#bf3526; background:#fdeee4; box-shadow:0 2px 10px rgba(191,53,38,.15); }
+    html.theme-trattoria .menu-item.hot-dish { border-color:#c97d1d !important; background:linear-gradient(135deg,#fdf3da,#fdeee4) !important; }
+    html.theme-trattoria .menu-item input[type=radio],
+    html.theme-trattoria .menu-item input[type=checkbox] { accent-color:#bf3526; }
+    html.theme-trattoria .allergen-legend { background:#f8efdb; border-color:var(--border); }
+
+    /* Polia */
+    html.theme-trattoria textarea,
+    html.theme-trattoria .modal input,
+    html.theme-trattoria input[type=text],
+    html.theme-trattoria input[type=email],
+    html.theme-trattoria input[type=password],
+    html.theme-trattoria input[type=date],
+    html.theme-trattoria input[type=time] {
+      background:#fffdf6; color:var(--text); border:2px solid #dcc9a3;
+    }
+    html.theme-trattoria textarea:focus,
+    html.theme-trattoria input:focus { border-color:#bf3526 !important; box-shadow:0 0 0 3px rgba(191,53,38,.12); }
+
+    /* Tlačidlá — pečiatkový vzhľad */
+    html.theme-trattoria .btn-primary { background:#b23827; box-shadow:inset 0 -3px 0 rgba(60,10,0,.25); }
+    html.theme-trattoria .btn-primary:hover { background:#9e2b1e; }
+    html.theme-trattoria .btn-primary:disabled { background:#c4b193; box-shadow:none; }
+    html.theme-trattoria .btn-qr { background:#5b7a33; box-shadow:inset 0 -3px 0 rgba(30,50,10,.3); }
+    html.theme-trattoria .btn-qr:hover { background:#4c6829; }
+    html.theme-trattoria .btn-secondary { background:#f3e9d2; color:#5a4632; border:1px solid #dcc9a3; }
+    html.theme-trattoria .btn-secondary:hover { background:#eadcba; }
+    html.theme-trattoria .btn-danger { background:#fbeee2; color:#bf3526; border:1px solid #e3b8a3; }
+
+    /* Avatary a číselné odznaky — terakota */
+    html.theme-trattoria .order-avatar,
+    html.theme-trattoria .menu-item-num,
+    html.theme-trattoria .summary-num,
+    html.theme-trattoria .admin-num-badge { background:linear-gradient(135deg,#b23827,#7c2d12) !important; color:#fff4dd; }
+    html.theme-trattoria .price-badge { background:#5b7a33; }
+    html.theme-trattoria .hot-badge { background:linear-gradient(135deg,#c97d1d,#b23827); }
+
+    /* Tabuľky */
+    html.theme-trattoria .summary-table th,
+    html.theme-trattoria .admin-table th { background:#7c2d12; color:#f7ecd7; }
+    html.theme-trattoria .summary-table tr:nth-child(even) td,
+    html.theme-trattoria .admin-table tr:nth-child(even) td { background:#faf2df; }
+    html.theme-trattoria .summary-section-header td { background:#f3e9d2 !important; }
+    html.theme-trattoria .summary-count { background:#b23827; }
+    html.theme-trattoria .history-bar { background:linear-gradient(90deg,#7c2d12,#b23827); }
+
+    /* Countdown — teplé tóny */
+    html.theme-trattoria #countdown-bar.green  { background:#e7eed7; color:#3c5220; }
+    html.theme-trattoria #countdown-bar.orange { background:#f7e6c4; color:#7a5210; }
+    html.theme-trattoria #countdown-bar.red    { background:#f6d9d2; color:#7c2012; }
+    html.theme-trattoria #countdown-bar.closed { background:#eee4cd; color:#6b5b44; }
+
+    /* Modály — papierové lístky */
+    html.theme-trattoria .modal,
+    html.theme-trattoria .qr-modal {
+      background:#fffaf0; border:1px solid #dcc9a3;
+      box-shadow:0 24px 70px rgba(62,46,32,.4);
+    }
+    html.theme-trattoria .modal h2,
+    html.theme-trattoria .qr-modal h2 { color:#7c2d12; font-style:italic; }
+    html.theme-trattoria .qr-modal img { border-color:#dcc9a3; }
+    html.theme-trattoria .modal-tab { background:#f3e9d2; }
+    html.theme-trattoria .modal-tab.active { background:#b23827; color:#fff4dd; }
+
+    /* Admin */
+    html.theme-trattoria .admin-stat-card { border-color:#b23827; }
+    html.theme-trattoria .admin-stat-num { color:#b23827; }
+    html.theme-trattoria .admin-tab-btn.active { color:#b23827; border-bottom-color:#b23827; }
+
+    /* ── Výber témy v admin paneli ── */
+    .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
+    .theme-option:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
+    .theme-option.selected { border-color:var(--accent); box-shadow:0 0 0 3px rgba(231,76,60,.18); }
+    .theme-option .t-emoji { font-size:30px; line-height:1; }
+    .theme-option .t-name { font-weight:800; font-size:15px; margin-top:8px; color:var(--text); }
+    .theme-option .t-desc { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.5; }
+    .theme-dots { display:flex; gap:5px; margin-top:10px; }
+    .theme-dots span { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); display:inline-block; }
+    .theme-option .t-check { position:absolute; top:10px; right:12px; font-size:16px; display:none; }
+    .theme-option.selected .t-check { display:block; }
   </style>
 </head>
 <body>
@@ -1158,21 +1300,32 @@
       <div class="card">
         <div class="card-title">🎨 Vzhľad aplikácie</div>
         <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2e7d32">
-          <strong>ℹ️ Futuristický dizajn</strong> je nepovinná neónová „Neon Cyber" téma. Nastavenie je <strong>globálne</strong> — prejaví sa všetkým návštevníkom stránky.
+          <strong>ℹ️ Výber témy</strong> je <strong>globálny</strong> — prejaví sa všetkým návštevníkom stránky. Zmena sa aplikuje okamžite.
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--bg);border-radius:10px;padding:16px 18px">
-          <div>
-            <div style="font-size:15px;font-weight:700;color:var(--text)">🚀 Futuristický dizajn</div>
-            <div style="font-size:13px;color:var(--muted);margin-top:3px" id="vzhlad-state-label">Načítavam…</div>
+        <div id="vzhlad-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+          <div class="theme-option" data-theme="classic" onclick="saveDesignConfig('classic')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🏛️</div>
+            <div class="t-name">Klasický</div>
+            <div class="t-desc">Pôvodný svetlý dizajn — prehľadný a overený.</div>
+            <div class="theme-dots"><span style="background:#2c3e50"></span><span style="background:#e74c3c"></span><span style="background:#f5f6fa"></span></div>
           </div>
-          <label class="fx-switch">
-            <input type="checkbox" id="vzhlad-toggle" onchange="saveDesignConfig(this.checked)">
-            <span class="fx-slider"></span>
-          </label>
+          <div class="theme-option" data-theme="futuristic" onclick="saveDesignConfig('futuristic')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🚀</div>
+            <div class="t-name">Neon Cyber</div>
+            <div class="t-desc">Tmavá neónová téma — aurora, glassmorphism, žiariace prvky.</div>
+            <div class="theme-dots"><span style="background:#0a1226"></span><span style="background:#ff2e9a"></span><span style="background:#7df9ff"></span></div>
+          </div>
+          <div class="theme-option" data-theme="trattoria" onclick="saveDesignConfig('trattoria')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🍝</div>
+            <div class="t-name">Retro Trattoria</div>
+            <div class="t-desc">Stará talianska osteria — kockovaný obrus, krémový papier, serif.</div>
+            <div class="theme-dots"><span style="background:#b23827"></span><span style="background:#f3e9d2"></span><span style="background:#5b7a33"></span></div>
+          </div>
         </div>
-        <div style="margin-top:14px;font-size:12px;color:var(--muted)">
-          Tip: zmena sa prejaví okamžite. Klasický dizajn obnovíš vypnutím prepínača.
-        </div>
+        <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
       </div>
     </div>
   </div>
@@ -1248,6 +1401,17 @@
       <button onclick="hideChangelog()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
     </div>
     <p style="margin:0 0 16px;color:var(--muted);font-size:13px">Aktuálna verzia: <strong id="changelog-version">v…</strong></p>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.3.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Pridané</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li><strong>Téma „Retro Trattoria"</strong> 🍝 — talianska osteria: kockovaný obrus, krémový papier, serif.</li>
+          <li>Admin → Vzhľad je teraz <strong>výber z 3 tém</strong> (Klasický / Neon Cyber / Retro Trattoria).</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="changelog-entry" style="margin-bottom:18px">
       <div style="font-weight:800;color:var(--brand);font-size:15px">v1.2.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
@@ -2523,40 +2687,54 @@ function switchAdminTab(tab) {
   if (tab === 'vzhlad') loadDesignConfig();
 }
 
-// ── Vzhľad / futuristický dizajn ────────────────────────────────────────────
-function applyFuturisticTheme(on) {
-  document.documentElement.classList.toggle('theme-futuristic', !!on);
-  try { localStorage.setItem('fob_theme', on ? 'futuristic' : 'classic'); } catch(e) {}
+// ── Vzhľad / témy ───────────────────────────────────────────────────────────
+const APP_THEMES = ['classic', 'futuristic', 'trattoria'];
+const THEME_LABELS = {
+  classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
+  futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
+  trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' }
+};
+function applyTheme(theme) {
+  if (!APP_THEMES.includes(theme)) theme = 'classic';
+  document.documentElement.classList.toggle('theme-futuristic', theme === 'futuristic');
+  document.documentElement.classList.toggle('theme-trattoria',  theme === 'trattoria');
+  try { localStorage.setItem('fob_theme', theme); } catch(e) {}
+  return theme;
+}
+function markThemeSelection(theme) {
+  document.querySelectorAll('#vzhlad-options .theme-option').forEach(el =>
+    el.classList.toggle('selected', el.dataset.theme === theme));
 }
 async function loadDesignConfig() {
-  const toggle = document.getElementById('vzhlad-toggle');
-  const label  = document.getElementById('vzhlad-state-label');
+  const label = document.getElementById('vzhlad-state-label');
   try {
     const res = await fetch('/api/design');
     const data = await res.json();
-    const on = !!(data.ok && data.futuristic);
-    if (toggle) toggle.checked = on;
-    if (label)  label.textContent = on ? 'Zapnutý — neónová téma je aktívna.' : 'Vypnutý — klasický dizajn.';
-    applyFuturisticTheme(on);
+    if (!data.ok) throw new Error();
+    const theme = applyTheme(data.theme || (data.futuristic ? 'futuristic' : 'classic'));
+    markThemeSelection(theme);
+    if (label) label.textContent = THEME_LABELS[theme].state;
   } catch(e) {
     if (label) label.textContent = 'Nepodarilo sa načítať stav.';
   }
 }
-async function saveDesignConfig(on) {
+async function saveDesignConfig(theme) {
   const label = document.getElementById('vzhlad-state-label');
   if (label) label.textContent = 'Ukladám…';
   // Okamzita lokalna odozva
-  applyFuturisticTheme(on);
+  theme = applyTheme(theme);
+  markThemeSelection(theme);
   try {
     const res = await fetch('/api/admin/design', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminPass: adminPassword, futuristic: !!on })
+      body: JSON.stringify({ adminPass: adminPassword, theme })
     });
     const data = await res.json();
     if (data.ok) {
-      applyFuturisticTheme(data.futuristic);
-      if (label) label.textContent = data.futuristic ? 'Zapnutý — neónová téma je aktívna.' : 'Vypnutý — klasický dizajn.';
-      showToast(data.futuristic ? '🚀 Futuristický dizajn zapnutý' : '🎨 Klasický dizajn obnovený', 'success');
+      const t = applyTheme(data.theme);
+      markThemeSelection(t);
+      if (label) label.textContent = THEME_LABELS[t].state;
+      showToast(THEME_LABELS[t].toast, 'success');
     } else {
       showToast('❌ ' + (data.error || 'Chyba ukladania'), 'error');
       loadDesignConfig();

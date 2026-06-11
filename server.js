@@ -65,9 +65,10 @@ const nastaveniaPlatbySchema = new mongoose.Schema({
 });
 const NastaveniaPlatby = mongoose.model('NastaveniaPlatby', nastaveniaPlatbySchema);
 
-// Nastavenia vzhladu (prepinanie futuristickeho dizajnu)
+// Nastavenia vzhladu (vyber temy; futuristicky boolean ostava pre spatnu kompatibilitu)
 const nastaveniaVzhladSchema = new mongoose.Schema({
-  futuristicky: { type: Boolean, default: false }
+  futuristicky: { type: Boolean, default: false },
+  tema: { type: String, default: '' }
 });
 const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
 
@@ -130,14 +131,19 @@ async function getPlatba() {
 function clearPlatbaCache() { _platbaCache = null; }
 
 // ── Nastavenia vzhladu ─────────────────────────────────────────────────────
+const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria'];
 let _vzhladCache = null;
 async function getVzhlad() {
   if (_vzhladCache) return _vzhladCache;
   try {
     const doc = await NastaveniaVzhlad.findOne({});
-    _vzhladCache = { futuristicky: !!doc?.futuristicky };
+    // Novsie pole 'tema' ma prednost; stary boolean 'futuristicky' je fallback
+    const tema = (doc?.tema && PLATNE_TEMY.includes(doc.tema))
+      ? doc.tema
+      : (doc?.futuristicky ? 'futuristic' : 'classic');
+    _vzhladCache = { tema };
   } catch(e) {
-    _vzhladCache = { futuristicky: false };
+    _vzhladCache = { tema: 'classic' };
   }
   return _vzhladCache;
 }
@@ -514,20 +520,24 @@ app.get('/api/version', (req, res) => {
 // GET /api/design — aktualny vzhlad (verejne, pre prepnutie temy)
 app.get('/api/design', async (req, res) => {
   const vzhlad = await getVzhlad();
-  res.json({ ok: true, futuristic: vzhlad.futuristicky });
+  // 'futuristic' boolean ostava pre spatnu kompatibilitu klientov
+  res.json({ ok: true, theme: vzhlad.tema, futuristic: vzhlad.tema === 'futuristic' });
 });
 
-// POST /api/admin/design — zapnutie/vypnutie futuristickeho dizajnu
+// POST /api/admin/design — vyber temy (classic / futuristic / trattoria)
 app.post('/api/admin/design', async (req, res) => {
-  const { adminPass, futuristic } = req.body;
+  const { adminPass, theme, futuristic } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  // Novy klient posiela 'theme'; stary boolean 'futuristic' je fallback
+  const tema = theme || (typeof futuristic !== 'undefined' ? (futuristic ? 'futuristic' : 'classic') : '');
+  if (!PLATNE_TEMY.includes(tema)) return res.status(400).json({ ok: false, error: 'Neznáma téma' });
   try {
     await NastaveniaVzhlad.findOneAndUpdate(
-      {}, { $set: { futuristicky: !!futuristic } }, { upsert: true, new: true }
+      {}, { $set: { tema, futuristicky: tema === 'futuristic' } }, { upsert: true, new: true }
     );
     clearVzhladCache();
     const vzhlad = await getVzhlad();
-    res.json({ ok: true, futuristic: vzhlad.futuristicky });
+    res.json({ ok: true, theme: vzhlad.tema, futuristic: vzhlad.tema === 'futuristic' });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
