@@ -7,6 +7,7 @@ const { fetchMenu, setManualMenu, clearCache } = require('./scraper');
 const { sendEmail, sendMail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
+const pkg = require('./package.json');
 
 const app = express();
 
@@ -482,6 +483,11 @@ app.post('/api/clear-orders', async (req, res) => {
     await saveOrders({}, []);
     res.json({ ok: true, message: 'Objednavky vymazane' });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// GET /api/version — verzia aplikacie (z package.json)
+app.get('/api/version', (req, res) => {
+  res.json({ ok: true, version: pkg.version });
 });
 
 // POST /api/qr

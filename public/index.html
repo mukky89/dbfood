@@ -706,6 +706,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Pätička s verziou -->
+    <footer style="text-align:center;margin-top:28px;padding:16px 0 8px;color:var(--muted);font-size:12px;opacity:.85">
+      🍕 Fantozzi Objednávky ·
+      <a href="#" onclick="showChangelog(event)" title="Zobraziť changelog" style="color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--border)"><span id="app-version">v…</span></a>
+    </footer>
   </div>
 
   <!-- Admin panel -->
@@ -1065,6 +1071,55 @@
       <p style="color:var(--muted);font-size:14px;margin:12px 0 20px">IBAN nie je nastavený.</p>
       <button class="btn btn-secondary" style="width:100%" onclick="hideQR()">Zavrieť</button>
     </div>
+  </div>
+</div>
+
+<!-- Changelog Modal -->
+<div class="modal-overlay" id="changelog-modal" style="display:none">
+  <div class="modal" style="max-width:560px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 style="margin:0">📋 Changelog</h2>
+      <button onclick="hideChangelog()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
+    </div>
+    <p style="margin:0 0 16px;color:var(--muted);font-size:13px">Aktuálna verzia: <strong id="changelog-version">v…</strong></p>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.1.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Pridané</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li><strong>Platba cez Revolut</strong> ako ďalšia možnosť popri QR kóde — tlačidlo s predvyplnenou sumou.</li>
+          <li>Konfigurovateľné <code>revolut.me</code> meno v admin paneli (Platba).</li>
+          <li><strong>Zobrazenie verzie</strong> aplikácie v pätičke + tento changelog.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.0.1 <span style="font-weight:400;color:var(--muted);font-size:12px">· 10. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Zmenené / opravené</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li>Prechod na <strong>Brevo HTTP API</strong> pre e-maily (Railway blokuje SMTP).</li>
+          <li>Trvalé presmerovanie (301) zo starej EvenNode domény na Railway.</li>
+          <li>Normalizácia príjemcov e-mailov a oprava <code>package-lock.json</code> pre deploy.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="changelog-entry">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.0.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 22. 5. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Prvé vydanie</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li>Načítanie denného menu, zadávanie/úprava/rušenie objednávok s uzávierkou.</li>
+          <li>Platba cez QR kód (Pay by Square) + odoslanie QR na e-mail.</li>
+          <li>Admin panel, blokované obdobia, notifikácie (e-mail + ntfy).</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" style="width:100%;margin-top:8px" onclick="hideChangelog()">Zavrieť</button>
   </div>
 </div>
 
@@ -2779,6 +2834,25 @@ async function sendQREmail() {
 
 function hideQR() { document.getElementById('qr-modal').classList.remove('open'); }
 document.getElementById('qr-modal').addEventListener('click', function(e) { if(e.target===this) hideQR(); });
+
+// ── Verzia & Changelog ──────────────────────────────────────────────────────
+async function loadAppVersion() {
+  try {
+    const res = await fetch('/api/version');
+    const data = await res.json();
+    if (data.ok && data.version) {
+      const v = 'v' + data.version;
+      const elFooter = document.getElementById('app-version');
+      const elModal  = document.getElementById('changelog-version');
+      if (elFooter) elFooter.textContent = v;
+      if (elModal)  elModal.textContent  = v;
+    }
+  } catch(e) {}
+}
+function showChangelog(e) { if (e) e.preventDefault(); document.getElementById('changelog-modal').style.display = 'flex'; }
+function hideChangelog() { document.getElementById('changelog-modal').style.display = 'none'; }
+document.getElementById('changelog-modal').addEventListener('click', function(e) { if(e.target===this) hideChangelog(); });
+loadAppVersion();
 
 // ── Toast ─────────────────────────────────────────────────────────────────
 let toastTimeout;
