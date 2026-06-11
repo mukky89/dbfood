@@ -706,6 +706,12 @@
         </div>
       </div>
     </div>
+
+    <!-- Pätička s verziou -->
+    <footer style="text-align:center;margin-top:28px;padding:16px 0 8px;color:var(--muted);font-size:12px;opacity:.85">
+      🍕 Fantozzi Objednávky ·
+      <a href="#" onclick="showChangelog(event)" title="Zobraziť changelog" style="color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--border)"><span id="app-version">v…</span></a>
+    </footer>
   </div>
 
   <!-- Admin panel -->
@@ -979,6 +985,15 @@
               style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;outline:none"
               onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
           </div>
+
+          <div style="grid-column:1/-1">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Revolut <span style="font-weight:400;text-transform:none">(revolut.me meno, nepovinné)</span></label>
+            <input id="platba-revolut" type="text" autocomplete="off" spellcheck="false"
+              placeholder="napr. jankohrasko alebo revolut.me/jankohrasko"
+              style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-size:14px;font-family:monospace;outline:none"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <div id="platba-revolut-hint" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
         </div>
 
         <div style="margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -1035,6 +1050,9 @@
       <div class="qr-detail" id="qr-detail"></div>
       <div class="qr-iban" id="qr-iban"></div>
       <div class="qr-note">Funguje v: <strong>SLSP, VÚB, Tatra, ČSOB, mBank, Raiffeisen</strong></div>
+      <a id="qr-revolut-btn" href="#" target="_blank" rel="noopener"
+         style="display:none;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;background:#0666eb;color:#fff;text-decoration:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;margin-top:14px;transition:background .2s"
+         onmouseover="this.style.background='#0552c4'" onmouseout="this.style.background='#0666eb'">💳 Zaplatiť cez Revolut</a>
       <div style="border-top:1px solid var(--border);margin:16px 0 12px;padding-top:14px">
         <div style="font-size:13px;font-weight:700;color:var(--brand);margin-bottom:8px">📧 Poslať QR na email</div>
         <div style="display:flex;gap:8px">
@@ -1053,6 +1071,55 @@
       <p style="color:var(--muted);font-size:14px;margin:12px 0 20px">IBAN nie je nastavený.</p>
       <button class="btn btn-secondary" style="width:100%" onclick="hideQR()">Zavrieť</button>
     </div>
+  </div>
+</div>
+
+<!-- Changelog Modal -->
+<div class="modal-overlay" id="changelog-modal" style="display:none">
+  <div class="modal" style="max-width:560px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 style="margin:0">📋 Changelog</h2>
+      <button onclick="hideChangelog()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);line-height:1;padding:0 4px">×</button>
+    </div>
+    <p style="margin:0 0 16px;color:var(--muted);font-size:13px">Aktuálna verzia: <strong id="changelog-version">v…</strong></p>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.1.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 11. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Pridané</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li><strong>Platba cez Revolut</strong> ako ďalšia možnosť popri QR kóde — tlačidlo s predvyplnenou sumou.</li>
+          <li>Konfigurovateľné <code>revolut.me</code> meno v admin paneli (Platba).</li>
+          <li><strong>Zobrazenie verzie</strong> aplikácie v pätičke + tento changelog.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="changelog-entry" style="margin-bottom:18px">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.0.1 <span style="font-weight:400;color:var(--muted);font-size:12px">· 10. 6. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Zmenené / opravené</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li>Prechod na <strong>Brevo HTTP API</strong> pre e-maily (Railway blokuje SMTP).</li>
+          <li>Trvalé presmerovanie (301) zo starej EvenNode domény na Railway.</li>
+          <li>Normalizácia príjemcov e-mailov a oprava <code>package-lock.json</code> pre deploy.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="changelog-entry">
+      <div style="font-weight:800;color:var(--brand);font-size:15px">v1.0.0 <span style="font-weight:400;color:var(--muted);font-size:12px">· 22. 5. 2026</span></div>
+      <div style="font-size:13px;line-height:1.55;margin-top:6px">
+        <strong>Prvé vydanie</strong>
+        <ul style="margin:4px 0 0;padding-left:20px">
+          <li>Načítanie denného menu, zadávanie/úprava/rušenie objednávok s uzávierkou.</li>
+          <li>Platba cez QR kód (Pay by Square) + odoslanie QR na e-mail.</li>
+          <li>Admin panel, blokované obdobia, notifikácie (e-mail + ntfy).</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" style="width:100%;margin-top:8px" onclick="hideChangelog()">Zavrieť</button>
   </div>
 </div>
 
@@ -2722,6 +2789,15 @@ async function showQR() {
     document.getElementById('qr-suma').textContent = data.suma.toFixed(2) + ' €';
     document.getElementById('qr-detail').innerHTML = data.detail.join('<br>');
     document.getElementById('qr-iban').textContent = 'IBAN: ' + data.iban;
+    const revBtn = document.getElementById('qr-revolut-btn');
+    if (revBtn) {
+      if (data.revolut) {
+        revBtn.href = `https://revolut.me/${data.revolut}/${data.suma.toFixed(2)}eur`;
+        revBtn.style.display = 'flex';
+      } else {
+        revBtn.style.display = 'none';
+      }
+    }
     document.getElementById('qr-modal-content').style.display = 'block';
   } catch(e) {
     document.getElementById('qr-modal-loading').style.display = 'none';
@@ -2758,6 +2834,25 @@ async function sendQREmail() {
 
 function hideQR() { document.getElementById('qr-modal').classList.remove('open'); }
 document.getElementById('qr-modal').addEventListener('click', function(e) { if(e.target===this) hideQR(); });
+
+// ── Verzia & Changelog ──────────────────────────────────────────────────────
+async function loadAppVersion() {
+  try {
+    const res = await fetch('/api/version');
+    const data = await res.json();
+    if (data.ok && data.version) {
+      const v = 'v' + data.version;
+      const elFooter = document.getElementById('app-version');
+      const elModal  = document.getElementById('changelog-version');
+      if (elFooter) elFooter.textContent = v;
+      if (elModal)  elModal.textContent  = v;
+    }
+  } catch(e) {}
+}
+function showChangelog(e) { if (e) e.preventDefault(); document.getElementById('changelog-modal').style.display = 'flex'; }
+function hideChangelog() { document.getElementById('changelog-modal').style.display = 'none'; }
+document.getElementById('changelog-modal').addEventListener('click', function(e) { if(e.target===this) hideChangelog(); });
+loadAppVersion();
 
 // ── Toast ─────────────────────────────────────────────────────────────────
 let toastTimeout;
@@ -2861,6 +2956,7 @@ async function loadPlatbaAdminConfig() {
     document.getElementById('platba-bic').value  = data.bic  || '';
     document.getElementById('platba-meno').value = data.meno || '';
     document.getElementById('platba-vs').value   = data.vs   || '';
+    document.getElementById('platba-revolut').value = data.revolut || '';
 
     // Show ENV hints
     const hint = (envVal, label) =>
@@ -2868,9 +2964,11 @@ async function loadPlatbaAdminConfig() {
     const hI = document.getElementById('platba-iban-hint');
     const hB = document.getElementById('platba-bic-hint');
     const hM = document.getElementById('platba-meno-hint');
+    const hR = document.getElementById('platba-revolut-hint');
     if (hI) hI.innerHTML = hint(fmtIban(data.envIban), 'IBAN');
     if (hB) hB.innerHTML = hint(data.envBic,  'BIC');
     if (hM) hM.innerHTML = hint(data.envMeno, 'Meno');
+    if (hR) hR.innerHTML = hint(data.envRevolut, 'Revolut');
 
     // Effective preview
     const eff = data.effective;
@@ -2894,6 +2992,8 @@ async function loadPlatbaAdminConfig() {
                 <td style="padding:7px 4px;font-size:14px">${eff.meno}${srcTag(data.meno, data.envMeno)}</td></tr>
             <tr style="background:var(--bg)"><td style="padding:7px 4px;font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">Var. symbol</td>
                 <td style="padding:7px 4px;font-family:monospace;font-size:14px">${eff.vs || '<em style="color:#aaa">neuvedený</em>'}</td></tr>
+            <tr><td style="padding:7px 4px;font-weight:700;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px">Revolut</td>
+                <td style="padding:7px 4px;font-family:monospace;font-size:14px">${eff.revolut ? `revolut.me/${eff.revolut}${srcTag(data.revolut, data.envRevolut)}` : '<em style="color:#aaa">neuvedený</em>'}</td></tr>
           </table>`;
       }
     }
@@ -2905,6 +3005,7 @@ async function savePlatbaAdminConfig() {
   const bic     = document.getElementById('platba-bic').value.trim();
   const meno    = document.getElementById('platba-meno').value.trim();
   const vs      = document.getElementById('platba-vs').value.trim();
+  const revolut = document.getElementById('platba-revolut').value.trim();
   const statusEl = document.getElementById('platba-save-status');
 
   // Warn on invalid IBAN (non-empty)
@@ -2916,7 +3017,7 @@ async function savePlatbaAdminConfig() {
   try {
     const res = await fetch('/api/admin/platba-config', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminPass: adminPassword, iban: ibanRaw, bic, meno, vs })
+      body: JSON.stringify({ adminPass: adminPassword, iban: ibanRaw, bic, meno, vs, revolut })
     });
     const data = await res.json();
     if (data.ok) {

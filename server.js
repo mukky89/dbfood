@@ -7,6 +7,7 @@ const { fetchMenu, setManualMenu, clearCache } = require('./scraper');
 const { sendEmail, sendMail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
+const pkg = require('./package.json');
 
 const app = express();
 
@@ -59,7 +60,8 @@ const nastaveniaPlatbySchema = new mongoose.Schema({
   iban: { type: String, default: '' },
   bic:  { type: String, default: '' },
   meno: { type: String, default: '' },
-  vs:   { type: String, default: '' }
+  vs:   { type: String, default: '' },
+  revolut: { type: String, default: '' }
 });
 const NastaveniaPlatby = mongoose.model('NastaveniaPlatby', nastaveniaPlatbySchema);
 
@@ -104,14 +106,16 @@ async function getPlatba() {
       iban: ((doc?.iban || config.platbaIban || '')).replace(/\s/g, ''),
       bic:  ((doc?.bic  || config.platbaBic  || '')).replace(/\s/g, ''),
       meno:  doc?.meno || config.platbaMeno  || 'Fantozzi',
-      vs:    doc?.vs   || config.platbaVS    || ''
+      vs:    doc?.vs   || config.platbaVS    || '',
+      revolut: doc?.revolut || config.platbaRevolut || ''
     };
   } catch(e) {
     _platbaCache = {
       iban: (config.platbaIban || '').replace(/\s/g, ''),
       bic:  (config.platbaBic  || '').replace(/\s/g, ''),
       meno:  config.platbaMeno || 'Fantozzi',
-      vs:    config.platbaVS   || ''
+      vs:    config.platbaVS   || '',
+      revolut: config.platbaRevolut || ''
     };
   }
   return _platbaCache;
@@ -481,6 +485,11 @@ app.post('/api/clear-orders', async (req, res) => {
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
+// GET /api/version — verzia aplikacie (z package.json)
+app.get('/api/version', (req, res) => {
+  res.json({ ok: true, version: pkg.version });
+});
+
 // POST /api/qr
 app.post('/api/qr', async (req, res) => {
   const { polievka, jedlo, pizza, dezert } = req.body;
@@ -496,7 +505,7 @@ app.post('/api/qr', async (req, res) => {
       suma: cena.celkom, sprava,
       meno: platba.meno, variabilnySymbol: platba.vs
     });
-    res.json({ ok: true, qr: qrBase64, suma: cena.celkom, detail: cena.detail, iban: platba.iban, sprava });
+    res.json({ ok: true, qr: qrBase64, suma: cena.celkom, detail: cena.detail, iban: platba.iban, sprava, revolut: platba.revolut });
   } catch(err) { res.status(500).json({ ok: false, error: err.message }); }
 });
 
@@ -717,14 +726,16 @@ app.get('/api/admin/platba-config', async (req, res) => {
     const dbBic  = doc?.bic  || '';
     const dbMeno = doc?.meno || '';
     const dbVs   = doc?.vs   || '';
+    const dbRevolut = doc?.revolut || '';
     const platba = await getPlatba();
     res.json({
       ok: true,
       // Current DB-saved values (what's in the edit form)
-      iban: dbIban, bic: dbBic, meno: dbMeno, vs: dbVs,
+      iban: dbIban, bic: dbBic, meno: dbMeno, vs: dbVs, revolut: dbRevolut,
       // Env var fallbacks (shown as hints)
       envIban: config.platbaIban || '', envBic: config.platbaBic || '',
       envMeno: config.platbaMeno || '', envVs:  config.platbaVS  || '',
+      envRevolut: config.platbaRevolut || '',
       // Effective merged values
       effective: platba
     });
@@ -733,16 +744,23 @@ app.get('/api/admin/platba-config', async (req, res) => {
 
 // POST /api/admin/platba-config
 app.post('/api/admin/platba-config', async (req, res) => {
-  const { adminPass, iban, bic, meno, vs } = req.body;
+  const { adminPass, iban, bic, meno, vs, revolut } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
   try {
+    // Normalizuj Revolut na cisty revtag/username (znesie aj vlozeny revolut.me odkaz alebo @tag)
+    const revolutClean = (revolut || '').trim()
+      .replace(/^@/, '')
+      .replace(/^https?:\/\/(www\.)?revolut\.me\//i, '')
+      .replace(/\/+$/, '')
+      .replace(/\s/g, '');
     await NastaveniaPlatby.findOneAndUpdate(
       {},
       { $set: {
         iban: (iban || '').replace(/\s/g, '').toUpperCase(),
         bic:  (bic  || '').replace(/\s/g, '').toUpperCase(),
         meno: (meno || '').trim(),
-        vs:   (vs   || '').trim()
+        vs:   (vs   || '').trim(),
+        revolut: revolutClean
       }},
       { upsert: true, new: true }
     );
