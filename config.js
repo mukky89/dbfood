@@ -11,6 +11,7 @@ module.exports = {
   platbaBic: process.env.PLATBA_BIC,
   platbaMeno: process.env.PLATBA_MENO,
   platbaVS: process.env.PLATBA_VS || "",
+  platbaRevolut: process.env.PLATBA_REVOLUT || "",
   smtpHost: process.env.SMTP_HOST || "smtp-relay.brevo.com",
   smtpPort: parseInt(process.env.SMTP_PORT) || 587,
   smtpUser: process.env.SMTP_USER,
