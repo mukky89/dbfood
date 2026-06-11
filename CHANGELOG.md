@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.4.0] — 2026-06-11
+
+### Pridané
+- **Téma „Galaxy Far Away"** 🌌 (Star Wars) — hlboký vesmír s animovaným hviezdnym poľom, galaktická hmlovina, ikonická SW žltá na nadpisy, hologramové panely so skenovacím prúžkom a tlačidlá ako svetelné meče (modrý/zelený glow).
+- Štvrtá voľba v admin výbere tém (Klasický / Neon Cyber / Retro Trattoria / Galaxy Far Away).
+
 ## [1.3.0] — 2026-06-11
 
 ### Pridané
