@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -957,6 +957,133 @@
     html.theme-starwars .admin-stat-num { color:#ffe81f; text-shadow:0 0 12px rgba(255,232,31,.4); }
     html.theme-starwars .admin-tab-btn.active { color:#ffe81f; border-bottom-color:#ffe81f; }
 
+    /* ════════════════════════════════════════════════════════════════════
+       FIFA 2026 — "Futbalová edícia" (prepínateľná v Admin → Vzhľad)
+       Zelený trávnik s čiarami ihriska, biele panely ako dres, červeno-zlaté
+       akcenty a štadiónová atmosféra. Trieda .theme-fifa.
+       ════════════════════════════════════════════════════════════════════ */
+    html.theme-fifa {
+      --brand:#0a7d34; --accent:#e30613; --green:#0a7d34; --orange:#f7a600;
+      --bg:#0c5e2a; --card:#ffffff; --border:#cfe6d4;
+      --text:#10241a; --muted:#5b7a66; --radius:10px;
+    }
+    html.theme-fifa body {
+      background:#0a6a2e; color:var(--text);
+      font-family:'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+    /* Trávnik — pruhy pokoseného ihriska */
+    html.theme-fifa body::before {
+      content:''; position:fixed; inset:0; z-index:-2; pointer-events:none;
+      background:repeating-linear-gradient(90deg, #0a6a2e 0, #0a6a2e 60px, #0c7634 60px, #0c7634 120px);
+      opacity:.95;
+    }
+    /* Čiary ihriska — stredový kruh a okrajová čiara */
+    html.theme-fifa body::after {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 38%, transparent 88px, rgba(255,255,255,.18) 88px, rgba(255,255,255,.18) 92px, transparent 93px),
+        radial-gradient(circle at 50% 38%, rgba(255,255,255,.16) 5px, transparent 6px);
+    }
+
+    /* Header — tribúna štadióna */
+    html.theme-fifa header {
+      background:linear-gradient(180deg,#063d1b,#0a6a2e);
+      border-bottom:3px solid #f7a600;
+      box-shadow:0 4px 18px rgba(0,0,0,.3);
+    }
+    html.theme-fifa .hdr-brand { color:#ffffff; text-shadow:0 2px 4px rgba(0,0,0,.4); letter-spacing:.5px; }
+    html.theme-fifa .hdr-sub { color:#bdf0cc; text-transform:uppercase; letter-spacing:1.5px; }
+    html.theme-fifa .phone-dropdown { background:#ffffff; border:1px solid #cfe6d4; box-shadow:0 12px 40px rgba(0,0,0,.3); }
+    html.theme-fifa .phone-item { color:var(--text); }
+    html.theme-fifa .phone-item:hover { background:#eafaef; color:#0a7d34; }
+    html.theme-fifa #user-badge { background:rgba(255,255,255,.18); }
+
+    /* Karty — biely dres so zeleno-zlatým pruhom navrchu */
+    html.theme-fifa .card {
+      background:var(--card); border:1px solid var(--border); position:relative; overflow:hidden;
+      box-shadow:0 6px 22px rgba(0,0,0,.18);
+    }
+    html.theme-fifa .card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:4px;
+      background:linear-gradient(90deg,#0a7d34,#f7a600,#e30613,#0a7d34);
+    }
+    html.theme-fifa .card-title {
+      color:#0a7d34; text-transform:uppercase; letter-spacing:1px; font-weight:800;
+      border-bottom:2px solid #eafaef;
+    }
+
+    /* Menu položky */
+    html.theme-fifa .menu-item { background:#f4fbf6; border:2px solid #dcefe2; }
+    html.theme-fifa .menu-item:hover,
+    html.theme-fifa .menu-item.selected { border-color:#0a7d34; background:#e8f8ee; box-shadow:0 2px 12px rgba(10,125,52,.2); }
+    html.theme-fifa .menu-item.hot-dish { border-color:#f7a600 !important; background:linear-gradient(135deg,#fff6e0,#e8f8ee) !important; }
+    html.theme-fifa .menu-item input[type=radio],
+    html.theme-fifa .menu-item input[type=checkbox] { accent-color:#0a7d34; }
+    html.theme-fifa .allergen-legend { background:#f4fbf6; border-color:var(--border); }
+
+    /* Polia */
+    html.theme-fifa textarea,
+    html.theme-fifa .modal input,
+    html.theme-fifa input[type=text],
+    html.theme-fifa input[type=email],
+    html.theme-fifa input[type=password],
+    html.theme-fifa input[type=date],
+    html.theme-fifa input[type=time] {
+      background:#ffffff; color:var(--text); border:2px solid #cfe6d4;
+    }
+    html.theme-fifa textarea:focus,
+    html.theme-fifa input:focus { border-color:#0a7d34 !important; box-shadow:0 0 0 3px rgba(10,125,52,.15); }
+
+    /* Tlačidlá */
+    html.theme-fifa .btn-primary { background:linear-gradient(135deg,#0a7d34,#0c5e2a); color:#fff; box-shadow:inset 0 -3px 0 rgba(0,0,0,.18); }
+    html.theme-fifa .btn-primary:hover { filter:brightness(1.08); background:linear-gradient(135deg,#0a7d34,#0c5e2a); }
+    html.theme-fifa .btn-primary:disabled { background:#a9c9b4; box-shadow:none; color:#f0f6f2; }
+    html.theme-fifa .btn-qr { background:linear-gradient(135deg,#f7a600,#e07b00); color:#241500; box-shadow:inset 0 -3px 0 rgba(0,0,0,.18); }
+    html.theme-fifa .btn-qr:hover { filter:brightness(1.06); background:linear-gradient(135deg,#f7a600,#e07b00); }
+    html.theme-fifa .btn-secondary { background:#eafaef; color:#0a7d34; border:1px solid #cfe6d4; }
+    html.theme-fifa .btn-secondary:hover { background:#daf3e1; }
+    html.theme-fifa .btn-danger { background:#fdeaea; color:#e30613; border:1px solid #f5c2c2; }
+
+    /* Avatary a číselné odznaky */
+    html.theme-fifa .order-avatar,
+    html.theme-fifa .menu-item-num,
+    html.theme-fifa .summary-num,
+    html.theme-fifa .admin-num-badge { background:linear-gradient(135deg,#0a7d34,#0c5e2a) !important; color:#fff; }
+    html.theme-fifa .price-badge { background:#f7a600; color:#241500; }
+    html.theme-fifa .hot-badge { background:linear-gradient(135deg,#f7a600,#e30613); }
+
+    /* Tabuľky */
+    html.theme-fifa .summary-table th,
+    html.theme-fifa .admin-table th { background:linear-gradient(135deg,#0a7d34,#0c5e2a); color:#fff; text-transform:uppercase; letter-spacing:.5px; }
+    html.theme-fifa .summary-table tr:nth-child(even) td,
+    html.theme-fifa .admin-table tr:nth-child(even) td { background:#f4fbf6; }
+    html.theme-fifa .summary-section-header td { background:#eafaef !important; color:#0a7d34; }
+    html.theme-fifa .summary-count { background:#0a7d34; color:#fff; }
+    html.theme-fifa .history-bar { background:linear-gradient(90deg,#0c5e2a,#0a7d34); }
+
+    /* Countdown */
+    html.theme-fifa #countdown-bar.green  { background:#e3f6e8; color:#0a7d34; }
+    html.theme-fifa #countdown-bar.orange { background:#fff3da; color:#a86a00; }
+    html.theme-fifa #countdown-bar.red    { background:#fde6e6; color:#c00510; }
+    html.theme-fifa #countdown-bar.closed { background:#e8eee9; color:#5b7a66; }
+
+    /* Modály */
+    html.theme-fifa .modal,
+    html.theme-fifa .qr-modal {
+      background:#ffffff; border-top:4px solid #0a7d34; color:var(--text);
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+    }
+    html.theme-fifa .modal h2,
+    html.theme-fifa .qr-modal h2 { color:#0a7d34; text-transform:uppercase; letter-spacing:.5px; }
+    html.theme-fifa .qr-modal img { border-color:#cfe6d4; }
+    html.theme-fifa .modal-tab { background:#eafaef; }
+    html.theme-fifa .modal-tab.active { background:linear-gradient(135deg,#0a7d34,#0c5e2a); color:#fff; }
+
+    /* Admin */
+    html.theme-fifa .admin-stat-card { border-color:#0a7d34; }
+    html.theme-fifa .admin-stat-num { color:#0a7d34; }
+    html.theme-fifa .admin-tab-btn.active { color:#0a7d34; border-bottom-color:#0a7d34; }
+
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
     .theme-option:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
@@ -1005,6 +1132,7 @@
     </a>
     <button class="secrets-btn" onclick="openSecrets()" title="Tajné Easter Eggy 🥚">🥚</button>
     <span id="user-badge" onclick="userBadgeClick()" title="Klikni pre zmenu · 2× rýchlo = Kríza Identity 👤">👤 <span id="username-display">...</span></span>
+    <button id="logout-btn" class="nav-link" onclick="changeUser()" title="Odhlásiť sa" style="display:none;background:none;border:none;cursor:pointer;font-family:inherit">🚪 Odhlásiť sa</button>
     <a href="/admin" class="nav-link">Admin</a>
   </div>
 </header>
@@ -1479,6 +1607,13 @@
             <div class="t-desc">Star Wars — hviezdne pole, ikonická žltá, hologramy, svetelné meče.</div>
             <div class="theme-dots"><span style="background:#05070e"></span><span style="background:#ffe81f"></span><span style="background:#1a86ff"></span></div>
           </div>
+          <div class="theme-option" data-theme="fifa" onclick="saveDesignConfig('fifa')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">⚽</div>
+            <div class="t-name">FIFA 2026</div>
+            <div class="t-desc">Futbalová edícia — zelený trávnik, kresba čiar ihriska, dres a štadiónová atmosféra.</div>
+            <div class="theme-dots"><span style="background:#0a7d34"></span><span style="background:#ffffff"></span><span style="background:#e30613"></span></div>
+          </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
       </div>
@@ -1823,6 +1958,7 @@ function changeUser() {
     localStorage.removeItem('fantozzi_user');
     currentUser = null;
     document.getElementById('username-display').textContent = '?';
+    updateUserDisplay();
     // Bug 2 fix: reset vsetkych vyberov po odhlaseni
     resetMenuSelections();
     showLoginBanner();
@@ -1859,14 +1995,17 @@ function resetMenuSelections() {
 function updateUserDisplay() {
   const badge = document.getElementById('user-badge');
   const display = document.getElementById('username-display');
+  const logoutBtn = document.getElementById('logout-btn');
   if (currentUser) {
     display.textContent = currentUser;
     badge.classList.remove('guest');
     badge.title = 'Klikni pre zmenu';
+    if (logoutBtn) logoutBtn.style.display = '';
   } else {
     display.textContent = 'Prihlásiť sa';
     badge.classList.add('guest');
     badge.title = 'Nie si prihlásený — klikni pre prihlásenie';
+    if (logoutBtn) logoutBtn.style.display = 'none';
   }
 }
 
@@ -2854,18 +2993,20 @@ function switchAdminTab(tab) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
   trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' },
-  starwars:   { name: '🌌 Galaxy Far Away',  toast: '🌌 May the Food be with you!',   state: 'Aktívna téma: Galaxy Far Away — Star Wars.' }
+  starwars:   { name: '🌌 Galaxy Far Away',  toast: '🌌 May the Food be with you!',   state: 'Aktívna téma: Galaxy Far Away — Star Wars.' },
+  fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
   document.documentElement.classList.toggle('theme-futuristic', theme === 'futuristic');
   document.documentElement.classList.toggle('theme-trattoria',  theme === 'trattoria');
   document.documentElement.classList.toggle('theme-starwars',   theme === 'starwars');
+  document.documentElement.classList.toggle('theme-fifa',       theme === 'fifa');
   try { localStorage.setItem('fob_theme', theme); } catch(e) {}
   return theme;
 }
