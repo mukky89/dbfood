@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.6.0] — 2026-06-19
+
+### Pridané
+- **Interaktívne lopty** ⚽ v téme FIFA — pribudlo ich viac (10) a po **kliknutí sa kopnú** náhodným smerom s rotáciou a vrátia sa späť. 5 kopnutí rýchlo za sebou spustí loptový dážď (GÓÓL!).
+- **Ticker výsledkov FIFA 2026** v hlavičke — vlajky, tímy a skóre, auto-rotácia každých 5 s (klik = ďalší zápas). Dáta z TheSportsDB (free), s cache 5 min a ukážkovým fallbackom keď zdroj nie je dostupný.
+- Backend endpoint `GET /api/fifa-scores` (TheSportsDB liga 4429 = MS, mapovanie krajín na vlajky, fallback sada zápasov).
+
 ## [1.5.0] — 2026-06-19
 
 ### Pridané

@@ -90,6 +90,20 @@
     .phone-item-icon { font-size: 16px; flex-shrink: 0; }
     .phone-drop-addr { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
     .header-right { display: flex; align-items: center; gap: 12px; }
+    /* FIFA 2026 — ticker s výsledkami v hlavičke */
+    .fifa-scores { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:20px; padding:5px 14px; font-size:14px; color:#fff; cursor:pointer; white-space:nowrap; transition:background .2s, transform .15s; max-width:42vw; overflow:hidden; }
+    .fifa-scores:hover { background:rgba(255,255,255,.2); transform:scale(1.02); }
+    .fifa-scores .fs-team { display:inline-flex; align-items:center; gap:5px; font-weight:600; }
+    .fifa-scores .fs-flag { font-size:17px; line-height:1; }
+    .fifa-scores .fs-score { font-weight:800; letter-spacing:1px; padding:0 4px; }
+    .fifa-scores .fs-status { font-size:10px; font-weight:800; text-transform:uppercase; border-radius:10px; padding:2px 7px; letter-spacing:.5px; }
+    .fifa-scores .fs-status.live { background:#e30613; color:#fff; animation:pulse-badge 1.4s ease-in-out infinite; }
+    .fifa-scores .fs-status.ft   { background:rgba(255,255,255,.22); color:#fff; }
+    .fifa-scores .fs-status.up   { background:#f7a600; color:#241500; }
+    .fifa-scores .fs-label { font-size:14px; opacity:.85; }
+    .fifa-scores .fs-demo { font-size:10px; opacity:.7; font-style:italic; }
+    @media (max-width: 980px) { .fifa-scores { display:none !important; } }
+    html.theme-fifa .fifa-scores { background:rgba(255,255,255,.14); border-color:#f7a600; }
     #user-badge { background: rgba(255,255,255,.15); border-radius: 20px; padding: 4px 14px; font-size: 14px; cursor: pointer; transition: background .2s; }
     #user-badge:hover { background: rgba(255,255,255,.25); }
     .nav-link { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
@@ -1102,15 +1116,29 @@
     html.theme-fifa .fifa-logo-text { font-weight:900; font-size:15px; letter-spacing:1px; color:#fff; font-style:italic; }
     html.theme-fifa .fifa-logo-text b { color:#f7a600; margin-left:2px; }
 
-    /* Dekoratívne plávajúce lopty v rohoch */
-    html.theme-fifa #fifa-balls { display:block; position:fixed; inset:0; z-index:-1; pointer-events:none; }
-    html.theme-fifa .fifa-ball { position:fixed; opacity:.5; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3)); }
-    html.theme-fifa .fifa-ball.b1 { left:3vw;  top:78vh; font-size:46px; animation:fifaFloat 6s   ease-in-out infinite; }
-    html.theme-fifa .fifa-ball.b2 { right:5vw; top:70vh; font-size:34px; animation:fifaFloat 7.5s ease-in-out infinite .8s; }
-    html.theme-fifa .fifa-ball.b3 { left:8vw;  top:20vh; font-size:26px; animation:fifaFloat 8s   ease-in-out infinite .4s; }
-    html.theme-fifa .fifa-ball.b4 { right:4vw; top:24vh; font-size:40px; opacity:.4; animation:fifaFloat 9s ease-in-out infinite 1.2s; }
-    html.theme-fifa .fifa-ball.b5 { right:9vw; bottom:6vh; font-size:30px; opacity:.45; animation:fifaFloat 7s ease-in-out infinite .6s; }
-    @media (max-width:800px) { html.theme-fifa .fifa-ball.b3, html.theme-fifa .fifa-ball.b4 { display:none; } }
+    /* Dekoratívne lopty — plávajú a po kliknutí sa kopnú (interaktívne) */
+    html.theme-fifa #fifa-balls { display:block; position:fixed; inset:0; z-index:40; pointer-events:none; }
+    html.theme-fifa .fifa-ball {
+      position:fixed; opacity:.55; cursor:pointer; pointer-events:auto; user-select:none;
+      filter:drop-shadow(0 4px 6px rgba(0,0,0,.3)); transition:transform .2s ease, opacity .2s ease;
+      will-change:transform;
+    }
+    html.theme-fifa .fifa-ball:hover { opacity:.95; transform:scale(1.18); }
+    html.theme-fifa .fifa-ball.kick { transition:transform .7s cubic-bezier(.18,1.25,.4,1), opacity .7s ease; opacity:.95; }
+    html.theme-fifa .fifa-ball.b1 { left:2vw;  top:80vh; font-size:46px; animation:fifaFloat 6s   ease-in-out infinite; }
+    html.theme-fifa .fifa-ball.b2 { right:3vw; top:72vh; font-size:34px; animation:fifaFloat 7.5s ease-in-out infinite .8s; }
+    html.theme-fifa .fifa-ball.b3 { left:4vw;  top:30vh; font-size:26px; animation:fifaFloat 8s   ease-in-out infinite .4s; }
+    html.theme-fifa .fifa-ball.b4 { right:2vw; top:34vh; font-size:40px; animation:fifaFloat 9s   ease-in-out infinite 1.2s; }
+    html.theme-fifa .fifa-ball.b5 { right:6vw; bottom:6vh; font-size:30px; animation:fifaFloat 7s   ease-in-out infinite .6s; }
+    html.theme-fifa .fifa-ball.b6 { left:7vw;  bottom:8vh; font-size:36px; animation:fifaFloat 8.5s ease-in-out infinite .2s; }
+    html.theme-fifa .fifa-ball.b7 { left:1vw;  top:52vh; font-size:24px; animation:fifaFloat 6.5s ease-in-out infinite 1.5s; }
+    html.theme-fifa .fifa-ball.b8 { right:1vw; top:54vh; font-size:28px; animation:fifaFloat 7.8s ease-in-out infinite .9s; }
+    html.theme-fifa .fifa-ball.b9 { left:3vw;  top:8vh;  font-size:22px; animation:fifaFloat 9.5s ease-in-out infinite .3s; }
+    html.theme-fifa .fifa-ball.b10{ right:3vw; top:10vh; font-size:32px; animation:fifaFloat 8.2s ease-in-out infinite 1.1s; }
+    @media (max-width:800px) {
+      html.theme-fifa .fifa-ball.b3, html.theme-fifa .fifa-ball.b4,
+      html.theme-fifa .fifa-ball.b9, html.theme-fifa .fifa-ball.b10 { display:none; }
+    }
 
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
@@ -1138,6 +1166,7 @@
     <button class="easter-hdr-btn" onclick="easterHdrClick(event)" title="">⭐</button>
     <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
   </h1>
+  <div id="fifa-scores" class="fifa-scores" onclick="cycleFifaScore(1)" title="FIFA 2026 — klikni pre ďalší zápas" style="display:none"></div>
   <div class="header-right">
     <div class="phone-wrap">
       <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
@@ -1166,13 +1195,18 @@
   </div>
 </header>
 
-<!-- FIFA 2026 — dekoratívne plávajúce lopty (viditeľné len v téme .theme-fifa) -->
+<!-- FIFA 2026 — interaktívne plávajúce lopty (viditeľné len v téme .theme-fifa) -->
 <div id="fifa-balls" aria-hidden="true">
-  <span class="fifa-ball b1">⚽</span>
-  <span class="fifa-ball b2">⚽</span>
-  <span class="fifa-ball b3">⚽</span>
-  <span class="fifa-ball b4">🥅</span>
-  <span class="fifa-ball b5">🏆</span>
+  <span class="fifa-ball b1" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b2" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b3" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b4" onclick="kickBall(this)">🥅</span>
+  <span class="fifa-ball b5" onclick="kickBall(this)">🏆</span>
+  <span class="fifa-ball b6" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b7" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b8" onclick="kickBall(this)">🧤</span>
+  <span class="fifa-ball b9" onclick="kickBall(this)">⚽</span>
+  <span class="fifa-ball b10" onclick="kickBall(this)">⚽</span>
 </div>
 
 <div id="countdown-bar" onclick="countdownClick()" style="cursor:default">
@@ -1899,6 +1933,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadHistory();
   await loadOrders();
   setInterval(loadOrders, 30000);
+  loadFifaScores();
+  setInterval(loadFifaScores, 5 * 60 * 1000);
 
   // Ak nie je prihlaseny, zobraz banner (nie modal)
   if (!currentUser) {
@@ -2780,6 +2816,79 @@ function pizzaRain() {
     }, i * 70);
   }
   showToast('🍕 Fantozzi mode aktivovaný!', 'success');
+}
+
+// ── FIFA: kopnutie do dekoratívnej lopty (klik) ────────────────────────────
+let _ballKicks = 0, _ballKickTimer;
+function kickBall(el) {
+  // Zastav plávajúcu animáciu, kopni loptu náhodným smerom (s rotáciou), potom vráť späť
+  el.style.animation = 'none';
+  const dx  = (Math.random() * 2 - 1) * 240;
+  const dy  = (Math.random() * 2 - 1) * 200;
+  const rot = (Math.random() * 2 - 1) * 900;
+  el.classList.add('kick');
+  el.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1.2)`;
+  clearTimeout(el._kickReset);
+  el._kickReset = setTimeout(() => {
+    el.style.transition = 'transform 1.4s cubic-bezier(.34,1.4,.5,1)';
+    el.style.transform  = 'translate(0,0) rotate(0deg) scale(1)';
+    setTimeout(() => {
+      el.classList.remove('kick');
+      el.style.transition = ''; el.style.transform = ''; el.style.animation = '';
+    }, 1450);
+  }, 720);
+  // Bonus: 5 kopnutí rýchlo za sebou → loptový dážď (GÓÓL!)
+  _ballKicks++;
+  clearTimeout(_ballKickTimer);
+  _ballKickTimer = setTimeout(() => { _ballKicks = 0; }, 3000);
+  if (_ballKicks >= 5) { _ballKicks = 0; activateLoptaEgg(); }
+}
+
+// ── FIFA 2026 — výsledky v hlavičke (ticker) ───────────────────────────────
+let _fifaMatches = [];
+let _fifaIdx = 0;
+let _fifaSource = '';
+let _fifaRotateTimer = null;
+async function loadFifaScores() {
+  try {
+    const res = await fetch('/api/fifa-scores');
+    const data = await res.json();
+    if (!data || !data.ok || !Array.isArray(data.matches) || !data.matches.length) return;
+    _fifaMatches = data.matches;
+    _fifaSource = data.source || '';
+    if (_fifaIdx >= _fifaMatches.length) _fifaIdx = 0;
+    renderFifaScore();
+    // Auto-rotácia každých 5s
+    clearInterval(_fifaRotateTimer);
+    _fifaRotateTimer = setInterval(() => cycleFifaScore(1), 5000);
+  } catch (e) { /* ticker je nepovinný — ticho ignoruj */ }
+}
+function cycleFifaScore(dir) {
+  if (!_fifaMatches.length) return;
+  _fifaIdx = (_fifaIdx + dir + _fifaMatches.length) % _fifaMatches.length;
+  renderFifaScore();
+}
+function renderFifaScore() {
+  const box = document.getElementById('fifa-scores');
+  if (!box || !_fifaMatches.length) return;
+  const m = _fifaMatches[_fifaIdx];
+  const live = m.status === 'LIVE';
+  const finished = m.status === 'FT';
+  const scoreTxt = (m.homeScore != null && m.awayScore != null)
+    ? `${m.homeScore} : ${m.awayScore}` : 'vs';
+  const statusCls = live ? 'live' : finished ? 'ft' : 'up';
+  const statusTxt = live ? '🔴 Live' : finished ? 'Koniec' : 'Čoskoro';
+  box.innerHTML =
+    `<span class="fs-label">⚽</span>` +
+    `<span class="fs-team"><span class="fs-flag">${m.homeFlag || '🏳️'}</span>${esc(m.home || '?')}</span>` +
+    `<span class="fs-score">${scoreTxt}</span>` +
+    `<span class="fs-team">${esc(m.away || '?')}<span class="fs-flag">${m.awayFlag || '🏳️'}</span></span>` +
+    `<span class="fs-status ${statusCls}">${statusTxt}</span>` +
+    (_fifaSource === 'fallback' ? `<span class="fs-demo">(ukážka)</span>` : '');
+  box.style.display = 'flex';
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
 
 function renderOrders(orders, count) {
