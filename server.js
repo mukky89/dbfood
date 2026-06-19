@@ -4,7 +4,7 @@ const axios = require('axios');
 const path = require('path');
 const cron = require('node-cron');
 const config = require('./config');
-const { fetchMenu, setManualMenu, clearCache } = require('./scraper');
+const { fetchMenu, setManualMenu, clearCache, debugFetch } = require('./scraper');
 const { sendEmail, sendMail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
@@ -221,6 +221,13 @@ app.get('/api/menu', async (req, res) => {
     if (!menu) return res.json({ ok: false, error: 'Menu sa nepodarilo nacitat', menu: null });
     res.json({ ok: true, menu });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// GET /api/admin/menu-debug — diagnostika scrapovania (cerstvy pokus, bez cache)
+app.get('/api/admin/menu-debug', async (req, res) => {
+  if (req.query.adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  const result = await debugFetch();
+  res.json(result);
 });
 
 // GET /api/orders

@@ -19,15 +19,14 @@ async function fetchMenu() {
   try {
     console.log('[Scraper] Stahujem menu z', config.restaurantUrl);
 
-    const response = await axios.get(config.restaurantUrl, {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    });
+    const response = await fetchHtml(config.restaurantUrl);
 
     const $ = cheerio.load(response.data);
     const menu = parseMenu($);
+
+    if (!menu.sekcie || menu.sekcie.length === 0) {
+      console.warn('[Scraper] Stranka nacitana, ale nenasli sa ziadne sekcie menu (mozno sa zmenila struktura stranky).');
+    }
 
     // Ulozime do cache
     cache.data = menu;
@@ -37,13 +36,49 @@ async function fetchMenu() {
     return menu;
 
   } catch (err) {
-    console.error('[Scraper] Chyba pri stahovani menu:', err.message);
+    const status = err.response?.status;
+    console.error('[Scraper] Chyba pri stahovani menu:', status ? `HTTP ${status}` : err.message);
+    if (status === 403 || status === 429) {
+      console.error('[Scraper] Fantozzi pravdepodobne blokuje automatizovane poziadavky (anti-bot). Zvaz manualne menu v admin zone.');
+    }
     // Ak mame stary cache, vratime ho aj po vyprsani
     if (cache.data) {
       console.log('[Scraper] Vraciame stary cache po chybe');
       return cache.data;
     }
     return null;
+  }
+}
+
+// Stiahne HTML so sadou hlaviciek imitujucich realny prehliadac (Chrome),
+// aby sme znizili sancu na 403 z anti-bot WAF. Pri 403/429 skusi 1 retry.
+async function fetchHtml(url, attempt = 1) {
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'sk-SK,sk;q=0.9,cs;q=0.8,en;q=0.7',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'Referer': 'https://www.fantozzi.sk/'
+  };
+  try {
+    return await axios.get(url, { timeout: 12000, headers, maxRedirects: 5 });
+  } catch (err) {
+    const status = err.response?.status;
+    if ((status === 403 || status === 429) && attempt < 2) {
+      console.warn(`[Scraper] HTTP ${status} — skusam znova (pokus ${attempt + 1})...`);
+      await new Promise(r => setTimeout(r, 1200));
+      return fetchHtml(url, attempt + 1);
+    }
+    throw err;
   }
 }
 
@@ -127,4 +162,30 @@ function clearCache() {
   console.log('[Scraper] Cache vymazana');
 }
 
-module.exports = { fetchMenu, setManualMenu, clearCache };
+// Diagnostika: cerstvy pokus o stiahnutie + parsovanie (bez cache).
+// Vrati HTTP status / chybu a pocet najdenych sekcii — na overenie scrapovania.
+async function debugFetch() {
+  try {
+    const response = await fetchHtml(config.restaurantUrl);
+    const $ = cheerio.load(response.data);
+    const menu = parseMenu($);
+    return {
+      ok: true,
+      url: config.restaurantUrl,
+      httpStatus: response.status,
+      htmlLength: (response.data || '').length,
+      sekcie: menu.sekcie.length,
+      datum: menu.datum,
+      nazvy: menu.sekcie.map(s => s.nazov)
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      url: config.restaurantUrl,
+      httpStatus: err.response?.status || null,
+      error: err.message
+    };
+  }
+}
+
+module.exports = { fetchMenu, setManualMenu, clearCache, debugFetch };
