@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.6.1] — 2026-06-19
+
+### Opravené
+- **Načítavanie menu z Fantozzi** — fantozzi.sk začalo vracať HTTP 403 (anti-bot). Scraper teraz posiela kompletnú sadu hlavičiek reálneho prehliadača (plný User-Agent Chrome, `Accept`, `Accept-Language`, `Sec-Fetch-*`, `Referer`…) a pri 403/429 spraví jeden retry.
+
+### Pridané
+- Admin diagnostický endpoint `GET /api/admin/menu-debug?adminPass=…` — čerstvý pokus o scrape (HTTP status, dĺžka HTML, počet sekcií) na overenie funkčnosti.
+
 ## [1.6.0] — 2026-06-19
 
 ### Pridané
