@@ -9,6 +9,8 @@ projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
 ### Pridané
 - **Téma „FIFA 2026"** ⚽ (futbalová edícia) — zelený trávnik s pruhmi pokoseného ihriska a čiarami štadióna, biele panely ako dres, zeleno-zlato-červené akcenty a tlačidlá vo farbách trávnika.
+- **FIFA 2026 logo** v hlavičke a **dekoratívne plávajúce lopty** ⚽🏆🥅 v rohoch — zobrazené len v téme FIFA.
+- **Easter egg „Loptový Dážď"** ⚽ — napíš `lopta` (mimo políčok) a spustí sa GÓÓL dážď futbalových lôpt, trofejí a kariet.
 - Piata voľba v admin výbere tém (Klasický / Neon Cyber / Retro Trattoria / Galaxy Far Away / FIFA 2026).
 - **Tlačidlo „Odhlásiť sa"** 🚪 v hornej hlavičke — viditeľné len pri prihlásenom používateľovi; vymaže prihlásenie a vyžiada nové meno.
 
