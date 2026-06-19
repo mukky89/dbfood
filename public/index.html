@@ -371,6 +371,13 @@
     .easter-hdr-btn:hover { opacity:.9; transform:scale(1.25) rotate(20deg); }
     @keyframes pizzaFall { 0%{transform:translateY(-60px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:.7} }
     .pizza-drop { position:fixed; top:0; pointer-events:none; z-index:9999; animation:pizzaFall linear forwards; user-select:none; }
+    /* Loptový dážď (easter egg) — lopta sa točí pri páde */
+    .ball-drop { position:fixed; top:0; pointer-events:none; z-index:9999; animation:pizzaFall linear forwards; user-select:none; filter:drop-shadow(0 3px 4px rgba(0,0,0,.25)); }
+
+    /* FIFA logo + dekoratívne lopty — predvolene skryté, zobrazia sa len v téme FIFA */
+    .fifa-logo { display:none; }
+    #fifa-balls { display:none; }
+    @keyframes fifaFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-16px) rotate(18deg)} }
 
     /* Blokovaný deň */
     #countdown-bar.blok { background: #f8d7da; color: #721c24; cursor: default; }
@@ -1084,6 +1091,27 @@
     html.theme-fifa .admin-stat-num { color:#0a7d34; }
     html.theme-fifa .admin-tab-btn.active { color:#0a7d34; border-bottom-color:#0a7d34; }
 
+    /* FIFA wordmark logo v hlavičke */
+    html.theme-fifa .fifa-logo {
+      display:inline-flex; align-items:center; gap:6px; margin-left:10px;
+      padding:3px 10px 3px 8px; border-radius:20px;
+      background:linear-gradient(135deg,#063d1b,#0a7d34); border:1px solid #f7a600;
+      box-shadow:0 2px 8px rgba(0,0,0,.3); vertical-align:middle;
+    }
+    html.theme-fifa .fifa-logo-ball { font-size:16px; line-height:1; animation:fifaFloat 3s ease-in-out infinite; }
+    html.theme-fifa .fifa-logo-text { font-weight:900; font-size:15px; letter-spacing:1px; color:#fff; font-style:italic; }
+    html.theme-fifa .fifa-logo-text b { color:#f7a600; margin-left:2px; }
+
+    /* Dekoratívne plávajúce lopty v rohoch */
+    html.theme-fifa #fifa-balls { display:block; position:fixed; inset:0; z-index:-1; pointer-events:none; }
+    html.theme-fifa .fifa-ball { position:fixed; opacity:.5; filter:drop-shadow(0 4px 6px rgba(0,0,0,.3)); }
+    html.theme-fifa .fifa-ball.b1 { left:3vw;  top:78vh; font-size:46px; animation:fifaFloat 6s   ease-in-out infinite; }
+    html.theme-fifa .fifa-ball.b2 { right:5vw; top:70vh; font-size:34px; animation:fifaFloat 7.5s ease-in-out infinite .8s; }
+    html.theme-fifa .fifa-ball.b3 { left:8vw;  top:20vh; font-size:26px; animation:fifaFloat 8s   ease-in-out infinite .4s; }
+    html.theme-fifa .fifa-ball.b4 { right:4vw; top:24vh; font-size:40px; opacity:.4; animation:fifaFloat 9s ease-in-out infinite 1.2s; }
+    html.theme-fifa .fifa-ball.b5 { right:9vw; bottom:6vh; font-size:30px; opacity:.45; animation:fifaFloat 7s ease-in-out infinite .6s; }
+    @media (max-width:800px) { html.theme-fifa .fifa-ball.b3, html.theme-fifa .fifa-ball.b4 { display:none; } }
+
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
     .theme-option:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
@@ -1108,6 +1136,7 @@
       <span class="hdr-sub">Objednávky</span>
     </a>
     <button class="easter-hdr-btn" onclick="easterHdrClick(event)" title="">⭐</button>
+    <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
   </h1>
   <div class="header-right">
     <div class="phone-wrap">
@@ -1136,6 +1165,15 @@
     <a href="/admin" class="nav-link">Admin</a>
   </div>
 </header>
+
+<!-- FIFA 2026 — dekoratívne plávajúce lopty (viditeľné len v téme .theme-fifa) -->
+<div id="fifa-balls" aria-hidden="true">
+  <span class="fifa-ball b1">⚽</span>
+  <span class="fifa-ball b2">⚽</span>
+  <span class="fifa-ball b3">⚽</span>
+  <span class="fifa-ball b4">🥅</span>
+  <span class="fifa-ball b5">🏆</span>
+</div>
 
 <div id="countdown-bar" onclick="countdownClick()" style="cursor:default">
   <div class="cd-inner">
@@ -3784,6 +3822,7 @@ const EGGS_INFO = [
   { id:'starrain', emoji:'🌠',  name:'Hviezdny Dážď',          diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Drž Shift + klikni na ⭐ v hlavičke',                          effect:'Hviezdy letia NAHOR namiesto nadol 🌠✨' },
   { id:'namerand', emoji:'👤',  name:'Kríza Identity',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Dvojklikni rýchlo na svoje meno (👤 badge v hlavičke)',        effect:'Tvoje meno sa na 2.5 sekundy randomizuje cez vtipné mená 😂' },
   { id:'trailer',  emoji:'🎬',  name:'Filmový Trailer',        diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Napíš  t-r-a-i-l-e-r  na klávesnici (mimo políčok)',          effect:'Fantozzi Studios uvádza: epický filmový trailer na motivy objednávania obedov 🍿' },
+  { id:'lopta',    emoji:'⚽',  name:'Loptový Dážď',           diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  l-o-p-t-a  na klávesnici (mimo políčok)',              effect:'GÓÓÓL! Dážď futbalových lôpt, trofejí a kariet zo stropu ⚽🏆🟥' },
 ];
 
 // Farby pre user badges (deterministic by meno)
@@ -3937,6 +3976,7 @@ function _buildDebugButtons() {
     starrain: () => { recordEggTrigger('starrain'); starRain(); },
     namerand: () => activateNameRandomizer(null),
     trailer:  () => activateTrailerEgg(),
+    lopta:    () => activateLoptaEgg(),
   };
 
   for (const egg of EGGS_INFO) {
@@ -4080,6 +4120,7 @@ document.addEventListener('keydown', e => {
       nocna: activateNocnaEgg,
       super: activateSuperEgg,
       trailer: activateTrailerEgg,
+      lopta: activateLoptaEgg,
     };
     for (const [word, fn] of Object.entries(eggs)) {
       if (wordBuffer.endsWith(word)) {
@@ -4266,6 +4307,25 @@ function activateSrdceEgg() {
     }, i*65);
   }
   showToast('❤️ Love is in the air!', 'success');
+}
+
+// ── Easter egg: Napíš "lopta" → Loptový dážď (FIFA) ─────────────────────
+function activateLoptaEgg() {
+  recordEggTrigger('lopta');
+  const balls = ['⚽','⚽','⚽','🥅','🏆','🦵','🧤','🟨','🟥'];
+  for (let i = 0; i < 36; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'ball-drop';
+      el.textContent = balls[Math.floor(Math.random() * balls.length)];
+      el.style.left = (Math.random() * 96) + 'vw';
+      el.style.fontSize = (18 + Math.random() * 24) + 'px';
+      el.style.animationDuration = (1.6 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, i * 60);
+  }
+  showToast('⚽ GÓÓÓL! Vitaj na FIFA 2026! 🏆', 'success');
 }
 
 // ── Easter egg 11: Napíš "matrix" → Jedlo Matrix ─────────────────────────
