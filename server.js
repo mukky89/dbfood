@@ -10,6 +10,18 @@ const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 const pkg = require('./package.json');
 
+// Odstrani diakritiku (á→a, č→c, …) — pay by square poznamka inak nemusi fungovat
+function bezDiakritiky(str) {
+  return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// Poznamka do QR platby: vzdy meno + datum, bez diakritiky
+function qrSprava(meno) {
+  const datum = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' });
+  const text = meno && meno.trim() ? `${meno.trim()} ${datum}` : `Obed Fantozzi ${datum}`;
+  return bezDiakritiky(text);
+}
+
 const app = express();
 
 // Presmerovanie zo starej EvenNode domeny na Railway (trvale, 301).
@@ -630,14 +642,14 @@ app.get('/api/fifa-scores', async (req, res) => {
 
 // POST /api/qr
 app.post('/api/qr', async (req, res) => {
-  const { polievka, jedlo, pizza, dezert } = req.body;
+  const { meno, polievka, jedlo, pizza, dezert } = req.body;
   const platba = await getPlatba();
   if (!platba.iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený — nastav ho v Admin → Platba' });
   try {
     const menu = await fetchMenu();
     const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu);
     if (!cena) return res.status(400).json({ ok: false, error: 'Nepodarilo sa vypocitat cenu' });
-    const sprava = `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
+    const sprava = qrSprava(meno);
     const qrBase64 = await generatePayBySquareQR({
       iban: platba.iban, bic: platba.bic,
       suma: cena.celkom, sprava,
@@ -675,7 +687,7 @@ app.post('/api/send-qr-email', async (req, res) => {
     const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu);
     if (!cena) return res.status(400).json({ ok: false, error: 'Nepodarilo sa vypočítať cenu' });
 
-    const sprava = `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
+    const sprava = qrSprava(meno);
     const qrBase64 = await generatePayBySquareQR({
       iban: platba.iban, bic: platba.bic,
       suma: cena.celkom, sprava,
@@ -775,7 +787,7 @@ app.post('/api/admin/qr-test', async (req, res) => {
       detail = cena.detail;
     }
 
-    const spravaText = sprava || `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`;
+    const spravaText = bezDiakritiky(sprava || `Obed Fantozzi ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`);
     const qrBase64   = await generatePayBySquareQR({
       iban, bic, suma, sprava: spravaText,
       meno: platba.meno || 'Fantozzi',

@@ -3638,7 +3638,7 @@ async function showQR() {
   if (emailInput) emailInput.value = currentEmail || getCookie('fantozzi_email') || '';
   try {
     const res = await fetch('/api/qr', { method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ polievka: currentQROrder.polievka, jedlo: currentQROrder.jedlo, pizza: currentQROrder.pizza, dezert: currentQROrder.dezert }) });
+      body: JSON.stringify({ meno: currentUser || '', polievka: currentQROrder.polievka, jedlo: currentQROrder.jedlo, pizza: currentQROrder.pizza, dezert: currentQROrder.dezert }) });
     const data = await res.json();
     document.getElementById('qr-modal-loading').style.display = 'none';
     if (!data.ok) { document.getElementById('qr-modal-error').style.display = 'block'; return; }
