@@ -3948,6 +3948,7 @@ const EGGS_INFO = [
   { id:'kava',     emoji:'☕',  name:'Kávový Dážď',            diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  k-a-v-a  na klávesnici (mimo políčok)',                effect:'Bez kávy ani na krok — dážď káv, čajov a bublinkového ☕🧋' },
   { id:'pivo',     emoji:'🍺',  name:'Pivný Dážď',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  p-i-v-o  na klávesnici (mimo políčok)',                effect:'Na zdravie! Dážď pív a bubliniek zo stropu 🍻' },
   { id:'raketa',   emoji:'🚀',  name:'Štart Rakety',           diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  r-a-k-e-t-a  na klávesnici (mimo políčok)',            effect:'3… 2… 1… ŠTART! Rakety a hviezdy letia NAHOR cez celú obrazovku 🚀⭐' },
+  { id:'emojify',  emoji:'🍔',  name:'Všetko je Jedlo',        diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  j-e-d-l-o  na klávesnici (mimo políčok)',              effect:'Všetky písmená na stránke sa na 4 s premenia na jedlo emoji 🍕🍔🌮' },
 ];
 
 // Farby pre user badges (deterministic by meno)
@@ -4105,6 +4106,7 @@ function _buildDebugButtons() {
     kava:     () => activateKavaEgg(),
     pivo:     () => activatePivoEgg(),
     raketa:   () => activateRaketaEgg(),
+    emojify:  () => activateEmojifyEgg(),
   };
 
   for (const egg of EGGS_INFO) {
@@ -4252,6 +4254,7 @@ document.addEventListener('keydown', e => {
       kava: activateKavaEgg,
       pivo: activatePivoEgg,
       raketa: activateRaketaEgg,
+      jedlo: activateEmojifyEgg,
     };
     for (const [word, fn] of Object.entries(eggs)) {
       if (wordBuffer.endsWith(word)) {
@@ -4370,24 +4373,40 @@ function activateAIEgg() {
   }, 380);
 }
 
-// ── Easter egg 7: Závrať — 4 zmeny smeru wheel do 2 sekúnd ──────────────
-let _wheelLastDir = null, _wheelDirChanges = 0, _wheelTimer, _wheelCooldown = false;
-window.addEventListener('wheel', (e) => {
-  if (_wheelCooldown) return;
-  const dir = e.deltaY > 0 ? 'dn' : e.deltaY < 0 ? 'up' : null;
-  if (!dir || dir === _wheelLastDir) return;
-  _wheelLastDir = dir;
-  _wheelDirChanges++;
-  eeDebugLog(`🌀 wheel ${dir === 'dn' ? '↓' : '↑'}  →  ${_wheelDirChanges}/3`, '');
-  clearTimeout(_wheelTimer);
-  _wheelTimer = setTimeout(() => { _wheelDirChanges = 0; _wheelLastDir = null; }, 2500);
-  if (_wheelDirChanges >= 3) {
-    _wheelDirChanges = 0; _wheelLastDir = null; _wheelCooldown = true;
+// ── Easter egg 7: Závrať — rýchle zmeny smeru rolovania (wheel + touch) ──
+let _dizLastDir = null, _dizChanges = 0, _dizTimer, _dizCooldown = false;
+function _registerDizzyDir(dir) {
+  if (_dizCooldown || !dir || dir === _dizLastDir) return;
+  _dizLastDir = dir;
+  _dizChanges++;
+  eeDebugLog(`🌀 smer ${dir === 'dn' ? '↓' : '↑'}  →  ${_dizChanges}/3`, '');
+  clearTimeout(_dizTimer);
+  _dizTimer = setTimeout(() => { _dizChanges = 0; _dizLastDir = null; }, 2500);
+  if (_dizChanges >= 3) {
+    _dizChanges = 0; _dizLastDir = null; _dizCooldown = true;
     eeDebugLog('✅ MATCH: závrať aktivovaná!', 'match');
     activateScrollEgg();
-    setTimeout(() => { _wheelCooldown = false; }, 4000);
+    setTimeout(() => { _dizCooldown = false; }, 4000);
   }
+}
+// Myš / trackpad
+window.addEventListener('wheel', (e) => {
+  const dir = e.deltaY > 4 ? 'dn' : e.deltaY < -4 ? 'up' : null;
+  _registerDizzyDir(dir);
 }, { passive: true });
+// Dotyk (mobil/tablet) — sledujeme smer pohybu prsta
+let _dizTouchY = null;
+window.addEventListener('touchstart', (e) => { _dizTouchY = e.touches[0]?.clientY ?? null; }, { passive: true });
+window.addEventListener('touchmove', (e) => {
+  if (_dizTouchY === null) return;
+  const y = e.touches[0]?.clientY;
+  if (y == null) return;
+  const dy = _dizTouchY - y; // prst nahor => obsah ide dole
+  if (Math.abs(dy) < 24) return; // deadzone proti drobnému chveniu
+  _registerDizzyDir(dy > 0 ? 'dn' : 'up');
+  _dizTouchY = y;
+}, { passive: true });
+window.addEventListener('touchend', () => { _dizTouchY = null; }, { passive: true });
 
 function activateScrollEgg() {
   recordEggTrigger('scroll');
@@ -4497,6 +4516,38 @@ function activateRaketaEgg() {
   recordEggTrigger('raketa');
   emojiRain(['🚀','🚀','🛸','⭐','💨','🚀'], { cls: 'star-drop', count: 28 });
   showToast('🚀 3… 2… 1… ŠTART! Obed na obežnej dráhe!', 'success');
+}
+
+// ── Easter egg: Napíš "jedlo" → Všetky písmená sa zmenia na jedlo 🍕 ──────
+let _emojifyActive = false;
+function activateEmojifyEgg() {
+  if (_emojifyActive) return;
+  _emojifyActive = true;
+  recordEggTrigger('emojify');
+  const foods = ['🍕','🍔','🍟','🌭','🍿','🧀','🥪','🌮','🌯','🥙','🥗','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🍤','🍗','🍖','🥩','🍳','🥞','🧇','🥓','🍞','🥐','🥨','🧆','🥘','🍠','🍅','🥦','🌽','🥕','🍆','🍩','🍪','🧁'];
+  const pickFood = () => foods[Math.floor(Math.random() * foods.length)];
+  const skipTags = new Set(['SCRIPT','STYLE','NOSCRIPT','TEXTAREA','INPUT','SELECT','OPTION']);
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue || !/\S/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+      const p = node.parentElement;
+      if (!p || skipTags.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+      // nech ostane čitateľný toast, secrets modal aj debug panel
+      if (p.closest('#toast, .secrets-overlay, #ee-dbg-panel')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const saved = [];
+  let n;
+  while ((n = walker.nextNode())) {
+    saved.push([n, n.nodeValue]);
+    n.nodeValue = n.nodeValue.replace(/[\p{L}\p{N}]/gu, () => pickFood());
+  }
+  showToast('🍕 Všetko je zrazu jedlo! 🤤', 'success');
+  setTimeout(() => {
+    saved.forEach(([node, val]) => { try { node.nodeValue = val; } catch(e) {} });
+    _emojifyActive = false;
+  }, 4500);
 }
 
 // ── Easter egg 11: Napíš "matrix" → Jedlo Matrix ─────────────────────────
