@@ -138,6 +138,7 @@
     .menu-item-text { flex: 1; }
     .menu-item-name { font-size: 14px; font-weight: 500; line-height: 1.4; }
     .menu-item-weight { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .gyros-warn { display: inline-block; font-size: 11px; font-weight: 700; color: #b23827; background: #fdecea; border: 1px solid #f5c6bf; border-radius: 8px; padding: 1px 8px; margin-top: 3px; }
     .menu-item-num { background: var(--brand); color: white; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 
     /* HOT badge */
@@ -2411,6 +2412,7 @@ function renderMenu(menu) {
           <span class="menu-item-num">${prefix}${p.cislo}</span>
           <span class="menu-item-text">
             <span class="menu-item-name">${nazovClean}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
+            ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">⚠️ Pozor: môže obsahovať cibuľu</span>` : ''}
             <span class="menu-item-weight">${hmotnostText}</span>
             ${alergenyHtml}
             ${variantRadios}
@@ -2632,6 +2634,7 @@ function lockOrderForm(polievka, jedlo, pizza, dezert, poznamka, porcie) {
   if (polievka) html += `🍲 <strong>Polievka:</strong> ${relabel(polievka,'P')}<br>`;
   if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${relabel(jedlo,'J')}<br>`;
   if (pizza)    html += `🍕 <strong>Pizza:</strong> ${relabel(pizza,'PZ')}<br>`;
+  if (pizza && /gyros/i.test(pizza)) html += `<span class="gyros-warn" style="margin:2px 0 6px">⚠️ Pozor: môže obsahovať cibuľu</span><br>`;
   if (dezert)   html += `🍮 <strong>Dezert:</strong> ${relabel(dezert,'D')}<br>`;
   if (porcie > 1) html += `👥 <strong>Počet porcií:</strong> ${porcie}<br>`;
   if (poznamka) html += `📝 <em>${poznamka}</em>`;
