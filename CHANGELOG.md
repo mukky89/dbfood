@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.9.0] — 2026-06-23
+
+### Pridané
+- **Nový easter egg „Všetko je Jedlo"** 🍔 — napíš `jedlo` a všetky písmená a čísla na stránke sa na 4 sekundy premenia na jedlo emoji 🍕🍔🌮.
+
+### Opravené
+- **Easter egg „Závrať"** 🌀 — predtým detekoval len koliesko myši, takže na mobile/tablete (a často aj na trackpade) vôbec nereagoval. Teraz deteguje rýchle zmeny smeru rolovania aj **dotykom** (touchmove), s malou deadzone proti chveniu.
+
 ## [1.8.1] — 2026-06-23
 
 ### Zmenené
