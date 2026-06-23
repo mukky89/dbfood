@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.7.1] — 2026-06-23
+
+### Zmenené
+- **Poznámka v Pay by Square QR** obsahuje teraz vždy **meno objednávateľa + dátum** (napr. `Zofia Mullerova 23. 6. 2026`) a je **bez diakritiky**, aby ju bankové aplikácie spoľahlivo prečítali. Týka sa QR pri objednávke aj QR posielaného e-mailom; aj admin vlastná poznámka sa zbavuje diakritiky.
+
 ## [1.7.0] — 2026-06-23
 
 ### Zmenené
