@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.7.0] — 2026-06-23
+
+### Zmenené
+- **Nové označenie jedál a polievok** — namiesto `č.2 Zeleninova polievka` sa teraz používa `P2 Zeleninova` pre polievky a `J2 …` pre hlavné jedlá (pizza `PZ`, dezerty `D`). Zmena je premietnutá naprieč celým systémom: menu, číselné odznaky, admin tabuľky a grafy, e-maily, push notifikácie aj QR šablóny. Existujúce objednávky v starom formáte `č.N` zostávajú plne kompatibilné.
+
 ## [1.6.1] — 2026-06-19
 
 ### Opravené
