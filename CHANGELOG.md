@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.9.1] — 2026-06-23
+
+### Zmenené
+- **Súhrn počtov na stránke** — číselné koliesko pri položke teraz zobrazuje aj prefix podľa typu (P1, J3, PZ8 …) namiesto holého čísla. Koliesko sa prispôsobí 2–3 znakom.
+
 ## [1.9.0] — 2026-06-23
 
 ### Pridané
