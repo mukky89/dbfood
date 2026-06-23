@@ -5,6 +5,16 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.8.0] — 2026-06-23
+
+### Opravené
+- **Easter egg „Rozbité hodiny"** ⏰ — tikajúce hodiny prepisovali `🍕:🍕:🍕` takmer okamžite, takže to vyzeralo, že egg nefunguje. Počas eggu sa hodiny dočasne neprepisujú.
+- **Easter egg „AI Analýza"** 🤖 — po 3-sekundovom podržaní tlačidla „Potvrdiť" sa pri pustení omylom odoslala objednávka. Následný klik je teraz potlačený.
+
+### Pridané
+- **3 nové easter eggy**: ☕ **Kávový dážď** (napíš `kava`), 🍺 **Pivný dážď** (`pivo`) a 🚀 **Štart rakety** (`raketa`) — rakety a hviezdy letia nahor.
+- Zobrazovanie prefixu **P/J/PZ/D** aj pre staršie objednávky uložené vo formáte `č.N` (feed, potvrdená objednávka, e-maily aj push súhrny).
+
 ## [1.7.1] — 2026-06-23
 
 ### Zmenené
