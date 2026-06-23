@@ -138,7 +138,7 @@
     .menu-item-text { flex: 1; }
     .menu-item-name { font-size: 14px; font-weight: 500; line-height: 1.4; }
     .menu-item-weight { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .menu-item-num { background: var(--brand); color: white; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .menu-item-num { background: var(--brand); color: white; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
 
     /* HOT badge */
     .hot-badge { position: absolute; top: -8px; right: 8px; background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(231,76,60,.4); }
@@ -1449,12 +1449,12 @@
 
             <div>
               <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Polievka</label>
-              <input id="qrt-polievka" type="text" placeholder="napr. č.1 Slepačia vývar" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              <input id="qrt-polievka" type="text" placeholder="napr. P1 Slepačia vývar" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
             </div>
 
             <div>
               <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px">Hlavné jedlo</label>
-              <input id="qrt-jedlo" type="text" placeholder="napr. č.2 Kurací rezeň, ryža" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              <input id="qrt-jedlo" type="text" placeholder="napr. J2 Kurací rezeň, ryža" style="width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
             </div>
 
             <div>
@@ -2374,6 +2374,7 @@ function renderMenu(menu) {
     const isDezert   = sekcia.nazov.toLowerCase().includes('dezert');
     const inputType  = isPolievka ? 'radio' : isJedlo ? 'radio' : isPizza ? 'radio' : 'checkbox';
     const groupName  = isPolievka ? 'polievka' : isJedlo ? 'jedlo' : isPizza ? 'pizza' : 'dezert';
+    const prefix     = isPolievka ? 'P' : isJedlo ? 'J' : isPizza ? 'PZ' : 'D';
 
     const isHotSekcia = isPizza || isJedlo;
 
@@ -2385,7 +2386,7 @@ function renderMenu(menu) {
       const id = `${groupName}_${p.cislo}`;
       const { varianty, nazovClean } = parseVarianty(p.nazov);
       const hasVariants = varianty.length >= 2;
-      const value = `č.${p.cislo} ${nazovClean}`;
+      const value = `${prefix}${p.cislo} ${nazovClean}`;
       const { hmotnostText, alergenyHtml } = parseHmotnost(p.hmotnost);
       const isHot = topJedlo && (topJedlo.startsWith(value) || topJedlo === value) && isHotSekcia;
 
@@ -2406,7 +2407,7 @@ function renderMenu(menu) {
         <label class="menu-item${isHot ? ' hot-dish' : ''}" id="label_${id}" onclick="handleMenuClick(event,'${id}','${groupName}')">
           ${isHot ? `<div class="hot-badge">🔥 TOP</div>` : ''}
           <input type="${inputType}" name="${groupName}" id="${id}" value="${value}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
-          <span class="menu-item-num">${p.cislo}</span>
+          <span class="menu-item-num">${prefix}${p.cislo}</span>
           <span class="menu-item-text">
             <span class="menu-item-name">${nazovClean}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
             <span class="menu-item-weight">${hmotnostText}</span>
@@ -2937,8 +2938,8 @@ function renderSummary(entries) {
     if (o.dezert)   dezertMap[o.dezert]      = (dezertMap[o.dezert]    ||0)+1;
   });
 
-  function skrat(text, max=36) { return text.replace(/^č\.\d+\s*/,'').slice(0,max); }
-  function numOf(text) { const m=text.match(/č\.(\d+)/); return m?m[1]:'?'; }
+  function skrat(text, max=36) { return text.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'').slice(0,max); }
+  function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
 
   function buildRows(map, color) {
     return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
@@ -3220,8 +3221,8 @@ function renderAdminOrders(orders, history = []) {
   const polEl = document.getElementById('admin-polievky-list');
   polEl.innerHTML = !Object.keys(polievkyMap).length ? '<div class="empty-state">Žiadne</div>' :
     Object.entries(polievkyMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
-      const m=nazov.match(/č\.(\d+)/); const num=m?m[1]:'?';
-      const skrat=nazov.replace(/^č\.\d+\s*/,'');
+      const m=nazov.match(/^(?:č\.|PZ|[PJD])(\d+)/); const num=m?m[1]:'?';
+      const skrat=nazov.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'');
       const pct=Math.round(pocet/maxP*100);
       return `<div class="admin-item-row"><span class="admin-num-badge" style="background:#1565c0">${num}</span>
         <div class="admin-item-bar-wrap"><div class="admin-item-name">${skrat}</div>
@@ -3236,10 +3237,10 @@ function renderAdminOrders(orders, history = []) {
   const jedEl = document.getElementById('admin-jedla-list');
   jedEl.innerHTML = !Object.keys(jedlaMap).length ? '<div class="empty-state">Žiadne</div>' :
     Object.entries(jedlaMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
-      const m=nazov.match(/č\.(\d+)/); const num=m?m[1]:'?';
+      const m=nazov.match(/^(?:č\.|PZ|[PJD])(\d+)/); const num=m?m[1]:'?';
       const isPizza=nazov.toLowerCase().includes('pizza');
       const isTop=topJedlo&&nazov===topJedlo;
-      const skrat=nazov.replace(/^č\.\d+\s*/,'');
+      const skrat=nazov.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'');
       const pct=Math.round(pocet/maxJ*100);
       const color=isPizza?'#e67e22':'#c0392b';
       return `<div class="admin-item-row" style="${isTop?'background:#fffbeb;border-radius:6px;padding:4px 6px;':''}">
@@ -3256,8 +3257,8 @@ function renderAdminOrders(orders, history = []) {
       const initials=o.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
       const color=colors[o.meno.charCodeAt(0)%colors.length];
       const editBadge=o.editCount>0?`<span style="background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;font-size:11px;margin-left:4px">upravené ${o.editCount}x</span>`:'';
-      const jSkrat=o.jedlo?o.jedlo.replace(/^č\.\d+\s*/,''):'-';
-      const pSkrat=o.polievka?o.polievka.replace(/^č\.\d+\s*/,''):'-';
+      const jSkrat=o.jedlo?o.jedlo.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''):'-';
+      const pSkrat=o.polievka?o.polievka.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''):'-';
       return `<div class="admin-user-row">
         <div class="admin-user-avatar" style="background:${color}">${initials}</div>
         <div style="flex:1;min-width:0">
@@ -3277,13 +3278,13 @@ function renderAdminOrders(orders, history = []) {
   const tblEl = document.getElementById('admin-orders-content');
   tblEl.innerHTML = !entries.length ? '<div class="empty-state">Žiadne objednávky</div>' :
     `<div style="overflow-x:auto"><table class="admin-table"><thead><tr>
-      <th>#</th><th>Meno</th><th>č. Polievka</th><th>č. Jedlo</th><th>Poznámka</th><th>Čas</th><th>Úpravy</th><th></th>
+      <th>#</th><th>Meno</th><th>Polievka</th><th>Jedlo</th><th>Poznámka</th><th>Čas</th><th>Úpravy</th><th></th>
     </tr></thead><tbody>
     ${entries.map((o,i) => {
-      const pNum=(o.polievka?.match(/č\.(\d+)/)||[])[1]||'';
-      const jNum=(o.jedlo?.match(/č\.(\d+)/)||[])[1]||'';
-      const pNazov=o.polievka?o.polievka.replace(/^č\.\d+\s*/,''):'-';
-      const jNazov=o.jedlo?o.jedlo.replace(/^č\.\d+\s*/,''):'-';
+      const pNum=(o.polievka?.match(/^(?:č\.|PZ|[PJD])(\d+)/)||[])[1]||'';
+      const jNum=(o.jedlo?.match(/^(?:č\.|PZ|[PJD])(\d+)/)||[])[1]||'';
+      const pNazov=o.polievka?o.polievka.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''):'-';
+      const jNazov=o.jedlo?o.jedlo.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''):'-';
       return `<tr><td style="color:var(--muted);font-size:12px">${i+1}</td>
         <td><strong>${o.meno}</strong></td>
         <td>${pNum?`<span class="admin-num-badge" style="background:#1565c0;display:inline-flex">${pNum}</span>`:''}<span style="font-size:13px">${pNazov}</span></td>
@@ -4623,7 +4624,7 @@ function updateFloatingBar() {
   if (!hasAny && !confirmed) { bar.classList.remove('visible'); document.body.classList.remove('fob-open'); return; }
 
   const chips = [];
-  const shorten = s => s ? s.replace(/^č\.\d+\s*/, '').substring(0, 28) + (s.replace(/^č\.\d+\s*/, '').length > 28 ? '…' : '') : null;
+  const shorten = s => s ? s.replace(/^(?:č\.|PZ|[PJD])\d+\s*/, '').substring(0, 28) + (s.replace(/^(?:č\.|PZ|[PJD])\d+\s*/, '').length > 28 ? '…' : '') : null;
   if (polievka) chips.push(`<span class="fob-chip">🍲 ${shorten(polievka)}</span>`);
   if (jedlo)    chips.push(`<span class="fob-chip main">🍽️ ${shorten(jedlo)}</span>`);
   if (pizza)    chips.push(`<span class="fob-chip main">🍕 ${shorten(pizza)}</span>`);
