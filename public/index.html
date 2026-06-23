@@ -197,7 +197,7 @@
     .summary-table tr:nth-child(even) td { background: #fafbfc; }
     .summary-count { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; font-weight: 700; font-size: 13px; }
     .summary-section-header td { background: var(--bg) !important; font-weight: 700; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 6px 10px 4px; }
-    .summary-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--brand); color: white; font-size: 10px; font-weight: 700; margin-right: 5px; flex-shrink: 0; }
+    .summary-num { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--brand); color: white; font-size: 10px; font-weight: 700; margin-right: 5px; flex-shrink: 0; }
     .polievka-badge { color: #1565c0; }
     .jedlo-badge { color: #b71c1c; }
     .hot-row td { background: linear-gradient(135deg, #fffbeb, #fff) !important; }
@@ -2953,10 +2953,10 @@ function renderSummary(entries) {
   function skrat(text, max=36) { return text.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'').slice(0,max); }
   function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
 
-  function buildRows(map, color) {
+  function buildRows(map, color, prefix) {
     return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
       const isTop = topJedlo && k === topJedlo;
-      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-num" style="background:${color}">${numOf(k)}</span><span style="color:${color}">${isTop?'🔥 ':''}<strong style="color:var(--text)">${skrat(k)}</strong></span></td><td style="text-align:center"><span class="summary-count" style="background:${color}">${v}</span></td></tr>`;
+      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span style="color:${color}">${isTop?'🔥 ':''}<strong style="color:var(--text)">${skrat(k)}</strong></span></td><td style="text-align:center"><span class="summary-count" style="background:${color}">${v}</span></td></tr>`;
     }).join('');
   }
 
@@ -2966,10 +2966,10 @@ function renderSummary(entries) {
   const hasPol    = Object.keys(polievkyMap).length > 0;
 
   el.innerHTML = `<table class="summary-table"><thead><tr><th>Položka</th><th style="text-align:center">Počet</th></tr></thead><tbody>
-    ${hasPol ? `<tr class="summary-section-header"><td colspan="2">🍲 Polievky</td></tr>${buildRows(polievkyMap,'#1565c0')}` : ''}
-    ${hasJedlo ? `<tr class="summary-section-header"><td colspan="2">🍽️ Hlavné jedlá</td></tr>${buildRows(jedlaMap,'#c0392b')}` : ''}
-    ${hasPizza ? `<tr class="summary-section-header"><td colspan="2">🍕 Pizza</td></tr>${buildRows(pizzaMap,'#e67e22')}` : ''}
-    ${hasDezert ? `<tr class="summary-section-header"><td colspan="2">🍮 Dezert</td></tr>${buildRows(dezertMap,'#8e44ad')}` : ''}
+    ${hasPol ? `<tr class="summary-section-header"><td colspan="2">🍲 Polievky</td></tr>${buildRows(polievkyMap,'#1565c0','P')}` : ''}
+    ${hasJedlo ? `<tr class="summary-section-header"><td colspan="2">🍽️ Hlavné jedlá</td></tr>${buildRows(jedlaMap,'#c0392b','J')}` : ''}
+    ${hasPizza ? `<tr class="summary-section-header"><td colspan="2">🍕 Pizza</td></tr>${buildRows(pizzaMap,'#e67e22','PZ')}` : ''}
+    ${hasDezert ? `<tr class="summary-section-header"><td colspan="2">🍮 Dezert</td></tr>${buildRows(dezertMap,'#8e44ad','D')}` : ''}
     <tr style="border-top:2px solid var(--border)"><td style="font-weight:700;color:var(--brand)">Celkom</td><td style="text-align:center"><span class="summary-count" style="background:var(--brand)">${entries.length}</span></td></tr>
   </tbody></table>`;
 }
