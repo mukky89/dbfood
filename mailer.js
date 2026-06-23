@@ -2,6 +2,14 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 const config = require('./config');
 
+// Vzdy zobrazi spravny prefix podla typu (P/J/PZ/D), aj pre stare "č.N" objednavky
+function relabel(val, prefix) {
+  if (!val) return val;
+  const m = val.match(/^(?:č\.|PZ|[PJD])(\d+)\s*/);
+  if (!m) return val;
+  return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
+}
+
 function createTransporter() {
   // Ak je v config nastaveny vlastny SMTP (napr. Brevo), pouzi ho
   if (config.smtpHost) {
@@ -41,15 +49,17 @@ function formatEmail(orders, menu) {
   const pocty = {};
   zoznam.forEach(o => {
     if (o.polievka) {
-      pocty[o.polievka] = (pocty[o.polievka] || 0) + 1;
+      const k = relabel(o.polievka, 'P');
+      pocty[k] = (pocty[k] || 0) + 1;
     }
     if (o.pizza) {
-      pocty[`🍕 ${o.pizza}`] = (pocty[`🍕 ${o.pizza}`] || 0) + 1;
+      pocty[`🍕 ${relabel(o.pizza, 'PZ')}`] = (pocty[`🍕 ${relabel(o.pizza, 'PZ')}`] || 0) + 1;
     } else if (o.jedlo) {
-      pocty[o.jedlo] = (pocty[o.jedlo] || 0) + 1;
+      const k = relabel(o.jedlo, 'J');
+      pocty[k] = (pocty[k] || 0) + 1;
     }
     if (o.dezert) {
-      pocty[`🍮 ${o.dezert}`] = (pocty[`🍮 ${o.dezert}`] || 0) + 1;
+      pocty[`🍮 ${relabel(o.dezert, 'D')}`] = (pocty[`🍮 ${relabel(o.dezert, 'D')}`] || 0) + 1;
     }
   });
 
@@ -60,9 +70,9 @@ function formatEmail(orders, menu) {
   text += `ZOZNAM:\n`;
   zoznam.forEach((o, i) => {
     text += `${i + 1}. ${o.meno.padEnd(15)} `;
-    text += `Polievka: ${o.polievka || '-'} | `;
-    text += `Jedlo: ${o.pizza ? `Pizza: ${o.pizza}` : (o.jedlo || '-')}`;
-    if (o.dezert) text += ` | Dezert: ${o.dezert}`;
+    text += `Polievka: ${o.polievka ? relabel(o.polievka, 'P') : '-'} | `;
+    text += `Jedlo: ${o.pizza ? `Pizza: ${relabel(o.pizza, 'PZ')}` : (o.jedlo ? relabel(o.jedlo, 'J') : '-')}`;
+    if (o.dezert) text += ` | Dezert: ${relabel(o.dezert, 'D')}`;
     if (o.poznamka) text += ` | Poznamka: ${o.poznamka}`;
     text += '\n';
   });
@@ -75,8 +85,8 @@ function formatEmail(orders, menu) {
   const riadkyHtml = zoznam.map((o, i) => `
     <tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#ffffff'}">
       <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:bold">${o.meno}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.polievka || '<em style="color:#999">-</em>'}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.pizza ? `🍕 ${o.pizza}` : (o.jedlo || '<em style="color:#999">-</em>')}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.polievka ? relabel(o.polievka, 'P') : '<em style="color:#999">-</em>'}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.pizza ? `🍕 ${relabel(o.pizza, 'PZ')}` : (o.jedlo ? relabel(o.jedlo, 'J') : '<em style="color:#999">-</em>')}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;font-size:13px">${o.poznamka || ''}</td>
     </tr>
   `).join('');

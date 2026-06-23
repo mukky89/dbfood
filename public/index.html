@@ -2197,7 +2197,8 @@ function updateClock() {
   const dateEl  = document.getElementById('cd-date');
   const clockEl = document.getElementById('cd-clock');
   if (dateEl)  dateEl.textContent  = `${days[now.getDay()]} ${now.getDate()}. ${months[now.getMonth()]}`;
-  if (clockEl) clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  // Pocas easter-egg "rozbitych hodin" nech tikajuce hodiny neprepisu 🍕:🍕:🍕
+  if (clockEl && !window._clockBroken) clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
 
 function updateCdInfo() {
@@ -2552,6 +2553,8 @@ function getCenaZMenuFE(typ) {
 
 // ── Objednanie ────────────────────────────────────────────────────────────
 async function submitOrder() {
+  // Ak práve zbehol AI easter egg (3s podržanie), preskoč odoslanie z následného clicku
+  if (window._aiEggJustFired) { window._aiEggJustFired = false; return; }
   if (!orderingOpen) { showToast('Objednávanie je uzavreté!', 'error'); return; }
   if (!currentUser) { showToast('Pre objednávanie sa musíš prihlásiť', 'error'); showNameModal(); return; }
 
@@ -2626,10 +2629,10 @@ function lockOrderForm(polievka, jedlo, pizza, dezert, poznamka, porcie) {
   document.getElementById('order-form').style.display = 'none';
   document.getElementById('order-confirmed').style.display = 'block';
   let html = '';
-  if (polievka) html += `🍲 <strong>Polievka:</strong> ${polievka}<br>`;
-  if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${jedlo}<br>`;
-  if (pizza)    html += `🍕 <strong>Pizza:</strong> ${pizza}<br>`;
-  if (dezert)   html += `🍮 <strong>Dezert:</strong> ${dezert}<br>`;
+  if (polievka) html += `🍲 <strong>Polievka:</strong> ${relabel(polievka,'P')}<br>`;
+  if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${relabel(jedlo,'J')}<br>`;
+  if (pizza)    html += `🍕 <strong>Pizza:</strong> ${relabel(pizza,'PZ')}<br>`;
+  if (dezert)   html += `🍮 <strong>Dezert:</strong> ${relabel(dezert,'D')}<br>`;
   if (porcie > 1) html += `👥 <strong>Počet porcií:</strong> ${porcie}<br>`;
   if (poznamka) html += `📝 <em>${poznamka}</em>`;
   document.getElementById('confirmed-summary').innerHTML = html;
@@ -2892,6 +2895,15 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
 
+// Vzdy zobrazi spravny prefix podla typu: P=polievka, J=jedlo, PZ=pizza, D=dezert
+// Funguje aj pre stare objednavky ulozene s "č.N"
+function relabel(val, prefix) {
+  if (!val) return val;
+  const m = val.match(/^(?:č\.|PZ|[PJD])(\d+)\s*/);
+  if (!m) return val;
+  return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
+}
+
 function renderOrders(orders, count) {
   const list = document.getElementById('orders-list');
   const countEl = document.getElementById('order-count');
@@ -2910,13 +2922,13 @@ function renderOrders(orders, count) {
       <div style="flex:1;min-width:0">
         <div class="order-name">${o.meno} ${isMine ? '<span style="font-size:11px;color:var(--accent)">(ty)</span>' : ''}${editBadge}</div>
         <div class="order-detail">
-            ${o.polievka ? '🍲 ' + o.polievka : ''}
+            ${o.polievka ? '🍲 ' + relabel(o.polievka,'P') : ''}
             ${o.polievka && o.jedlo ? '<br>' : ''}
-            ${o.jedlo ? '🍽️ ' + o.jedlo : ''}
+            ${o.jedlo ? '🍽️ ' + relabel(o.jedlo,'J') : ''}
             ${(o.polievka || o.jedlo) && o.pizza ? '<br>' : ''}
-            ${o.pizza ? '🍕 ' + o.pizza : ''}
+            ${o.pizza ? '🍕 ' + relabel(o.pizza,'PZ') : ''}
             ${(o.jedlo || o.pizza) && o.dezert ? '<br>' : ''}
-            ${o.dezert ? '🍮 ' + o.dezert : ''}
+            ${o.dezert ? '🍮 ' + relabel(o.dezert,'D') : ''}
           </div>
         ${o.poznamka ? `<div class="order-note">📝 ${o.poznamka}</div>` : ''}
       </div>
@@ -3933,6 +3945,9 @@ const EGGS_INFO = [
   { id:'namerand', emoji:'👤',  name:'Kríza Identity',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Dvojklikni rýchlo na svoje meno (👤 badge v hlavičke)',        effect:'Tvoje meno sa na 2.5 sekundy randomizuje cez vtipné mená 😂' },
   { id:'trailer',  emoji:'🎬',  name:'Filmový Trailer',        diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Napíš  t-r-a-i-l-e-r  na klávesnici (mimo políčok)',          effect:'Fantozzi Studios uvádza: epický filmový trailer na motivy objednávania obedov 🍿' },
   { id:'lopta',    emoji:'⚽',  name:'Loptový Dážď',           diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  l-o-p-t-a  na klávesnici (mimo políčok)',              effect:'GÓÓÓL! Dážď futbalových lôpt, trofejí a kariet zo stropu ⚽🏆🟥' },
+  { id:'kava',     emoji:'☕',  name:'Kávový Dážď',            diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  k-a-v-a  na klávesnici (mimo políčok)',                effect:'Bez kávy ani na krok — dážď káv, čajov a bublinkového ☕🧋' },
+  { id:'pivo',     emoji:'🍺',  name:'Pivný Dážď',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  p-i-v-o  na klávesnici (mimo políčok)',                effect:'Na zdravie! Dážď pív a bubliniek zo stropu 🍻' },
+  { id:'raketa',   emoji:'🚀',  name:'Štart Rakety',           diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  r-a-k-e-t-a  na klávesnici (mimo políčok)',            effect:'3… 2… 1… ŠTART! Rakety a hviezdy letia NAHOR cez celú obrazovku 🚀⭐' },
 ];
 
 // Farby pre user badges (deterministic by meno)
@@ -4087,6 +4102,9 @@ function _buildDebugButtons() {
     namerand: () => activateNameRandomizer(null),
     trailer:  () => activateTrailerEgg(),
     lopta:    () => activateLoptaEgg(),
+    kava:     () => activateKavaEgg(),
+    pivo:     () => activatePivoEgg(),
+    raketa:   () => activateRaketaEgg(),
   };
 
   for (const egg of EGGS_INFO) {
@@ -4128,16 +4146,16 @@ function clockEasterClick(e) {
 function activateClockEgg() {
   if (clockBroken) return;
   clockBroken = true;
+  window._clockBroken = true; // zablokuj updateClock prepisovanie
   recordEggTrigger('clock');
   const clockEl = document.getElementById('cd-clock');
-  if (!clockEl) return;
-  const original = clockEl.textContent;
+  if (!clockEl) { clockBroken = false; window._clockBroken = false; return; }
   clockEl.classList.add('cd-clock-broken');
   clockEl.textContent = '🍕:🍕:🍕';
   showToast('⏰ Čas je len pizza 🍕', 'success');
   setTimeout(() => {
     clockEl.classList.remove('cd-clock-broken');
-    clockEl.textContent = original;
+    window._clockBroken = false; // updateClock obnoví aktuálny čas pri ďalšom tiku
     clockBroken = false;
   }, 3000);
 }
@@ -4231,6 +4249,9 @@ document.addEventListener('keydown', e => {
       super: activateSuperEgg,
       trailer: activateTrailerEgg,
       lopta: activateLoptaEgg,
+      kava: activateKavaEgg,
+      pivo: activatePivoEgg,
+      raketa: activateRaketaEgg,
     };
     for (const [word, fn] of Object.entries(eggs)) {
       if (wordBuffer.endsWith(word)) {
@@ -4317,6 +4338,8 @@ function cancelLongPress() { clearTimeout(longPressTimer); }
 function activateAIEgg() {
   if (aiOverlayActive) return;
   aiOverlayActive = true;
+  // Po pustení tlačidla príde 'click' → potlač ho, nech sa omylom neodošle objednávka
+  window._aiEggJustFired = true;
   recordEggTrigger('ai');
   const overlay = document.getElementById('ai-overlay');
   const bar     = document.getElementById('ai-bar-fill');
@@ -4436,6 +4459,44 @@ function activateLoptaEgg() {
     }, i * 60);
   }
   showToast('⚽ GÓÓÓL! Vitaj na FIFA 2026! 🏆', 'success');
+}
+
+// ── Generický dážď emoji ──────────────────────────────────────────────────
+// cls 'pizza-drop' padá zhora nadol, 'star-drop' letí zdola nahor
+function emojiRain(emojis, { count = 32, cls = 'pizza-drop', minSize = 18, maxSize = 40 } = {}) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = cls;
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (Math.random() * 96) + 'vw';
+      el.style.fontSize = (minSize + Math.random() * (maxSize - minSize)) + 'px';
+      el.style.animationDuration = (1.6 + Math.random() * 2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, i * 60);
+  }
+}
+
+// ── Easter egg: Napíš "kava" → Kávový dážď ───────────────────────────────
+function activateKavaEgg() {
+  recordEggTrigger('kava');
+  emojiRain(['☕','☕','🫖','🧋','☕','🍵']);
+  showToast('☕ Bez kávy ani na krok!', 'success');
+}
+
+// ── Easter egg: Napíš "pivo" → Pivný dážď ────────────────────────────────
+function activatePivoEgg() {
+  recordEggTrigger('pivo');
+  emojiRain(['🍺','🍻','🍺','🫧','🍺']);
+  showToast('🍻 Na zdravie! (po obede, samozrejme)', 'success');
+}
+
+// ── Easter egg: Napíš "raketa" → Štart rakety (letí NAHOR) ───────────────
+function activateRaketaEgg() {
+  recordEggTrigger('raketa');
+  emojiRain(['🚀','🚀','🛸','⭐','💨','🚀'], { cls: 'star-drop', count: 28 });
+  showToast('🚀 3… 2… 1… ŠTART! Obed na obežnej dráhe!', 'success');
 }
 
 // ── Easter egg 11: Napíš "matrix" → Jedlo Matrix ─────────────────────────
