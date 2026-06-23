@@ -45,23 +45,32 @@ function formatEmail(orders, menu) {
     };
   }
 
-  // Pocty od kazdeho jedla
-  const pocty = {};
+  // Pocty od kazdeho jedla — zoskupene podla typu: polievky → jedla → pizze → dezerty
+  const mapPol = {}, mapJedlo = {}, mapPizza = {}, mapDezert = {};
   zoznam.forEach(o => {
     if (o.polievka) {
       const k = relabel(o.polievka, 'P');
-      pocty[k] = (pocty[k] || 0) + 1;
+      mapPol[k] = (mapPol[k] || 0) + 1;
     }
     if (o.pizza) {
-      pocty[`🍕 ${relabel(o.pizza, 'PZ')}`] = (pocty[`🍕 ${relabel(o.pizza, 'PZ')}`] || 0) + 1;
+      const k = `🍕 ${relabel(o.pizza, 'PZ')}`;
+      mapPizza[k] = (mapPizza[k] || 0) + 1;
     } else if (o.jedlo) {
       const k = relabel(o.jedlo, 'J');
-      pocty[k] = (pocty[k] || 0) + 1;
+      mapJedlo[k] = (mapJedlo[k] || 0) + 1;
     }
     if (o.dezert) {
-      pocty[`🍮 ${relabel(o.dezert, 'D')}`] = (pocty[`🍮 ${relabel(o.dezert, 'D')}`] || 0) + 1;
+      const k = `🍮 ${relabel(o.dezert, 'D')}`;
+      mapDezert[k] = (mapDezert[k] || 0) + 1;
     }
   });
+  // V ramci skupiny zoradene podla cisla polozky (P1, P2, … / J2, J3, J5 …)
+  const sortByNum = map => Object.entries(map).sort((a, b) => {
+    const na = parseInt((a[0].match(/(\d+)/) || [])[1] || 0, 10);
+    const nb = parseInt((b[0].match(/(\d+)/) || [])[1] || 0, 10);
+    return na - nb;
+  });
+  const pocty = [...sortByNum(mapPol), ...sortByNum(mapJedlo), ...sortByNum(mapPizza), ...sortByNum(mapDezert)];
 
   // Plain text verzia
   let text = `OBJEDNAVKY FANTOZZI - ${dnes}\n`;
@@ -77,7 +86,7 @@ function formatEmail(orders, menu) {
     text += '\n';
   });
   text += `\nSUHRN POCTY:\n`;
-  Object.entries(pocty).forEach(([jedlo, pocet]) => {
+  pocty.forEach(([jedlo, pocet]) => {
     text += `  ${jedlo}: ${pocet}x\n`;
   });
 
@@ -91,7 +100,7 @@ function formatEmail(orders, menu) {
     </tr>
   `).join('');
 
-  const poctyHtml = Object.entries(pocty).map(([jedlo, pocet]) => `
+  const poctyHtml = pocty.map(([jedlo, pocet]) => `
     <tr>
       <td style="padding:6px 12px;border-bottom:1px solid #eee">${jedlo}</td>
       <td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:bold;color:#e74c3c">${pocet}x</td>

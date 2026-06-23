@@ -105,9 +105,9 @@ async function notifySuhrn(orders, menu) {
 
   let msg = `Celkom objednavok ${entries.length}\n`;
   msg += `\nSuhrn\n-------------`;
-  msg += formatSection('Jedlo:', jedlaMap);
+  msg += formatSection('Polievka:', polievkaMap);
+  msg += formatSection('\nJedlo:', jedlaMap);
   msg += formatSection('\nPizza:', pizzaMap);
-  msg += formatSection('\nPolievka:', polievkaMap);
   msg += formatSection('\nDezert:', dezertMap);
 
   return sendPush({ title: `Objednavky uzavrete - ${datum}`, message: msg, priority: 'high', tags: 'bell,memo' });

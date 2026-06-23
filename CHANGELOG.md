@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.8.1] — 2026-06-23
+
+### Zmenené
+- **Súhrn počtov** (v súhrnnom e-maile aj v push notifikácii) je teraz zoradený podľa typu: najprv **polievky**, potom **hlavné jedlá**, potom **pizze** (a nakoniec dezerty). V rámci skupiny zoradené podľa čísla položky (P1, P2, P3 …).
+
 ## [1.8.0] — 2026-06-23
 
 ### Opravené
