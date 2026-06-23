@@ -32,16 +32,16 @@ async function sendPush({ title, message, priority = 'default', tags = '' }) {
 }
 
 async function notifyNovaObjednavka(meno, polievka, jedlo, pizza, poznamka) {
-  const pSkrat = polievka ? polievka.replace(/^č\.\d+\s*/, '') : '-';
+  const pSkrat = polievka ? polievka.replace(/^(?:č\.|PZ|[PJD])\d+\s*/, '') : '-';
   const hlavne = pizza || jedlo;
-  const jSkrat = hlavne ? hlavne.replace(/^č\.\d+\s*/, '') : '-';
+  const jSkrat = hlavne ? hlavne.replace(/^(?:č\.|PZ|[PJD])\d+\s*/, '') : '-';
   let msg = `Polievka: ${pSkrat}\n${pizza ? '🍕 Pizza' : 'Jedlo'}: ${jSkrat}`;
   if (poznamka) msg += `\nPoznamka: ${poznamka}`;
   return sendPush({ title: `${meno} objednal/a obed`, message: msg, priority: 'default', tags: 'pizza,white_check_mark' });
 }
 
 async function notifyUpravaObjednavky(meno, jedlo) {
-  const jSkrat = jedlo ? jedlo.replace(/^č\.\d+\s*/, '') : '-';
+  const jSkrat = jedlo ? jedlo.replace(/^(?:č\.|PZ|[PJD])\d+\s*/, '') : '-';
   return sendPush({ title: `${meno} upravil/a objednavku`, message: `Nove jedlo: ${jSkrat}`, priority: 'low', tags: 'pencil' });
 }
 
@@ -63,8 +63,8 @@ function countItems(entries, getter) {
   entries.forEach(o => {
     const val = getter(o);
     if (!val) return;
-    const m = val.match(/č\.?(\d+)/i);
-    const key = m ? `č${m[1]}` : val.trim();
+    const m = val.match(/^((?:č\.|PZ|[PJD])\d+)/i);
+    const key = m ? m[1] : val.trim();
     map[key] = (map[key] || 0) + 1;
   });
   return map;
