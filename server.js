@@ -15,6 +15,14 @@ function bezDiakritiky(str) {
   return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+// Vzdy zobrazi spravny prefix podla typu (P/J/PZ/D), aj pre stare "č.N" objednavky
+function relabel(val, prefix) {
+  if (!val) return val;
+  const m = val.match(/^(?:č\.|PZ|[PJD])(\d+)\s*/);
+  if (!m) return val;
+  return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
+}
+
 // Poznamka do QR platby: vzdy meno + datum, bez diakritiky
 function qrSprava(meno) {
   const datum = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' });
@@ -696,10 +704,10 @@ app.post('/api/send-qr-email', async (req, res) => {
 
     const datumStr = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
     const items = [
-      polievka ? `🍲 ${polievka}` : null,
-      jedlo    ? `🍽️ ${jedlo}`   : null,
-      pizza    ? `🍕 ${pizza}`   : null,
-      dezert   ? `🍮 ${dezert}`  : null,
+      polievka ? `🍲 ${relabel(polievka,'P')}` : null,
+      jedlo    ? `🍽️ ${relabel(jedlo,'J')}`   : null,
+      pizza    ? `🍕 ${relabel(pizza,'PZ')}`   : null,
+      dezert   ? `🍮 ${relabel(dezert,'D')}`  : null,
     ].filter(Boolean);
     const base64Data = qrBase64.replace(/^data:image\/png;base64,/, '');
 

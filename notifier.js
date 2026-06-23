@@ -58,13 +58,22 @@ function safeDatum() {
   return `${days[d.getDay()]} ${dd}.${mm}.${yyyy}`;
 }
 
-function countItems(entries, getter) {
+// Vzdy zobrazi spravny prefix podla typu (P/J/PZ/D), aj pre stare "č.N" objednavky
+function relabel(val, prefix) {
+  if (!val) return val;
+  const m = val.match(/^(?:č\.|PZ|[PJD])(\d+)\s*/);
+  if (!m) return val;
+  return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
+}
+
+function countItems(entries, getter, prefix) {
   const map = {};
   entries.forEach(o => {
     const val = getter(o);
     if (!val) return;
-    const m = val.match(/^((?:č\.|PZ|[PJD])\d+)/i);
-    const key = m ? m[1] : val.trim();
+    const labeled = relabel(val, prefix);
+    const m = labeled.match(/^((?:č\.|PZ|[PJD])\d+)/i);
+    const key = m ? m[1] : labeled.trim();
     map[key] = (map[key] || 0) + 1;
   });
   return map;
@@ -89,10 +98,10 @@ async function notifySuhrn(orders, menu) {
   if (entries.length === 0) return;
   const datum = safeDatum();
 
-  const jedlaMap    = countItems(entries, o => o.jedlo);
-  const pizzaMap    = countItems(entries, o => o.pizza);
-  const polievkaMap = countItems(entries, o => o.polievka);
-  const dezertMap   = countItems(entries, o => o.dezert);
+  const jedlaMap    = countItems(entries, o => o.jedlo, 'J');
+  const pizzaMap    = countItems(entries, o => o.pizza, 'PZ');
+  const polievkaMap = countItems(entries, o => o.polievka, 'P');
+  const dezertMap   = countItems(entries, o => o.dezert, 'D');
 
   let msg = `Celkom objednavok ${entries.length}\n`;
   msg += `\nSuhrn\n-------------`;

@@ -2626,10 +2626,10 @@ function lockOrderForm(polievka, jedlo, pizza, dezert, poznamka, porcie) {
   document.getElementById('order-form').style.display = 'none';
   document.getElementById('order-confirmed').style.display = 'block';
   let html = '';
-  if (polievka) html += `🍲 <strong>Polievka:</strong> ${polievka}<br>`;
-  if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${jedlo}<br>`;
-  if (pizza)    html += `🍕 <strong>Pizza:</strong> ${pizza}<br>`;
-  if (dezert)   html += `🍮 <strong>Dezert:</strong> ${dezert}<br>`;
+  if (polievka) html += `🍲 <strong>Polievka:</strong> ${relabel(polievka,'P')}<br>`;
+  if (jedlo)    html += `🍽️ <strong>Hlavné jedlo:</strong> ${relabel(jedlo,'J')}<br>`;
+  if (pizza)    html += `🍕 <strong>Pizza:</strong> ${relabel(pizza,'PZ')}<br>`;
+  if (dezert)   html += `🍮 <strong>Dezert:</strong> ${relabel(dezert,'D')}<br>`;
   if (porcie > 1) html += `👥 <strong>Počet porcií:</strong> ${porcie}<br>`;
   if (poznamka) html += `📝 <em>${poznamka}</em>`;
   document.getElementById('confirmed-summary').innerHTML = html;
@@ -2892,6 +2892,15 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
 
+// Vzdy zobrazi spravny prefix podla typu: P=polievka, J=jedlo, PZ=pizza, D=dezert
+// Funguje aj pre stare objednavky ulozene s "č.N"
+function relabel(val, prefix) {
+  if (!val) return val;
+  const m = val.match(/^(?:č\.|PZ|[PJD])(\d+)\s*/);
+  if (!m) return val;
+  return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
+}
+
 function renderOrders(orders, count) {
   const list = document.getElementById('orders-list');
   const countEl = document.getElementById('order-count');
@@ -2910,13 +2919,13 @@ function renderOrders(orders, count) {
       <div style="flex:1;min-width:0">
         <div class="order-name">${o.meno} ${isMine ? '<span style="font-size:11px;color:var(--accent)">(ty)</span>' : ''}${editBadge}</div>
         <div class="order-detail">
-            ${o.polievka ? '🍲 ' + o.polievka : ''}
+            ${o.polievka ? '🍲 ' + relabel(o.polievka,'P') : ''}
             ${o.polievka && o.jedlo ? '<br>' : ''}
-            ${o.jedlo ? '🍽️ ' + o.jedlo : ''}
+            ${o.jedlo ? '🍽️ ' + relabel(o.jedlo,'J') : ''}
             ${(o.polievka || o.jedlo) && o.pizza ? '<br>' : ''}
-            ${o.pizza ? '🍕 ' + o.pizza : ''}
+            ${o.pizza ? '🍕 ' + relabel(o.pizza,'PZ') : ''}
             ${(o.jedlo || o.pizza) && o.dezert ? '<br>' : ''}
-            ${o.dezert ? '🍮 ' + o.dezert : ''}
+            ${o.dezert ? '🍮 ' + relabel(o.dezert,'D') : ''}
           </div>
         ${o.poznamka ? `<div class="order-note">📝 ${o.poznamka}</div>` : ''}
       </div>
