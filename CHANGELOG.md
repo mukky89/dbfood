@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.11.0] — 2026-06-24
+
+### Pridané
+- **Modernejší odpočet do uzávierky** — číslice ako „flip-clock" kartičky s pop animáciou pri každej zmene, pulzujúca „LIVE" bodka, jemný svetelný prelet cez celý pruh, žiariaci progress bar a v posledných minútach dramatické červené pulzovanie.
+
+### Opravené
+- **Changelog v aplikácii sa teraz načítava priamo z `CHANGELOG.md`** (`GET /api/changelog`) — predtým bol napevno v HTML a zasekol sa na v1.4.0. Už netreba udržiavať na dvoch miestach.
+
 ## [1.10.1] — 2026-06-24
 
 ### Pridané
