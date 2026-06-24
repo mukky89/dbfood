@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.10.1] — 2026-06-24
+
+### Pridané
+- **Náhľad e-mailu v admin paneli** — tlačidlo „👁️ Náhľad e-mailu" otvorí v novej karte vykreslený denný súhrnný e-mail (`GET /api/admin/email-preview`). Ak dnes ešte nikto neobjednal, zobrazí sa s ukážkovými dátami, nech je vidieť dizajn.
+
 ## [1.10.0] — 2026-06-24
 
 ### Zmenené

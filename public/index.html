@@ -1362,6 +1362,7 @@
         </div>
         <a href="/" class="btn btn-secondary" style="width:auto;text-decoration:none">🏠 Hlavná stránka</a>
         <button class="btn btn-primary" style="width:auto" onclick="adminSendEmail()">📧 Odoslať email</button>
+        <button class="btn btn-secondary" onclick="adminEmailPreview()" title="Otvorí náhľad denného súhrnného e-mailu v novej karte">👁️ Náhľad e-mailu</button>
         <button class="btn btn-secondary" onclick="adminTestPush()">🔔 Test push</button>
         <button class="btn btn-secondary" onclick="adminTestDeadline()" title="Manuálne spustí email + ntfy súhrn ako keby prišla uzávierka">🧪 Test uzávierky</button>
         <button class="btn btn-secondary" onclick="showManualMenuForm()">✏️ Menu ručne</button>
@@ -3448,6 +3449,11 @@ async function loadAdminConfigInfo() {
     ].map(([k,v]) => `<div style="color:var(--muted);font-weight:600">${k}</div><div style="font-weight:500;word-break:break-all">${v}</div>`).join('');
     box.style.display = 'block';
   } catch(e) {}
+}
+
+function adminEmailPreview() {
+  if (!adminPassword) { showToast('❌ Najprv sa prihlás ako admin', 'error'); return; }
+  window.open(`/api/admin/email-preview?adminPass=${encodeURIComponent(adminPassword)}`, '_blank');
 }
 
 async function adminSendEmail() {

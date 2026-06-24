@@ -5,7 +5,7 @@ const path = require('path');
 const cron = require('node-cron');
 const config = require('./config');
 const { fetchMenu, setManualMenu, clearCache, debugFetch } = require('./scraper');
-const { sendEmail, sendMail } = require('./mailer');
+const { sendEmail, sendMail, formatEmail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 const pkg = require('./package.json');
@@ -248,6 +248,36 @@ app.get('/api/admin/menu-debug', async (req, res) => {
   if (req.query.adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
   const result = await debugFetch();
   res.json(result);
+});
+
+// GET /api/admin/email-preview — náhľad denného súhrnného e-mailu (HTML)
+// Pri prázdnom dni zobrazí ukážkové dáta, nech je vidieť dizajn.
+app.get('/api/admin/email-preview', async (req, res) => {
+  if (req.query.adminPass !== config.adminPassword) {
+    return res.status(401).send('<h2 style="font-family:sans-serif">Nesprávne heslo</h2>');
+  }
+  try {
+    let orders = await loadOrders();
+    let menu = null;
+    try { menu = await fetchMenu(); } catch (e) { /* menu nie je nutné pre náhľad */ }
+    const isSample = !orders || Object.keys(orders).length === 0;
+    if (isSample) {
+      orders = {
+        'Šutaj Eštok':       { meno: 'Šutaj Eštok', polievka: 'č.1 Slepačia s mäsom, zeleninou a rezancami', jedlo: 'č.3 Pečené kuracie stehno 240g, prírodná omáčka, ryža, kompót', cas: '07:45' },
+        'Júlia Vavrinčíková':{ meno: 'Júlia Vavrinčíková', polievka: 'P3 Šošovicová s klobásou a zemiakmi', jedlo: 'J5 Vyprážané rybie file, varené zemiaky, tatárska omáčka', poznamka: 'bez cibule prosím', cas: '07:49' },
+        'The Chosen One':    { meno: 'The Chosen One', polievka: 'P2 Zeleninový vývar s haluškami', pizza: 'PZ8 Pizza- Gyros', cas: '07:24' },
+        'Marek Kováč':       { meno: 'Marek Kováč', polievka: 'P1 Slepačia s mäsom', jedlo: 'J2 Reštovaná hydinová pečeň, dusená ryža', dezert: 'D1 Domáce dukátové buchtičky', cas: '08:01' },
+      };
+    }
+    const { html } = formatEmail(orders, menu);
+    const banner = isSample
+      ? `<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#fff8e6;color:#8a6d3b;padding:10px 16px;text-align:center;font-size:13px;border-bottom:1px solid #f0e2bd">👁️ Náhľad s <strong>ukážkovými</strong> dátami — dnes ešte nikto neobjednal.</div>`
+      : `<div style="font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#eaf7ee;color:#15803d;padding:10px 16px;text-align:center;font-size:13px;border-bottom:1px solid #c9ebd3">👁️ Náhľad s <strong>dnešnými</strong> objednávkami (${Object.keys(orders).length}).</div>`;
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(banner + html);
+  } catch (err) {
+    res.status(500).send('<pre>' + err.message + '</pre>');
+  }
 });
 
 // GET /api/orders
