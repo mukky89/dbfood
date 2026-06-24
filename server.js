@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
 const { fetchMenu, setManualMenu, clearCache, debugFetch } = require('./scraper');
@@ -573,6 +574,34 @@ app.post('/api/clear-orders', async (req, res) => {
 // GET /api/version — verzia aplikacie (z package.json)
 app.get('/api/version', (req, res) => {
   res.json({ ok: true, version: pkg.version });
+});
+
+// GET /api/changelog — parsovany CHANGELOG.md (aby sa changelog v appke nemusel
+// udrziavat na dvoch miestach)
+let _changelogCache = null;
+app.get('/api/changelog', (req, res) => {
+  try {
+    if (!_changelogCache) {
+      const md = fs.readFileSync(path.join(__dirname, 'CHANGELOG.md'), 'utf8');
+      const versions = [];
+      let cur = null, sec = null;
+      md.split('\n').forEach(line => {
+        const vm = line.match(/^##\s*\[([^\]]+)\]\s*[—–-]\s*(.+?)\s*$/);
+        if (vm) { cur = { version: vm[1], date: vm[2].trim(), sections: [] }; versions.push(cur); sec = null; return; }
+        const sm = line.match(/^###\s+(.+?)\s*$/);
+        if (sm && cur) { sec = { title: sm[1].trim(), items: [] }; cur.sections.push(sec); return; }
+        const im = line.match(/^\s*[-*]\s+(.+?)\s*$/);
+        if (im && cur) {
+          if (!sec) { sec = { title: '', items: [] }; cur.sections.push(sec); }
+          sec.items.push(im[1].trim());
+        }
+      });
+      _changelogCache = versions;
+    }
+    res.json({ ok: true, versions: _changelogCache });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
 });
 
 // GET /api/design — aktualny vzhlad (verejne, pre prepnutie temy)
