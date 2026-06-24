@@ -4045,7 +4045,8 @@ function eeDebugLog(msg, type) {
   const time = new Date().toTimeString().slice(0, 8);
   _debugLog.unshift({ time, msg, type: type || '' });
   if (_debugLog.length > 15) _debugLog.pop();
-  if (_debugVisible) _updateDebugPanel();
+  // Chyba vo vykreslení debug panelu nesmie zhodiť easter-egg logiku, ktorá loguje
+  if (_debugVisible) { try { _updateDebugPanel(); } catch (e) { /* ignoruj */ } }
 }
 
 function _updateDebugPanel() {
@@ -4067,7 +4068,7 @@ function _updateDebugPanel() {
   set('ee-dbg-buffer',  wordBuffer || '(prázdny)');
   set('ee-dbg-input',   inInput ? 'ÁNO ⛔ — blokuje' : 'nie ✓',  inInput ? 'err' : 'ok');
   set('ee-dbg-active',  activeTag.toLowerCase() + activeId);
-  set('ee-dbg-wheel',   `${_wheelDirChanges}/4  (${_wheelLastDir || '—'})`);
+  set('ee-dbg-wheel',   `${_dizChanges}/3  (${_dizLastDir || '—'})`);
   set('ee-dbg-konami',  `${konamiBuffer.length}/10  [${konamiBuffer.slice(-3).join(' ')||'…'}]`);
   set('ee-dbg-esc',     `${escCount}/5`);
 
@@ -4954,7 +4955,7 @@ function updateFloatingBar() {
     </div>
     <div class="ee-dbg-row">
       <span class="ee-dbg-key">Wheel zmeny (Závrať):</span>
-      <span class="ee-dbg-val" id="ee-dbg-wheel">0/4</span>
+      <span class="ee-dbg-val" id="ee-dbg-wheel">0/3</span>
     </div>
     <div class="ee-dbg-row">
       <span class="ee-dbg-key">Konami postup:</span>

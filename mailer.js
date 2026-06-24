@@ -90,72 +90,138 @@ function formatEmail(orders, menu) {
     text += `  ${jedlo}: ${pocet}x\n`;
   });
 
-  // HTML verzia
-  const riadkyHtml = zoznam.map((o, i) => `
-    <tr style="background:${i % 2 === 0 ? '#f9f9f9' : '#ffffff'}">
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:bold">${o.meno}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.polievka ? relabel(o.polievka, 'P') : '<em style="color:#999">-</em>'}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee">${o.pizza ? `🍕 ${relabel(o.pizza, 'PZ')}` : (o.jedlo ? relabel(o.jedlo, 'J') : '<em style="color:#999">-</em>')}</td>
-      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#666;font-size:13px">${o.poznamka || ''}</td>
-    </tr>
-  `).join('');
+  // ── HTML verzia (moderný dizajn) ──────────────────────────────────────
+  const pocetPol    = zoznam.filter(o => o.polievka).length;
+  const pocetHlavne = zoznam.filter(o => o.jedlo || o.pizza).length;
+  const pocetDezert = zoznam.filter(o => o.dezert).length;
 
-  const poctyHtml = pocty.map(([jedlo, pocet]) => `
-    <tr>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee">${jedlo}</td>
-      <td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:bold;color:#e74c3c">${pocet}x</td>
-    </tr>
-  `).join('');
+  // Vykreslí "P2 Názov" → farebný odznak + text
+  const badgeCell = (val, color) => {
+    if (!val) return '<span style="color:#aeb6c0">—</span>';
+    const m = val.match(/^((?:PZ|[PJD])\d+)\s+([\s\S]*)$/);
+    const badge = m ? m[1] : '';
+    const rest  = m ? m[2] : val;
+    const chip = badge
+      ? `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px;margin-right:7px;letter-spacing:.3px">${badge}</span>`
+      : '';
+    return `${chip}<span style="color:#2b2f36">${rest}</span>`;
+  };
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="utf-8"></head>
-    <body style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#333">
-      
-      <div style="background:#2c3e50;color:white;padding:20px 24px;border-radius:8px 8px 0 0">
-        <h1 style="margin:0;font-size:22px">🍕 Objednávky Fantozzi</h1>
-        <p style="margin:6px 0 0;opacity:0.8;font-size:14px">${dnes}</p>
-      </div>
+  const avatarColors = ['#e74c3c','#3498db','#16a34a','#9b59b6','#f39c12','#1abc9c','#e67e22','#e91e63'];
+  const riadkyHtml = zoznam.map((o, i) => {
+    const initials = (o.meno || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const av = avatarColors[(o.meno || '').charCodeAt(0) % avatarColors.length];
+    const hlavne = o.pizza ? badgeCell(`🍕 ${relabel(o.pizza, 'PZ')}`, '#e67e22') : badgeCell(o.jedlo ? relabel(o.jedlo, 'J') : '', '#c0392b');
+    const gyros  = o.pizza && /gyros/i.test(o.pizza)
+      ? `<div style="margin-top:4px;font-size:11px;font-weight:700;color:#b23827">⚠️ Pozor: môže obsahovať cibuľu</div>` : '';
+    return `
+    <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafbfc'}">
+      <td style="padding:13px 16px;border-bottom:1px solid #eef1f4;vertical-align:top;width:38px">
+        <span style="display:inline-block;width:30px;height:30px;line-height:30px;border-radius:50%;background:${av};color:#fff;font-weight:800;font-size:12px;text-align:center">${initials}</span>
+      </td>
+      <td style="padding:13px 8px;border-bottom:1px solid #eef1f4;vertical-align:top">
+        <div style="font-weight:700;color:#1b1f24;font-size:14px;margin-bottom:5px">${o.meno}</div>
+        <div style="font-size:13px;margin-bottom:3px">${badgeCell(o.polievka ? relabel(o.polievka, 'P') : '', '#1565c0')}</div>
+        <div style="font-size:13px">${hlavne}</div>
+        ${o.dezert ? `<div style="font-size:13px;margin-top:3px">${badgeCell(relabel(o.dezert, 'D'), '#8e44ad')}</div>` : ''}
+        ${gyros}
+        ${o.poznamka ? `<div style="margin-top:5px;font-size:12px;color:#8a6d3b;background:#fff8e6;border-radius:7px;padding:4px 9px;display:inline-block">📝 ${o.poznamka}</div>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
 
-      <div style="background:#e74c3c;color:white;padding:10px 24px">
-        <strong>Celkový počet objednávok: ${zoznam.length}</strong>
-      </div>
+  // Súhrn počtov — zoskupený podľa typu
+  const suhrnGroups = [
+    { title: 'Polievky',     map: mapPol,    color: '#1565c0' },
+    { title: 'Hlavné jedlá', map: mapJedlo,  color: '#c0392b' },
+    { title: 'Pizza',        map: mapPizza,  color: '#e67e22' },
+    { title: 'Dezerty',      map: mapDezert, color: '#8e44ad' },
+  ];
+  const poctyHtml = suhrnGroups.map(g => {
+    const rows = sortByNum(g.map);
+    if (!rows.length) return '';
+    const head = `<tr><td colspan="2" style="padding:16px 16px 6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:${g.color}">${g.title}</td></tr>`;
+    const body = rows.map(([k, v]) => `
+      <tr>
+        <td style="padding:8px 16px;border-bottom:1px solid #eef1f4;font-size:14px;color:#2b2f36">${k}</td>
+        <td style="padding:8px 16px;border-bottom:1px solid #eef1f4;text-align:right;white-space:nowrap">
+          <span style="display:inline-block;min-width:22px;background:${g.color};color:#fff;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;text-align:center">${v}×</span>
+        </td>
+      </tr>`).join('');
+    return head + body;
+  }).join('');
 
-      <div style="border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;padding:20px">
-        
-        <h2 style="color:#2c3e50;font-size:16px;margin-top:0">Zoznam objednávok</h2>
-        <table style="width:100%;border-collapse:collapse;font-size:14px">
-          <thead>
-            <tr style="background:#2c3e50;color:white">
-              <th style="padding:10px 12px;text-align:left">Meno</th>
-              <th style="padding:10px 12px;text-align:left">Polievka</th>
-              <th style="padding:10px 12px;text-align:left">Jedlo / Pizza</th>
-              <th style="padding:10px 12px;text-align:left">Poznámka</th>
+  const statCard = (num, label, color) => `
+    <td width="33.33%" style="padding:6px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f9fb;border:1px solid #eef1f4;border-radius:14px">
+        <tr><td style="padding:14px 10px;text-align:center">
+          <div style="font-size:26px;font-weight:800;color:${color};line-height:1">${num}</div>
+          <div style="font-size:11px;color:#8a93a0;text-transform:uppercase;letter-spacing:.5px;margin-top:5px">${label}</div>
+        </td></tr>
+      </table>
+    </td>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="sk">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eef1f4;-webkit-font-smoothing:antialiased">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f4;padding:26px 12px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+    <tr><td align="center">
+      <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(20,30,50,.10)">
+
+        <!-- Hlavička -->
+        <tr><td style="background:#16a34a;background:linear-gradient(135deg,#0f7a3d 0%,#16a34a 55%,#22c55e 100%);padding:32px 30px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td style="vertical-align:middle">
+              <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.75)">Denný súhrn objednávok</div>
+              <div style="font-size:26px;font-weight:800;color:#ffffff;margin-top:6px">🍕 Fantozzi Objednávky</div>
+              <div style="font-size:14px;color:rgba(255,255,255,.85);margin-top:4px">${dnes}</div>
+            </td>
+            <td style="vertical-align:middle;text-align:right;white-space:nowrap">
+              <span style="display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 16px;color:#fff;font-weight:800;font-size:15px">${zoznam.length} ${zoznam.length === 1 ? 'objednávka' : (zoznam.length < 5 ? 'objednávky' : 'objednávok')}</span>
+            </td>
+          </tr></table>
+        </td></tr>
+
+        <!-- Štatistické karty -->
+        <tr><td style="padding:18px 18px 2px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            ${statCard(zoznam.length, 'Objednávok', '#16a34a')}
+            ${statCard(pocetPol, 'Polievok', '#1565c0')}
+            ${statCard(pocetHlavne, 'Hlavných jedál', '#c0392b')}
+          </tr></table>
+        </td></tr>
+
+        <!-- Zoznam objednávok -->
+        <tr><td style="padding:18px 24px 4px">
+          <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">👥 Kto si čo objednal</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f4;border-radius:14px;overflow:hidden">
+            ${riadkyHtml}
+          </table>
+        </td></tr>
+
+        <!-- Súhrn počtov -->
+        <tr><td style="padding:18px 24px 6px">
+          <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">📊 Súhrn počtov</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f4;border-radius:14px;overflow:hidden">
+            ${poctyHtml}
+            <tr style="background:#f7f9fb">
+              <td style="padding:12px 16px;font-weight:800;color:#16a34a;font-size:14px">Spolu objednávok</td>
+              <td style="padding:12px 16px;text-align:right"><span style="display:inline-block;background:#16a34a;color:#fff;font-weight:800;font-size:14px;padding:4px 12px;border-radius:999px">${zoznam.length}</span></td>
             </tr>
-          </thead>
-          <tbody>${riadkyHtml}</tbody>
-        </table>
+          </table>
+        </td></tr>
 
-        <h2 style="color:#2c3e50;font-size:16px;margin-top:24px">Súhrn počtov</h2>
-        <table style="width:50%;border-collapse:collapse;font-size:14px">
-          <thead>
-            <tr style="background:#ecf0f1">
-              <th style="padding:8px 12px;text-align:left">Položka</th>
-              <th style="padding:8px 12px;text-align:left">Počet</th>
-            </tr>
-          </thead>
-          <tbody>${poctyHtml}</tbody>
-        </table>
+        <!-- Pätička -->
+        <tr><td style="padding:18px 24px 28px;text-align:center">
+          <div style="font-size:12px;color:#aab2bd">Odoslané automaticky o 10:00 · <strong style="color:#8a93a0">Fantozzi Objednávkový Systém</strong></div>
+        </td></tr>
 
-      </div>
-
-      <p style="font-size:12px;color:#999;margin-top:16px;text-align:center">
-        Odoslané automaticky o 10:00 • Fantozzi Objednávkový Systém
-      </p>
-    </body>
-    </html>
-  `;
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
   return {
     subject: `Objednavky Fantozzi - ${dnes} (${zoznam.length}x)`,
@@ -246,4 +312,4 @@ async function sendEmail(orders, menu) {
   return sendMail({ to: config.emailRecipient, subject, text, html });
 }
 
-module.exports = { sendEmail, sendMail, createTransporter };
+module.exports = { sendEmail, sendMail, createTransporter, formatEmail };

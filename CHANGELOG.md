@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.10.0] — 2026-06-24
+
+### Zmenené
+- **Nový moderný dizajn e-mailov** — súhrnný denný e-mail aj e-mail s QR platbou dostali svieži, responzívny vzhľad: gradientová hlavička, štatistické karty, avatary, farebné odznaky položiek (P/J/PZ/D), prehľadný súhrn počtov a upozornenie na cibuľu pri Gyros.
+
+### Opravené
+- **Easter eggy nefungovali pri otvorenom debug paneli** — debug panel sa odkazoval na premennú zo starého scroll-detektora (`_wheelDirChanges`), čo pri každom stlačení klávesy vyhodilo chybu a prerušilo spracovanie typing-eggov (napr. `jedlo`). Odkaz opravený a vykresľovanie panelu je teraz odolné voči chybám.
+
 ## [1.9.2] — 2026-06-23
 
 ### Pridané

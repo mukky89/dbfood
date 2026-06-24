@@ -703,36 +703,96 @@ app.post('/api/send-qr-email', async (req, res) => {
     });
 
     const datumStr = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-    const items = [
-      polievka ? `🍲 ${relabel(polievka,'P')}` : null,
-      jedlo    ? `🍽️ ${relabel(jedlo,'J')}`   : null,
-      pizza    ? `🍕 ${relabel(pizza,'PZ')}`   : null,
-      dezert   ? `🍮 ${relabel(dezert,'D')}`  : null,
-    ].filter(Boolean);
     const base64Data = qrBase64.replace(/^data:image\/png;base64,/, '');
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;color:#333">
-  <div style="background:#2c3e50;color:white;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center">
-    <div style="font-size:36px">🍕</div>
-    <h2 style="margin:8px 0 0">Fantozzi — QR platba</h2>
-    <p style="margin:4px 0 0;opacity:.8;font-size:14px">${datumStr}</p>
-  </div>
-  <div style="border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;padding:24px">
-    ${meno ? `<p style="font-size:15px;margin-top:0">Ahoj <strong>${meno}</strong>! Tu je tvoj QR kód pre platbu obeda.</p>` : ''}
-    <div style="text-align:center;margin:16px 0">
-      <div style="font-size:32px;font-weight:900;color:#e74c3c;margin:10px 0">${cena.celkom.toFixed(2)} €</div>
-      <div style="font-size:13px;color:#666;margin:8px 0">📎 QR kód pre platbu nájdeš v prílohe (<strong>qr-platba.png</strong>)</div>
-      <div style="font-size:12px;color:#999;font-family:monospace;background:#f5f5f5;padding:6px 12px;border-radius:6px;display:inline-block">IBAN: ${platba.iban}</div>
-    </div>
-    <div style="background:#f9f9f9;border-radius:8px;padding:14px;margin-top:16px">
-      <div style="font-size:12px;font-weight:700;color:#999;text-transform:uppercase;margin-bottom:8px">Objednávka</div>
-      ${items.map(i => `<div style="font-size:14px;padding:3px 0">${i}</div>`).join('')}
-      ${poznamka ? `<div style="font-size:13px;color:#f39c12;margin-top:6px;font-style:italic">📝 ${poznamka}</div>` : ''}
-    </div>
-    <p style="font-size:12px;color:#999;margin-top:20px;text-align:center">Naskenuj QR kód v banking appke (SLSP, VÚB, Tatra, ČSOB, mBank, Raiffeisen)</p>
-  </div>
-</body></html>`;
+    // "P2 Názov" → farebný odznak + text
+    const itemRow = (val, emoji, color) => {
+      const m = val.match(/^((?:PZ|[PJD])\d+)\s+([\s\S]*)$/);
+      const badge = m ? m[1] : '';
+      const rest  = m ? m[2] : val;
+      return `<tr>
+        <td style="padding:9px 0;border-bottom:1px solid #eef1f4;font-size:14px;color:#2b2f36">
+          <span style="display:inline-block;width:22px">${emoji}</span>
+          ${badge ? `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:7px;margin:0 7px 0 2px">${badge}</span>` : ''}${rest}
+        </td></tr>`;
+    };
+    const itemsHtml = [
+      polievka ? itemRow(relabel(polievka, 'P'), '🍲', '#1565c0') : '',
+      jedlo    ? itemRow(relabel(jedlo, 'J'), '🍽️', '#c0392b') : '',
+      pizza    ? itemRow(relabel(pizza, 'PZ'), '🍕', '#e67e22') : '',
+      dezert   ? itemRow(relabel(dezert, 'D'), '🍮', '#8e44ad') : '',
+    ].join('');
+    const gyrosWarn = pizza && /gyros/i.test(pizza)
+      ? `<tr><td style="padding:8px 0 0"><span style="display:inline-block;font-size:12px;font-weight:700;color:#b23827;background:#fdecea;border:1px solid #f5c6bf;border-radius:8px;padding:3px 10px">⚠️ Pozor: môže obsahovať cibuľu</span></td></tr>`
+      : '';
+    const detailRow = (label, value) => `
+      <tr>
+        <td style="padding:7px 0;font-size:13px;color:#8a93a0;width:96px">${label}</td>
+        <td style="padding:7px 0;font-size:13px;color:#2b2f36;font-family:'SF Mono',Menlo,Consolas,monospace;word-break:break-all">${value}</td>
+      </tr>`;
+
+    const html = `<!DOCTYPE html>
+<html lang="sk">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eef1f4;-webkit-font-smoothing:antialiased">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f4;padding:26px 12px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+    <tr><td align="center">
+      <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(20,30,50,.10)">
+
+        <!-- Hlavička -->
+        <tr><td style="background:#16a34a;background:linear-gradient(135deg,#0f7a3d 0%,#16a34a 55%,#22c55e 100%);padding:30px 28px;text-align:center">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.78)">QR platba za obed</div>
+          <div style="font-size:24px;font-weight:800;color:#fff;margin-top:6px">🍕 Fantozzi</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);margin-top:4px">${datumStr}</div>
+        </td></tr>
+
+        <tr><td style="padding:24px 28px 6px">
+          ${meno ? `<p style="font-size:15px;margin:0 0 16px;color:#2b2f36">Ahoj <strong>${meno}</strong>! 👋 Tu je tvoja platba za obed.</p>` : ''}
+
+          <!-- Suma -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0;border-radius:16px">
+            <tr><td style="padding:20px;text-align:center">
+              <div style="font-size:12px;color:#15803d;font-weight:700;text-transform:uppercase;letter-spacing:.6px">Suma na úhradu</div>
+              <div style="font-size:38px;font-weight:800;color:#15803d;line-height:1;margin-top:8px">${cena.celkom.toFixed(2)} €</div>
+            </td></tr>
+          </table>
+
+          <!-- QR príloha -->
+          <div style="text-align:center;margin:18px 0 6px">
+            <span style="display:inline-block;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:600;padding:9px 16px;border-radius:999px">📎 QR kód nájdeš v prílohe <strong>qr-platba.png</strong></span>
+          </div>
+        </td></tr>
+
+        <!-- Platobné údaje -->
+        <tr><td style="padding:10px 28px 4px">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:4px">Platobné údaje</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f9fb;border:1px solid #eef1f4;border-radius:14px;padding:6px 16px">
+            ${detailRow('IBAN', platba.iban)}
+            ${platba.vs ? detailRow('VS', platba.vs) : ''}
+            ${detailRow('Poznámka', sprava)}
+          </table>
+        </td></tr>
+
+        <!-- Objednávka -->
+        <tr><td style="padding:16px 28px 4px">
+          <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:4px">Tvoja objednávka</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #eef1f4;border-radius:14px;padding:4px 16px">
+            ${itemsHtml}
+            ${gyrosWarn}
+            ${poznamka ? `<tr><td style="padding:8px 0 2px"><span style="display:inline-block;font-size:13px;color:#8a6d3b;background:#fff8e6;border-radius:8px;padding:4px 10px">📝 ${poznamka}</span></td></tr>` : ''}
+          </table>
+        </td></tr>
+
+        <!-- Pätička -->
+        <tr><td style="padding:18px 28px 28px;text-align:center">
+          <div style="font-size:12px;color:#aab2bd;line-height:1.6">Naskenuj QR kód v bankovej aplikácii<br><span style="color:#8a93a0">SLSP · VÚB · Tatra banka · ČSOB · mBank · Raiffeisen</span></div>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
     const result = await sendMail({
       to: email.trim(),
