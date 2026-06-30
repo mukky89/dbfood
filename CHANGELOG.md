@@ -5,13 +5,21 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.12.1] — 2026-06-30
+
+### Opravené
+- **Horné tlačidlo „Prihlásiť" naozaj funguje** — skutočnou príčinou bolo predčasné naviazanie `click` poslucháča na `#konami-overlay`, ktorý v DOM existuje až za koncom skriptu. `getElementById` vracal `null`, `.addEventListener` vyhodil chybu a prerušil zvyšok skriptu, takže `userBadgeClick` (a ďalšie funkcie) zostali nefunkčné. Naviazanie je teraz odložené po `DOMContentLoaded`.
+
+### Zmenené
+- **Poznámky k jedlám sú teraz priradené priamo k číslu jedla/pizze** — v súhrnnej notifikácii aj v e-maile sa poznámka zobrazí pod príslušnou položkou (napr. pod „J3 …" → „📝 bez ryže (Marek)"), namiesto samostatného zoznamu podľa mien.
+
 ## [1.12.0] — 2026-06-30
 
 ### Opravené
-- **Prihlásenie cez horné tlačidlo „Prihlásiť"** — klik na odznak používateľa v hlavičke, keď nie si prihlásený, teraz rovno otvorí prihlasovacie okno. Predtým sa omylom spustilo odhlásenie (`Odhlásiť sa ako null?`) a prihlásiť sa dalo len cez banner.
+- **Prihlásenie cez horné tlačidlo „Prihlásiť"** — klik na odznak používateľa v hlavičke, keď nie si prihlásený, otvorí prihlasovacie okno namiesto pokusu o odhlásenie (`Odhlásiť sa ako null?`).
 
 ### Pridané
-- **Poznámky k jedlám aj v notifikácii a e-maile** — súhrnný push (po uzávierke) má teraz sekciu „Poznamky" so zoznamom mien a ich poznámok. Denný súhrnný e-mail dostal samostatnú prehľadnú sekciu „📝 Poznámky k jedlám" (popri poznámke pri každej objednávke) v textovej aj HTML verzii.
+- **Poznámky k jedlám aj v notifikácii a e-maile** — súhrnný push (po uzávierke) a denný e-mail teraz obsahujú poznámky k jedlám.
 
 ## [1.11.0] — 2026-06-24
 

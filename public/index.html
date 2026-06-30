@@ -4298,9 +4298,18 @@ function closeKonami() {
   el.classList.add('out');
   setTimeout(() => { el.style.display = 'none'; el.classList.remove('out'); }, 280);
 }
-document.getElementById('konami-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeKonami();
-});
+// Pozor: tento skript beží počas parsovania, ale #konami-overlay je v DOM až
+// za koncom tohto skriptu, takže v čase behu ešte neexistuje. Bez odloženia by
+// getElementById vrátil null a .addEventListener by vyhodil chybu, ktorá preruší
+// zvyšok skriptu (a napr. prihlasovacie tlačidlo by potom nefungovalo).
+// Preto bindujeme až po DOMContentLoaded.
+(function bindKonamiOverlay() {
+  const bind = () => document.getElementById('konami-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) closeKonami();
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
+})();
 
 // ── Easter egg 2: Napíš "pizza" ───────────────────────────────────────────
 let pizzaToastTimeout;

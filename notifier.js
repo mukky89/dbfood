@@ -79,14 +79,31 @@ function countItems(entries, getter, prefix) {
   return map;
 }
 
-function formatNotes(entries) {
-  const withNotes = entries.filter(o => o.poznamka && String(o.poznamka).trim());
-  if (withNotes.length === 0) return '';
-  const lines = withNotes.map(o => `${o.meno}: ${String(o.poznamka).trim()}`).join('\n');
-  return `\n\nPoznamky\n-------------\n${lines}`;
+// Priradi poznamky ku konkretnemu cislu jedla/pizze.
+// Poznamka je ulozena ako "🍽️ <text> | 🍕 <text>" — emoji urcuje, ci ide o jedlo alebo pizzu.
+// Vrati mapu: kluc polozky (napr. "J3" / "PZ2") → pole "text (Meno)".
+function notesByItem(entries) {
+  const map = {};
+  entries.forEach(o => {
+    if (!o.poznamka) return;
+    String(o.poznamka).split('|').forEach(raw => {
+      const part = raw.trim();
+      if (!part) return;
+      let val, prefix;
+      if (part.startsWith('🍽️'))      { val = o.jedlo; prefix = 'J'; }
+      else if (part.startsWith('🍕')) { val = o.pizza; prefix = 'PZ'; }
+      else                            { val = o.pizza || o.jedlo; prefix = o.pizza ? 'PZ' : 'J'; }
+      if (!val) return;
+      const key = (relabel(val, prefix).match(/^((?:č\.|PZ|[PJD])\d+)/i) || [])[1];
+      if (!key) return;
+      const text = part.replace(/^🍽️\s*/, '').replace(/^🍕\s*/, '').trim();
+      (map[key] = map[key] || []).push(`${text} (${o.meno})`);
+    });
+  });
+  return map;
 }
 
-function formatSection(title, map) {
+function formatSection(title, map, notesMap) {
   const keys = Object.keys(map);
   if (keys.length === 0) return '';
   const lines = keys
@@ -95,7 +112,12 @@ function formatSection(title, map) {
       const nb = parseInt(b.replace(/\D/g, '')) || 0;
       return na - nb;
     })
-    .map(k => `${map[k]}x ${k}`)
+    .map(k => {
+      let line = `${map[k]}x ${k}`;
+      const notes = notesMap && notesMap[k];
+      if (notes && notes.length) line += notes.map(n => `\n   📝 ${n}`).join('');
+      return line;
+    })
     .join('\n');
   return `\n${title}\n${lines}`;
 }
@@ -110,13 +132,14 @@ async function notifySuhrn(orders, menu) {
   const polievkaMap = countItems(entries, o => o.polievka, 'P');
   const dezertMap   = countItems(entries, o => o.dezert, 'D');
 
+  const notesMap = notesByItem(entries);
+
   let msg = `Celkom objednavok ${entries.length}\n`;
   msg += `\nSuhrn\n-------------`;
   msg += formatSection('Polievka:', polievkaMap);
-  msg += formatSection('\nJedlo:', jedlaMap);
-  msg += formatSection('\nPizza:', pizzaMap);
+  msg += formatSection('\nJedlo:', jedlaMap, notesMap);
+  msg += formatSection('\nPizza:', pizzaMap, notesMap);
   msg += formatSection('\nDezert:', dezertMap);
-  msg += formatNotes(entries);
 
   return sendPush({ title: `Objednavky uzavrete - ${datum}`, message: msg, priority: 'high', tags: 'bell,memo' });
 }

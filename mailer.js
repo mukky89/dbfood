@@ -10,6 +10,30 @@ function relabel(val, prefix) {
   return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
 }
 
+// Priradi poznamky ku konkretnemu cislu jedla/pizze.
+// Poznamka je ulozena ako "🍽️ <text> | 🍕 <text>" — emoji urcuje, ci ide o jedlo alebo pizzu.
+// Vrati mapu: token polozky (napr. "J3" / "PZ2") → pole { meno, text }.
+function notesByItem(zoznam) {
+  const map = {};
+  zoznam.forEach(o => {
+    if (!o.poznamka) return;
+    String(o.poznamka).split('|').forEach(raw => {
+      const part = raw.trim();
+      if (!part) return;
+      let val, prefix;
+      if (part.startsWith('🍽️'))      { val = o.jedlo; prefix = 'J'; }
+      else if (part.startsWith('🍕')) { val = o.pizza; prefix = 'PZ'; }
+      else                            { val = o.pizza || o.jedlo; prefix = o.pizza ? 'PZ' : 'J'; }
+      if (!val) return;
+      const token = (relabel(val, prefix).match(/^((?:PZ|[PJD])\d+)/) || [])[1];
+      if (!token) return;
+      const text = part.replace(/^🍽️\s*/, '').replace(/^🍕\s*/, '').trim();
+      (map[token] = map[token] || []).push({ meno: o.meno, text });
+    });
+  });
+  return map;
+}
+
 function createTransporter() {
   // Ak je v config nastaveny vlastny SMTP (napr. Brevo), pouzi ho
   if (config.smtpHost) {
@@ -85,17 +109,15 @@ function formatEmail(orders, menu) {
     if (o.poznamka) text += ` | Poznamka: ${o.poznamka}`;
     text += '\n';
   });
-  // Poznamky k jedlam (zoskupene)
-  const sPoznamkami = zoznam.filter(o => o.poznamka && String(o.poznamka).trim());
-  if (sPoznamkami.length) {
-    text += `\nPOZNAMKY K JEDLAM:\n`;
-    sPoznamkami.forEach(o => {
-      text += `  ${o.meno}: ${String(o.poznamka).trim()}\n`;
-    });
-  }
+  // Poznamky priradene ku konkretnemu cislu jedla/pizze
+  const notesMap = notesByItem(zoznam);
   text += `\nSUHRN POCTY:\n`;
   pocty.forEach(([jedlo, pocet]) => {
     text += `  ${jedlo}: ${pocet}x\n`;
+    const token = (jedlo.match(/((?:PZ|[PJD])\d+)/) || [])[1];
+    (notesMap[token] || []).forEach(n => {
+      text += `     📝 ${n.text} (${n.meno})\n`;
+    });
   });
 
   // ── HTML verzia (moderný dizajn) ──────────────────────────────────────
@@ -149,29 +171,23 @@ function formatEmail(orders, menu) {
     const rows = sortByNum(g.map);
     if (!rows.length) return '';
     const head = `<tr><td colspan="2" style="padding:16px 16px 6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:${g.color}">${g.title}</td></tr>`;
-    const body = rows.map(([k, v]) => `
+    const body = rows.map(([k, v]) => {
+      const token = (k.match(/((?:PZ|[PJD])\d+)/) || [])[1];
+      const itemNotes = notesMap[token] || [];
+      const noteRows = itemNotes.map(n => `
       <tr>
-        <td style="padding:8px 16px;border-bottom:1px solid #eef1f4;font-size:14px;color:#2b2f36">${k}</td>
-        <td style="padding:8px 16px;border-bottom:1px solid #eef1f4;text-align:right;white-space:nowrap">
+        <td colspan="2" style="padding:0 16px 8px 16px;border-bottom:1px solid #eef1f4;font-size:12px;color:#8a6d3b">📝 ${n.text} <span style="color:#aab2bd">· ${n.meno}</span></td>
+      </tr>`).join('');
+      return `
+      <tr>
+        <td style="padding:8px 16px;${itemNotes.length ? '' : 'border-bottom:1px solid #eef1f4;'}font-size:14px;color:#2b2f36">${k}</td>
+        <td style="padding:8px 16px;${itemNotes.length ? '' : 'border-bottom:1px solid #eef1f4;'}text-align:right;white-space:nowrap">
           <span style="display:inline-block;min-width:22px;background:${g.color};color:#fff;font-weight:800;font-size:13px;padding:3px 10px;border-radius:999px;text-align:center">${v}×</span>
         </td>
-      </tr>`).join('');
+      </tr>${noteRows}`;
+    }).join('');
     return head + body;
   }).join('');
-
-  // Poznámky k jedlám — zoskupený zoznam (zvýraznené špeciálne požiadavky)
-  const poznamkoveRiadky = zoznam.filter(o => o.poznamka && String(o.poznamka).trim());
-  const poznamkyHtml = poznamkoveRiadky.length ? `
-        <tr><td style="padding:18px 24px 6px">
-          <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">📝 Poznámky k jedlám</div>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f4;border-radius:14px;overflow:hidden">
-            ${poznamkoveRiadky.map((o, i) => `
-            <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafbfc'}">
-              <td style="padding:11px 16px;border-bottom:1px solid #eef1f4;font-size:13px;font-weight:700;color:#1b1f24;white-space:nowrap;vertical-align:top">${o.meno}</td>
-              <td style="padding:11px 16px;border-bottom:1px solid #eef1f4;font-size:13px;color:#8a6d3b">${String(o.poznamka).trim()}</td>
-            </tr>`).join('')}
-          </table>
-        </td></tr>` : '';
 
   const statCard = (num, label, color) => `
     <td width="33.33%" style="padding:6px">
@@ -221,7 +237,7 @@ function formatEmail(orders, menu) {
             ${riadkyHtml}
           </table>
         </td></tr>
-${poznamkyHtml}
+
         <!-- Súhrn počtov -->
         <tr><td style="padding:18px 24px 6px">
           <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">📊 Súhrn počtov</div>
