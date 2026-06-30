@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -1172,6 +1172,86 @@
       html.theme-fifa .fifa-ball.b9, html.theme-fifa .fifa-ball.b10 { display:none; }
     }
 
+    /* ════════════════════════════════════════════════════════════════════
+       TÉMA: Činčily 🐭 (.theme-chinchilla)
+       Mäkká sivo-levanduľová „fluffy" téma s nakreslenými činčilami,
+       ktoré po kliknutí pišťia (WebAudio). Aktivuje sa triedou
+       .theme-chinchilla na <html>.
+       ════════════════════════════════════════════════════════════════════ */
+    html.theme-chinchilla {
+      --brand:#6b5e8c; --accent:#b48ec9; --orange:#e09a55;
+      --bg:#f4f0fa; --text:#3c3552; --muted:#8a82a0; --border:#e6dcf3;
+    }
+    html.theme-chinchilla body {
+      background:#efeaf7; color:var(--text);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(180,142,201,.12), transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(150,151,173,.14), transparent 46%);
+    }
+    html.theme-chinchilla header { background:linear-gradient(135deg,#8f7bb0 0%,#a98fc6 55%,#c6abda 100%); }
+    html.theme-chinchilla .hdr-sub { color:#f1e9fb; }
+    html.theme-chinchilla .phone-dropdown { background:#fbf8ff; border:1px solid #e6dcf3; box-shadow:0 12px 36px rgba(120,95,160,.22); }
+    html.theme-chinchilla .phone-item:hover { background:#f1e7fb; color:var(--brand); }
+    html.theme-chinchilla .card { background:#fbf8ff; border:1px solid #e7ddf3; border-radius:20px; box-shadow:0 8px 26px rgba(120,95,160,.12); }
+    html.theme-chinchilla .card-title { color:var(--brand); }
+    html.theme-chinchilla .menu-item { background:#f7f2fd; border:2px solid #ece2f7; border-radius:16px; }
+    html.theme-chinchilla .menu-item:hover,
+    html.theme-chinchilla .menu-item.selected { border-color:var(--accent); background:#f1e7fb; box-shadow:0 4px 16px rgba(180,142,201,.28); }
+    html.theme-chinchilla .menu-item.hot-dish { border-color:var(--orange) !important; background:linear-gradient(135deg, rgba(224,154,85,.12), rgba(180,142,201,.10)) !important; }
+    html.theme-chinchilla .menu-item input[type=radio],
+    html.theme-chinchilla .menu-item input[type=checkbox] { accent-color:var(--accent); }
+    html.theme-chinchilla .allergen-legend { background:#f7f2fd; border-color:var(--border); }
+    html.theme-chinchilla textarea,
+    html.theme-chinchilla .modal input,
+    html.theme-chinchilla input[type=text],
+    html.theme-chinchilla input[type=email],
+    html.theme-chinchilla input[type=password],
+    html.theme-chinchilla input[type=date],
+    html.theme-chinchilla input[type=time] { background:#fff; border:2px solid var(--border); color:var(--text); border-radius:12px; }
+    html.theme-chinchilla textarea:focus,
+    html.theme-chinchilla input:focus { border-color:var(--accent) !important; box-shadow:0 0 0 4px rgba(180,142,201,.22); }
+    html.theme-chinchilla .btn-primary { background:linear-gradient(135deg,#b48ec9,#8f7bb0); color:#fff; box-shadow:0 6px 18px rgba(143,123,176,.4); border-radius:14px; }
+    html.theme-chinchilla .btn-primary:hover { filter:brightness(1.07); background:linear-gradient(135deg,#b48ec9,#8f7bb0); }
+    html.theme-chinchilla .btn-primary:disabled { background:#e0d6ee; color:var(--muted); box-shadow:none; }
+    html.theme-chinchilla .btn-qr { background:linear-gradient(135deg,#7aa7c9,#6b8fb0); color:#fff; border-radius:14px; }
+    html.theme-chinchilla .btn-secondary { background:#f1e7fb; color:var(--brand); border:1px solid #ddcdef; }
+    html.theme-chinchilla .btn-danger { background:#fbe4ec; color:#c0567f; border:1px solid #f0c5d6; }
+    html.theme-chinchilla .order-avatar,
+    html.theme-chinchilla .menu-item-num,
+    html.theme-chinchilla .summary-num,
+    html.theme-chinchilla .admin-num-badge { background:linear-gradient(135deg,#a98fc6,#8688a0) !important; color:#fff; }
+    html.theme-chinchilla .summary-table th,
+    html.theme-chinchilla .admin-table th { background:linear-gradient(135deg,#a98fc6,#8f7bb0); color:#fff; }
+    html.theme-chinchilla .summary-table tr:nth-child(even) td,
+    html.theme-chinchilla .admin-table tr:nth-child(even) td { background:#f7f2fd; }
+    html.theme-chinchilla #user-badge { background:rgba(255,255,255,.2); }
+
+    /* Nakreslené činčily — dekoratívne kamarátky (len v .theme-chinchilla) */
+    #chinchilla-friends { display:none; }
+    html.theme-chinchilla #chinchilla-friends { display:block; }
+    .chin { position:fixed; z-index:140; cursor:pointer; user-select:none; -webkit-user-select:none;
+            filter:drop-shadow(0 6px 10px rgba(80,60,110,.28)); transition:transform .15s ease; }
+    .chin:hover { transform:scale(1.08) rotate(-3deg); }
+    .chin:active { transform:scale(.9); }
+    .chin .chin-svg { width:100%; height:auto; display:block; }
+    .chin.c-mascot { right:18px; bottom:88px; width:122px; animation:chinBob 3.2s ease-in-out infinite; }
+    .chin.c-left   { left:12px; top:128px; width:78px; animation:chinPeek 5s ease-in-out infinite; }
+    .chin.c-right  { right:26px; top:30vh; width:66px; opacity:.9; animation:chinBob 4s ease-in-out infinite .6s; }
+    .chin.squeaking { animation:chinSqueak .45s ease; }
+    @keyframes chinBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes chinPeek { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
+    @keyframes chinSqueak { 0%{transform:scale(1)} 30%{transform:scale(1.18) rotate(-6deg)} 60%{transform:scale(.94) rotate(4deg)} 100%{transform:scale(1)} }
+    #chin-bubble { position:fixed; right:150px; bottom:172px; z-index:141; background:#fff; color:#6b5e8c;
+                   padding:9px 15px; border-radius:18px 18px 4px 18px; font-weight:800; font-size:14px;
+                   box-shadow:0 8px 22px rgba(120,95,160,.28); display:none; white-space:nowrap; }
+    #chin-bubble.show { display:block; animation:bubblePop .3s ease; }
+    @keyframes bubblePop { from{transform:scale(.5) translateY(8px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+    @media (max-width:640px) {
+      .chin.c-left, .chin.c-right { display:none; }
+      .chin.c-mascot { width:92px; bottom:80px; right:10px; }
+      #chin-bubble { right:110px; bottom:150px; font-size:13px; }
+    }
+
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
     .theme-option:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,.12); }
@@ -1239,6 +1319,57 @@
   <span class="fifa-ball b8" onclick="kickBall(this)">🧤</span>
   <span class="fifa-ball b9" onclick="kickBall(this)">⚽</span>
   <span class="fifa-ball b10" onclick="kickBall(this)">⚽</span>
+</div>
+
+<!-- Činčily 🐭 — nakreslené kamarátky (viditeľné len v téme .theme-chinchilla). Klik = pišťanie (WebAudio). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chinchilla-symbol" viewBox="0 0 140 152">
+    <!-- chvost -->
+    <path d="M101 104 q34 -10 33 26 q-2 28 -31 17 q15 -24 -2 -43 z" fill="#85879f"/>
+    <path d="M106 110 q21 1 18 23" fill="none" stroke="#73758b" stroke-width="2.4" stroke-linecap="round"/>
+    <!-- uši -->
+    <ellipse cx="45" cy="33" rx="18" ry="22" fill="#9a9bad"/>
+    <ellipse cx="95" cy="31" rx="17" ry="21" fill="#9a9bad"/>
+    <ellipse cx="46" cy="35" rx="9.5" ry="13" fill="#f2b6c6"/>
+    <ellipse cx="94" cy="33" rx="9" ry="12" fill="#f2b6c6"/>
+    <!-- telo -->
+    <ellipse cx="70" cy="95" rx="46" ry="48" fill="#9a9bad"/>
+    <!-- hlava -->
+    <ellipse cx="69" cy="58" rx="42" ry="38" fill="#a7a8ba"/>
+    <!-- bruško -->
+    <ellipse cx="70" cy="104" rx="31" ry="35" fill="#eae7f2"/>
+    <!-- líčka -->
+    <circle cx="40" cy="67" r="8.5" fill="#f2b6c6" opacity=".55"/>
+    <circle cx="98" cy="67" r="8.5" fill="#f2b6c6" opacity=".55"/>
+    <!-- oči -->
+    <circle cx="54" cy="57" r="9.5" fill="#2c2438"/>
+    <circle cx="85" cy="57" r="9.5" fill="#2c2438"/>
+    <circle cx="57.5" cy="53.5" r="3.2" fill="#fff"/>
+    <circle cx="88.5" cy="53.5" r="3.2" fill="#fff"/>
+    <!-- nos -->
+    <ellipse cx="69.5" cy="69" rx="5.2" ry="3.6" fill="#df8aa0"/>
+    <!-- ústa -->
+    <path d="M69.5 72 q-6 7 -12 3 M69.5 72 q6 7 12 3" fill="none" stroke="#6b5b73" stroke-width="2.2" stroke-linecap="round"/>
+    <!-- fúzy -->
+    <g stroke="#cfd0db" stroke-width="1.7" stroke-linecap="round">
+      <path d="M50 71 q-22 -3 -33 -9"/>
+      <path d="M50 75 q-22 2 -33 3"/>
+      <path d="M89 71 q22 -3 33 -9"/>
+      <path d="M89 75 q22 2 33 3"/>
+    </g>
+    <!-- labky -->
+    <ellipse cx="52" cy="131" rx="11" ry="7.5" fill="#b6b7c6"/>
+    <ellipse cx="88" cy="131" rx="11" ry="7.5" fill="#b6b7c6"/>
+    <!-- maškrta v labkách -->
+    <ellipse cx="70" cy="118" rx="7.5" ry="5.5" fill="#caa66a"/>
+    <ellipse cx="70" cy="116.5" rx="4" ry="2.2" fill="#dcbd86"/>
+  </symbol>
+</svg>
+<div id="chinchilla-friends" aria-hidden="true">
+  <div class="chin c-mascot" onclick="chinchillaSqueak(this)" title="Pohlaď činčilu 🐭"><svg class="chin-svg" viewBox="0 0 140 152"><use href="#chinchilla-symbol"/></svg></div>
+  <div class="chin c-left"   onclick="chinchillaSqueak(this)" title="Pišti! 🐭"><svg class="chin-svg" viewBox="0 0 140 152"><use href="#chinchilla-symbol"/></svg></div>
+  <div class="chin c-right"  onclick="chinchillaSqueak(this)" title="Pišti! 🐭"><svg class="chin-svg" viewBox="0 0 140 152"><use href="#chinchilla-symbol"/></svg></div>
+  <div id="chin-bubble"></div>
 </div>
 
 <div id="countdown-bar" onclick="countdownClick()" style="cursor:default">
@@ -1718,6 +1849,13 @@
             <div class="t-name">FIFA 2026</div>
             <div class="t-desc">Futbalová edícia — zelený trávnik, kresba čiar ihriska, dres a štadiónová atmosféra.</div>
             <div class="theme-dots"><span style="background:#0a7d34"></span><span style="background:#ffffff"></span><span style="background:#e30613"></span></div>
+          </div>
+          <div class="theme-option" data-theme="chinchilla" onclick="saveDesignConfig('chinchilla')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🐭</div>
+            <div class="t-name">Činčily</div>
+            <div class="t-desc">Mäkká sivo-levanduľová téma — nakreslené činčily, ktoré po kliknutí pišťia (zvuky).</div>
+            <div class="theme-dots"><span style="background:#9a9bad"></span><span style="background:#b48ec9"></span><span style="background:#f2b6c6"></span></div>
           </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
@@ -2828,6 +2966,70 @@ function kickBall(el) {
   if (_ballKicks >= 5) { _ballKicks = 0; activateLoptaEgg(); }
 }
 
+// ── Téma Činčily 🐭 — zvuky (WebAudio) + interakcia ────────────────────────
+let _chinAudioCtx = null;
+function _chinCtx() {
+  if (!_chinAudioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try { _chinAudioCtx = new AC(); } catch(e) { return null; }
+  }
+  if (_chinAudioCtx.state === 'suspended') _chinAudioCtx.resume().catch(()=>{});
+  return _chinAudioCtx;
+}
+// Jedno „pip" — krátky vysoký cvrlikavý tón s rýchlym sklzom frekvencie a jemným vibratom.
+function _chinPip(ctx, startTime, baseFreq) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'triangle';
+  const f = baseFreq * (0.92 + Math.random() * 0.16);
+  osc.frequency.setValueAtTime(f * 0.7, startTime);
+  osc.frequency.exponentialRampToValueAtTime(f * 1.28, startTime + 0.05);
+  osc.frequency.exponentialRampToValueAtTime(f * 0.85, startTime + 0.13);
+  const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+  lfo.frequency.value = 30; lfoGain.gain.value = f * 0.05;
+  lfo.connect(lfoGain).connect(osc.frequency);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.22, startTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.15);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(startTime); lfo.start(startTime);
+  osc.stop(startTime + 0.17); lfo.stop(startTime + 0.17);
+}
+// Pišťanie činčily — 1–2 pípnutia (alebo zadaný počet).
+function _chinSqueakSound(pips) {
+  const ctx = _chinCtx();
+  if (!ctx) return;
+  const n = pips || (Math.random() < 0.5 ? 1 : 2);
+  const base = 1500 + Math.random() * 500;
+  for (let i = 0; i < n; i++) _chinPip(ctx, ctx.currentTime + i * 0.17, base);
+}
+const CHIN_BUBBLES = ['Pip pip! 🐭', 'Chrum chrum 🌿', 'Maškrtu? 😋', 'Ňuňu!', 'Píííp!', 'Som fluffy ☁️', 'Pohlaď ma!'];
+function chinchillaSqueak(el) {
+  _chinSqueakSound();
+  if (el) {
+    el.classList.remove('squeaking'); void el.offsetWidth; el.classList.add('squeaking');
+    setTimeout(() => el.classList.remove('squeaking'), 480);
+  }
+  const bubble = document.getElementById('chin-bubble');
+  if (bubble) {
+    bubble.textContent = CHIN_BUBBLES[Math.floor(Math.random() * CHIN_BUBBLES.length)];
+    bubble.classList.add('show');
+    clearTimeout(bubble._hide);
+    bubble._hide = setTimeout(() => bubble.classList.remove('show'), 1600);
+  }
+}
+// Prepnutie témy: po prvom geste odomkni audio, pri aktivácii zapišti na privítanie.
+let _chinThemeActive = false, _chinAudioUnlocked = false;
+function setupChinchillaTheme(active) {
+  if (active && !_chinAudioUnlocked) {
+    _chinAudioUnlocked = true;
+    document.addEventListener('pointerdown', () => _chinCtx(), { once: true });
+  }
+  if (active && !_chinThemeActive) setTimeout(() => _chinSqueakSound(2), 180);
+  _chinThemeActive = active;
+}
+
 // ── FIFA 2026 — výsledky v hlavičke (ticker) ───────────────────────────────
 let _fifaMatches = [];
 let _fifaIdx = 0;
@@ -3133,13 +3335,14 @@ function switchAdminTab(tab) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
   trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' },
   starwars:   { name: '🌌 Galaxy Far Away',  toast: '🌌 May the Food be with you!',   state: 'Aktívna téma: Galaxy Far Away — Star Wars.' },
-  fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' }
+  fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' },
+  chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -3147,6 +3350,8 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-trattoria',  theme === 'trattoria');
   document.documentElement.classList.toggle('theme-starwars',   theme === 'starwars');
   document.documentElement.classList.toggle('theme-fifa',       theme === 'fifa');
+  document.documentElement.classList.toggle('theme-chinchilla', theme === 'chinchilla');
+  if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   try { localStorage.setItem('fob_theme', theme); } catch(e) {}
   return theme;
 }

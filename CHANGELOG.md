@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.13.0] — 2026-06-30
+
+### Pridané
+- **Nová téma „🐭 Činčily"** — mäkký sivo-levanduľový „fluffy" vzhľad (zaoblené karty, levanduľová hlavička, jemné pozadie). Súčasťou sú **nakreslené činčily** (SVG): maskot vpravo dole + dve menšie, ktoré peknú z rohov. **Po kliknutí na činčilu vydávajú zvuky** — pišťanie syntetizované cez WebAudio — a zobrazí sa bublina (napr. „Pip pip! 🐭"). Pri zapnutí témy zaznie privítacie pišťanie. Téma sa vyberá v admin paneli → Vzhľad (globálne pre všetkých návštevníkov).
+
 ## [1.12.1] — 2026-06-30
 
 ### Opravené
