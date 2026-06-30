@@ -79,6 +79,13 @@ function countItems(entries, getter, prefix) {
   return map;
 }
 
+function formatNotes(entries) {
+  const withNotes = entries.filter(o => o.poznamka && String(o.poznamka).trim());
+  if (withNotes.length === 0) return '';
+  const lines = withNotes.map(o => `${o.meno}: ${String(o.poznamka).trim()}`).join('\n');
+  return `\n\nPoznamky\n-------------\n${lines}`;
+}
+
 function formatSection(title, map) {
   const keys = Object.keys(map);
   if (keys.length === 0) return '';
@@ -109,6 +116,7 @@ async function notifySuhrn(orders, menu) {
   msg += formatSection('\nJedlo:', jedlaMap);
   msg += formatSection('\nPizza:', pizzaMap);
   msg += formatSection('\nDezert:', dezertMap);
+  msg += formatNotes(entries);
 
   return sendPush({ title: `Objednavky uzavrete - ${datum}`, message: msg, priority: 'high', tags: 'bell,memo' });
 }

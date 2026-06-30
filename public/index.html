@@ -4706,6 +4706,14 @@ function closeTrailerEgg() {
 let _userBadgeTimer = null;
 let _userBadgeClicks = 0;
 function userBadgeClick() {
+  // Neprihlásený → rovno otvor prihlasovací modal (žiadny egg / žiadne odhlásenie)
+  if (!currentUser) {
+    _userBadgeClicks = 0;
+    clearTimeout(_userBadgeTimer);
+    _userBadgeTimer = null;
+    showNameModal();
+    return;
+  }
   _userBadgeClicks++;
   clearTimeout(_userBadgeTimer);
   // Druhý (alebo viac) klik do 400ms → egg

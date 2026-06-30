@@ -85,6 +85,14 @@ function formatEmail(orders, menu) {
     if (o.poznamka) text += ` | Poznamka: ${o.poznamka}`;
     text += '\n';
   });
+  // Poznamky k jedlam (zoskupene)
+  const sPoznamkami = zoznam.filter(o => o.poznamka && String(o.poznamka).trim());
+  if (sPoznamkami.length) {
+    text += `\nPOZNAMKY K JEDLAM:\n`;
+    sPoznamkami.forEach(o => {
+      text += `  ${o.meno}: ${String(o.poznamka).trim()}\n`;
+    });
+  }
   text += `\nSUHRN POCTY:\n`;
   pocty.forEach(([jedlo, pocet]) => {
     text += `  ${jedlo}: ${pocet}x\n`;
@@ -151,6 +159,20 @@ function formatEmail(orders, menu) {
     return head + body;
   }).join('');
 
+  // Poznámky k jedlám — zoskupený zoznam (zvýraznené špeciálne požiadavky)
+  const poznamkoveRiadky = zoznam.filter(o => o.poznamka && String(o.poznamka).trim());
+  const poznamkyHtml = poznamkoveRiadky.length ? `
+        <tr><td style="padding:18px 24px 6px">
+          <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">📝 Poznámky k jedlám</div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eef1f4;border-radius:14px;overflow:hidden">
+            ${poznamkoveRiadky.map((o, i) => `
+            <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafbfc'}">
+              <td style="padding:11px 16px;border-bottom:1px solid #eef1f4;font-size:13px;font-weight:700;color:#1b1f24;white-space:nowrap;vertical-align:top">${o.meno}</td>
+              <td style="padding:11px 16px;border-bottom:1px solid #eef1f4;font-size:13px;color:#8a6d3b">${String(o.poznamka).trim()}</td>
+            </tr>`).join('')}
+          </table>
+        </td></tr>` : '';
+
   const statCard = (num, label, color) => `
     <td width="33.33%" style="padding:6px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f9fb;border:1px solid #eef1f4;border-radius:14px">
@@ -199,7 +221,7 @@ function formatEmail(orders, menu) {
             ${riadkyHtml}
           </table>
         </td></tr>
-
+${poznamkyHtml}
         <!-- Súhrn počtov -->
         <tr><td style="padding:18px 24px 6px">
           <div style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#9aa3af;margin-bottom:8px">📊 Súhrn počtov</div>
