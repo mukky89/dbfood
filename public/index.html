@@ -4233,7 +4233,6 @@ const EGGS_INFO = [
   { id:'obed',     emoji:'🍽️', name:'Obed Alarm',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  o-b-e-d  na klávesnici (mimo políčok)',                  effect:'Spustí obed alarm s confetti jedlom 🔔🍽️' },
   { id:'fantozzi', emoji:'🇮🇹', name:'Taliansky Mode',         diff:'med',  diffLabel:'STREDNÝ', trigger:'Napíš  f-a-n-t-o-z-z-i  na klávesnici (mimo políčok)',          effect:'Fullscreen talianská vlajka + "Benvenuti a Fantozzi! 🤌"' },
   { id:'ai',       emoji:'🤖',  name:'AI Analýza',             diff:'hard', diffLabel:'ŤAŽKÝ',   trigger:'Podrž tlačidlo „Potvrdiť objednávku" 3 sekundy bez pustenia',  effect:'FantozziGPT analyzuje objednávku a výsledok je vždy rovnaký 🍕' },
-  { id:'scroll',   emoji:'🌀',  name:'Závrať',                 diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Roluj kolieskom myši rýchlo hore-dole 3× za 2.5 sekundy',      effect:'Závrať detekovaná! Spinning overlay 😵' },
   { id:'help',     emoji:'💻',  name:'CLI Terminál',           diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  h-e-l-p  (mimo políčok)',                               effect:'Otvorí falošný Fantozzi CLI terminál s príkazmi 😄' },
   { id:'hlad',     emoji:'🤤',  name:'Hlad Alarm',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  h-l-a-d  (mimo políčok)',                               effect:'Toast správa o hladu — objednaj si niečo! 🍽️' },
   { id:'srdce',    emoji:'❤️',  name:'Srdce Dážď',             diff:'easy', diffLabel:'ĽAHKÝ',   trigger:'Napíš  s-r-d-c-e  (mimo políčok)',                             effect:'Farebný dážď sŕdc zo stropu stránky 💕' },
@@ -4687,6 +4686,7 @@ function activateAIEgg() {
 // ── Easter egg 7: Závrať — rýchle zmeny smeru rolovania (wheel + touch) ──
 let _dizLastDir = null, _dizChanges = 0, _dizTimer, _dizCooldown = false;
 function _registerDizzyDir(dir) {
+  return; // Easter egg „Závrať" vypnutý
   if (_dizCooldown || !dir || dir === _dizLastDir) return;
   _dizLastDir = dir;
   _dizChanges++;
