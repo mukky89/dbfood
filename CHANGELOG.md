@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.14.0] — 2026-07-07
+
+### Pridané
+- **Predpoveď počasia pre Bratislavu Ružinov v hlavičke** — nový widget zobrazuje aktuálnu teplotu a stav počasia (emoji + slovenský popis, napr. „⛅ 24°C · Polojasno"). Dáta sa načítavajú z Open-Meteo (bez API kľúča) a obnovujú sa každých 15 minút. Widget je štýlovaný nezávisle od tém, takže zostáva zobrazený aj pri zmene vzhľadu.
+
+### Odstránené
+- **Easter egg „🌀 Závrať" bol vypnutý** — detekcia rýchleho rolovania (kolieskom myši aj dotykom) je deaktivovaná a egg je odstránený zo zoznamu tajných easter eggov (už sa nezapočítava do počtu objavených).
+
 ## [1.13.0] — 2026-06-30
 
 ### Pridané
