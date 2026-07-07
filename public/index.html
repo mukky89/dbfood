@@ -104,6 +104,15 @@
     .fifa-scores .fs-demo { font-size:10px; opacity:.7; font-style:italic; }
     @media (max-width: 980px) { .fifa-scores { display:none !important; } }
     html.theme-fifa .fifa-scores { background:rgba(255,255,255,.14); border-color:#f7a600; }
+    /* Predpoveď počasia pre Bratislavu Ružinov — vždy v hlavičke, nezávisle od témy */
+    .hdr-weather { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:5px 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
+    .hdr-weather:hover { background:rgba(255,255,255,.2); }
+    .hdr-weather .hw-icon { font-size:17px; line-height:1; }
+    .hdr-weather .hw-temp { font-weight:800; letter-spacing:.3px; }
+    .hdr-weather .hw-desc { font-size:12px; opacity:.85; }
+    .hdr-weather .hw-loc { font-size:11px; opacity:.6; }
+    @media (max-width: 860px) { .hdr-weather .hw-desc, .hdr-weather .hw-loc { display:none; } }
+    @media (max-width: 640px) { .hdr-weather { padding:4px 10px; } }
     #user-badge { background: rgba(255,255,255,.15); border-radius: 20px; padding: 4px 14px; font-size: 14px; cursor: pointer; transition: background .2s; }
     #user-badge:hover { background: rgba(255,255,255,.25); }
     .nav-link { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
@@ -1280,6 +1289,12 @@
   </h1>
   <div id="fifa-scores" class="fifa-scores" onclick="cycleFifaScore(1)" title="FIFA 2026 — klikni pre ďalší zápas" style="display:none"></div>
   <div class="header-right">
+    <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
+      <span class="hw-icon" id="hw-icon">⏳</span>
+      <span class="hw-temp" id="hw-temp">–°C</span>
+      <span class="hw-desc" id="hw-desc"></span>
+      <span class="hw-loc">Ružinov</span>
+    </div>
     <div class="phone-wrap">
       <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
         📞 <span class="phone-btn-label">Fantozzi</span>
@@ -2039,6 +2054,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setInterval(loadOrders, 30000);
   loadFifaScores();
   setInterval(loadFifaScores, 5 * 60 * 1000);
+  loadWeather();
+  setInterval(loadWeather, 15 * 60 * 1000);
 
   // Ak nie je prihlaseny, zobraz banner (nie modal)
   if (!currentUser) {
@@ -3028,6 +3045,66 @@ function setupChinchillaTheme(active) {
   }
   if (active && !_chinThemeActive) setTimeout(() => _chinSqueakSound(2), 180);
   _chinThemeActive = active;
+}
+
+// ── Počasie — Bratislava Ružinov (Open-Meteo, bez API kľúča) ──────────────
+// WMO weather code → { emoji, popis }
+function weatherInfo(code) {
+  const map = {
+    0:  ['☀️','Jasno'],
+    1:  ['🌤️','Prevažne jasno'],
+    2:  ['⛅','Polojasno'],
+    3:  ['☁️','Zamračené'],
+    45: ['🌫️','Hmla'],
+    48: ['🌫️','Mrznúca hmla'],
+    51: ['🌦️','Mrholenie'],
+    53: ['🌦️','Mrholenie'],
+    55: ['🌦️','Silné mrholenie'],
+    56: ['🌧️','Mrznúce mrholenie'],
+    57: ['🌧️','Mrznúce mrholenie'],
+    61: ['🌧️','Slabý dážď'],
+    63: ['🌧️','Dážď'],
+    65: ['🌧️','Silný dážď'],
+    66: ['🌧️','Mrznúci dážď'],
+    67: ['🌧️','Mrznúci dážď'],
+    71: ['🌨️','Slabé sneženie'],
+    73: ['🌨️','Sneženie'],
+    75: ['🌨️','Silné sneženie'],
+    77: ['🌨️','Snehové zrná'],
+    80: ['🌦️','Prehánky'],
+    81: ['🌦️','Prehánky'],
+    82: ['🌧️','Silné prehánky'],
+    85: ['🌨️','Snehové prehánky'],
+    86: ['🌨️','Snehové prehánky'],
+    95: ['⛈️','Búrka'],
+    96: ['⛈️','Búrka s krupobitím'],
+    99: ['⛈️','Búrka s krupobitím'],
+  };
+  return map[code] || ['🌡️','—'];
+}
+async function loadWeather() {
+  const iconEl = document.getElementById('hw-icon');
+  const tempEl = document.getElementById('hw-temp');
+  const descEl = document.getElementById('hw-desc');
+  if (!iconEl || !tempEl) return;
+  try {
+    // Bratislava Ružinov ≈ 48.155 N, 17.155 E
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=48.155&longitude=17.155'
+              + '&current=temperature_2m,weather_code&timezone=Europe/Bratislava';
+    const res = await fetch(url);
+    const data = await res.json();
+    const cur = data && data.current;
+    if (!cur || typeof cur.temperature_2m !== 'number') throw new Error('no data');
+    const [emoji, popis] = weatherInfo(cur.weather_code);
+    iconEl.textContent = emoji;
+    tempEl.textContent = Math.round(cur.temperature_2m) + '°C';
+    if (descEl) descEl.textContent = popis;
+  } catch (e) {
+    // Počasie je nepovinné — pri chybe nechaj decentný fallback
+    iconEl.textContent = '🌡️';
+    tempEl.textContent = '–°C';
+    if (descEl) descEl.textContent = '';
+  }
 }
 
 // ── FIFA 2026 — výsledky v hlavičke (ticker) ───────────────────────────────
