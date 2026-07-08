@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.15.0] — 2026-07-08
+
+### Pridané
+- **Úprava detailu objednávok cez admin prostredie** — v admin paneli pribudlo pri každej objednávke tlačidlo „✏️ Upraviť" (v karte „Ľudia dnes" aj v detailnej tabuľke). Otvorí okno s výberom polievky, hlavného jedla, pizze a dezertu z aktuálneho menu, plus počet porcií a poznámku. Admin môže objednávku upraviť **bez ohľadu na uzávierku**; zmena sa zapíše do histórie ako „✏️ Úprava" (`PUT /api/admin/orders/:meno`).
+
+### Zmenené
+- **Krajšie nakreslené činčily** — činčily v téme „🐭 Činčily" dostali nový, roztomilejší dizajn: veľké ligotavé očká so srdiečkovým leskom, nadýchané uši s ružovým vnútrom, chĩchol na hlave, ružové líčka a huňatý stočený chvost.
+- **Nové zvuky činčily po kliknutí** — namiesto jedného pišťania sa teraz náhodne prehrá jeden z piatich zvukov (veselý trilkot, zvedavé „bwoop", chichot, spokojné pradenie a klasické pišťanie), takže každé pohladenie znie inak.
+
 ## [1.14.0] — 2026-07-07
 
 ### Pridané
