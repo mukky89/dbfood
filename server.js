@@ -363,6 +363,43 @@ app.delete('/api/orders/:meno', async (req, res) => {
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
+// PUT /api/admin/orders/:meno — admin uprava detailu objednavky (bez ohladu na uzavierku)
+app.put('/api/admin/orders/:meno', async (req, res) => {
+  const { adminPass } = req.body;
+  if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
+
+  const meno = decodeURIComponent(req.params.meno);
+  const { polievka, jedlo, pizza, dezert, poznamka, porcie } = req.body;
+  if (!jedlo && !pizza) return res.status(400).json({ ok: false, error: 'Musí zostať hlavné jedlo alebo pizza' });
+
+  try {
+    const orders = await loadOrders();
+    const history = await loadTodayHistory();
+    if (!orders[meno]) return res.status(404).json({ ok: false, error: 'Objednavka nenajdena' });
+
+    const cas = getCasSK();
+    history.push({ meno, cas, akcia: 'UPRAVA',
+      predtym: { polievka: orders[meno].polievka, jedlo: orders[meno].jedlo, poznamka: orders[meno].poznamka },
+      potom: { polievka: polievka || null, jedlo: jedlo || null, poznamka: poznamka || '' }
+    });
+
+    orders[meno] = {
+      ...orders[meno],
+      meno,
+      polievka: polievka || null,
+      jedlo: jedlo || null,
+      pizza: pizza || null,
+      dezert: dezert || null,
+      porcie: parseInt(porcie) || 1,
+      poznamka: poznamka || '',
+      editCount: (orders[meno].editCount || 0) + 1
+    };
+
+    await saveOrders(orders, history);
+    res.json({ ok: true, message: `Objednavka ${meno} upravena` });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
 // ── Auth - OTP cez email ──────────────────────────────────────────────────────
 const otpStore = {};
 

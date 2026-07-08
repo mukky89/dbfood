@@ -266,6 +266,10 @@
     .admin-user-detail { font-size: 12px; color: var(--muted); margin-top: 1px; }
     .admin-delete-btn { margin-left: auto; background: #fee; border: 1px solid #fcc; color: var(--accent); border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: background .15s; flex-shrink: 0; }
     .admin-delete-btn:hover { background: #fcc; }
+    .admin-edit-btn { background: #eef4ff; border: 1px solid #c7d9f5; color: #1565c0; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: background .15s; flex-shrink: 0; margin-bottom: 4px; }
+    .admin-edit-btn:hover { background: #d9e6fb; }
+    .admin-edit-select { width: 100%; padding: 9px 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--card); color: var(--text); outline: none; }
+    .admin-edit-select:focus { border-color: var(--accent); }
     .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .admin-table th { background: var(--brand); color: white; padding: 10px 12px; text-align: left; }
     .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -1437,6 +1441,19 @@
     <div style="display:flex;gap:10px">
       <button class="btn btn-secondary" onclick="hideAdminModal()" style="flex:1">Zrušiť</button>
       <button class="btn btn-primary" onclick="loginAdmin()" style="flex:2;margin-top:0">Prihlásiť</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin: úprava detailu objednávky -->
+<div class="modal-overlay" id="admin-edit-modal" style="display:none">
+  <div class="modal" style="max-width:460px;max-height:88vh;overflow-y:auto">
+    <h2 style="margin-bottom:4px">✏️ Upraviť objednávku</h2>
+    <p style="margin-top:0" id="admin-edit-name"></p>
+    <div id="admin-edit-fields"></div>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn btn-secondary" onclick="closeAdminEdit()" style="flex:1">Zrušiť</button>
+      <button class="btn btn-primary" onclick="submitAdminEditOrder()" style="flex:2;margin-top:0">💾 Uložiť</button>
     </div>
   </div>
 </div>
@@ -3477,6 +3494,7 @@ async function saveDesignConfig(theme) {
 }
 
 function renderAdminOrders(orders, history = []) {
+  window._lastOrders = orders;
   const entries = Object.values(orders);
 
   // Stats
@@ -3543,6 +3561,7 @@ function renderAdminOrders(orders, history = []) {
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${o.cas||''}</div>
+          <button class="admin-edit-btn" onclick="adminEditOrder('${o.meno}')">✏️ Upraviť</button>
           <button class="admin-delete-btn" onclick="adminDeleteOrder('${o.meno}')">🗑️ Zmazať</button>
         </div>
       </div>`;
@@ -3566,7 +3585,8 @@ function renderAdminOrders(orders, history = []) {
         <td style="color:var(--orange);font-size:13px">${o.poznamka||''}</td>
         <td style="color:var(--muted);font-size:12px;white-space:nowrap">${o.cas||''}</td>
         <td style="text-align:center">${o.editCount>0?`<span style="background:#fff3cd;color:#856404;border-radius:4px;padding:2px 6px;font-size:12px">${o.editCount}×</span>`:'—'}</td>
-        <td><button class="admin-delete-btn" onclick="adminDeleteOrder('${o.meno}')">🗑️</button></td>
+        <td style="white-space:nowrap"><button class="admin-edit-btn" onclick="adminEditOrder('${o.meno}')">✏️</button>
+          <button class="admin-delete-btn" onclick="adminDeleteOrder('${o.meno}')">🗑️</button></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 
@@ -3679,6 +3699,91 @@ async function adminDeleteOrder(meno) {
     const data = await res.json();
     if (data.ok) { showToast('✅ Zmazané', 'success'); await loadOrders(); }
   } catch(e) { showToast('❌ Chyba', 'error'); }
+}
+
+// ── Admin: úprava detailu objednávky ──────────────────────────────────────
+let _adminEditMeno = null;
+
+function _escAttr(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Voľby z aktuálneho menu pre danú skupinu (polievka/jedlo/pizza/dezert)
+function _adminMenuOptions(groupName) {
+  const opts = [];
+  if (!menuData || !Array.isArray(menuData.sekcie)) return opts;
+  menuData.sekcie.forEach(sekcia => {
+    const n = (sekcia.nazov || '').toLowerCase();
+    const isPolievka = n.includes('polievka');
+    const isPizza    = n.includes('pizza');
+    const isJedlo    = n.includes('hlavné');
+    const isDezert   = n.includes('dezert');
+    const g = isPolievka ? 'polievka' : isJedlo ? 'jedlo' : isPizza ? 'pizza' : isDezert ? 'dezert' : null;
+    if (g !== groupName) return;
+    const prefix = isPolievka ? 'P' : isJedlo ? 'J' : isPizza ? 'PZ' : 'D';
+    (sekcia.polozky || []).forEach(p => {
+      const { nazovClean } = parseVarianty(p.nazov);
+      opts.push(`${prefix}${p.cislo} ${nazovClean}`);
+    });
+  });
+  return opts;
+}
+
+function _adminSelect(id, groupName, current, emptyLabel) {
+  const opts = _adminMenuOptions(groupName);
+  let html = `<select id="${id}" class="admin-edit-select"><option value="">${emptyLabel}</option>`;
+  // Zachovaj pôvodnú hodnotu, aj keď (napr. kvôli variantu) nie je presne v ponuke
+  if (current && !opts.includes(current)) {
+    html += `<option value="${_escAttr(current)}" selected>${_escAttr(current)} (pôvodné)</option>`;
+  }
+  opts.forEach(o => {
+    html += `<option value="${_escAttr(o)}"${o === current ? ' selected' : ''}>${_escAttr(o)}</option>`;
+  });
+  html += `</select>`;
+  return html;
+}
+
+function adminEditOrder(meno) {
+  const order = (window._lastOrders && window._lastOrders[meno]) || null;
+  if (!order) { showToast('❌ Objednávka sa nenašla', 'error'); return; }
+  _adminEditMeno = meno;
+  document.getElementById('admin-edit-name').innerHTML = `<strong>${_escAttr(meno)}</strong>`;
+  const lbl = 'font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:12px 0 4px';
+  document.getElementById('admin-edit-fields').innerHTML = `
+    <div style="${lbl}">🍲 Polievka</div>${_adminSelect('ae-polievka','polievka',order.polievka,'— žiadna —')}
+    <div style="${lbl}">🍽️ Hlavné jedlo</div>${_adminSelect('ae-jedlo','jedlo',order.jedlo,'— žiadne —')}
+    <div style="${lbl}">🍕 Pizza</div>${_adminSelect('ae-pizza','pizza',order.pizza,'— žiadna —')}
+    <div style="${lbl}">🍰 Dezert</div>${_adminSelect('ae-dezert','dezert',order.dezert,'— žiadny —')}
+    <div style="${lbl}">🔢 Porcie</div><input id="ae-porcie" type="number" min="1" max="20" value="${order.porcie || 1}" class="admin-edit-select">
+    <div style="${lbl}">📝 Poznámka</div><input id="ae-poznamka" type="text" value="${_escAttr(order.poznamka || '')}" placeholder="napr. bez cibule" class="admin-edit-select">`;
+  document.getElementById('admin-edit-modal').style.display = 'flex';
+}
+
+function closeAdminEdit() {
+  document.getElementById('admin-edit-modal').style.display = 'none';
+  _adminEditMeno = null;
+}
+
+async function submitAdminEditOrder() {
+  if (!_adminEditMeno) return;
+  const jedlo = document.getElementById('ae-jedlo').value;
+  const pizza = document.getElementById('ae-pizza').value;
+  if (!jedlo && !pizza) { showToast('❌ Musí zostať hlavné jedlo alebo pizza', 'error'); return; }
+  const body = {
+    adminPass: adminPassword,
+    polievka: document.getElementById('ae-polievka').value || null,
+    jedlo: jedlo || null,
+    pizza: pizza || null,
+    dezert: document.getElementById('ae-dezert').value || null,
+    porcie: parseInt(document.getElementById('ae-porcie').value) || 1,
+    poznamka: document.getElementById('ae-poznamka').value || ''
+  };
+  try {
+    const res = await fetch(`/api/admin/orders/${encodeURIComponent(_adminEditMeno)}`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.ok) { showToast('✅ Objednávka upravená', 'success'); closeAdminEdit(); await loadOrders(); }
+    else { showToast('❌ ' + (data.error || 'Chyba'), 'error'); }
+  } catch(e) { showToast('❌ Chyba spojenia', 'error'); }
 }
 
 async function adminClearOrders() {
