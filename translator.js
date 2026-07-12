@@ -1,53 +1,55 @@
 const axios = require('axios');
 const config = require('./config');
 
-// DeepL Free API — https://developers.deepl.com/docs
-// Zdarma do 500 000 znakov/mesiac. Vyzaduje bezplatny kluc v env DEEPL_KEY.
-const DEEPL_URL = 'https://api-free.deepl.com/v2/translate';
+// MyMemory Translation API — https://mymemory.translated.net/doc/spec.php
+// Zdarma bez kluca: ~5000 slov/den (anonymne, podla IP). S e-mailom v parametri
+// `de` sa limit zdvihne na ~50 000 slov/den — nastav MYMEMORY_EMAIL v env.
+// MyMemory neprekladá dávkovo — jeden text = jeden GET request. Objem menu je
+// maly (~15 poloziek), takze prelozime kazdy text zvlast (paralelne v ramci jazyka).
+const MYMEMORY_URL = 'https://api.mymemory.translated.net/get';
 
-// Cielove jazyky: kod v menu (nazov_en/nazov_fr) -> DeepL kod cieloveho jazyka
+// Cielove jazyky: kod v menu (nazov_en/nazov_fr) -> MyMemory langpair
 const TARGETS = [
-  ['en', 'EN-GB'],
-  ['fr', 'FR']
+  ['en', 'sk|en'],
+  ['fr', 'sk|fr']
 ];
 
-// Preloz pole textov zo SK do cieloveho jazyka cez DeepL (jedna davka).
-// Vrati pole prelozenych textov v rovnakom poradi, alebo null pri chybe.
-async function translateBatch(texts, targetLang) {
-  if (!texts.length) return [];
+// Preloz jeden text (SK -> cielovy jazyk). Vrati preklad, alebo null pri chybe/limite.
+async function translateOne(text, langpair) {
+  if (!text || !text.trim()) return text;
   try {
-    const resp = await axios.post(DEEPL_URL, {
-      text: texts,
-      source_lang: 'SK',
-      target_lang: targetLang
-    }, {
-      headers: {
-        'Authorization': `DeepL-Auth-Key ${config.deeplKey}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 12000
-    });
-    return (resp.data.translations || []).map(t => t.text);
+    const params = { q: text, langpair };
+    if (config.mymemoryEmail) params.de = config.mymemoryEmail;
+    const resp = await axios.get(MYMEMORY_URL, { params, timeout: 12000 });
+    const data = resp.data || {};
+    const translated = data.responseData?.translatedText;
+    const status = data.responseStatus;
+
+    // MyMemory pri prekroceni limitu vracia varovanie priamo v texte (napr.
+    // "MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS FOR TODAY").
+    if (!translated || /MYMEMORY WARNING|QUOTA EXCEEDED|INVALID LANGUAGE/i.test(translated)) {
+      console.error('[Translator] MyMemory limit/chyba:', data.responseDetails || translated || status);
+      return null;
+    }
+    if (status && String(status) !== '200') {
+      console.error('[Translator] MyMemory status:', status, data.responseDetails || '');
+      return null;
+    }
+    return translated;
   } catch (err) {
-    const status = err.response?.status;
-    console.error('[Translator] DeepL chyba:', status ? `HTTP ${status}` : err.message);
-    if (status === 403) console.error('[Translator] Neplatny alebo chybajuci DEEPL_KEY.');
-    if (status === 456) console.error('[Translator] Vycerpany mesacny limit DeepL Free.');
+    console.error('[Translator] MyMemory chyba:', err.response?.status || err.message);
     return null;
   }
 }
 
 // Obohati menu o preklady: k sekciam/polozkam/datumu prida nazov_en/nazov_fr
 // (resp. datum_en/datum_fr). Preklad prebehne raz pri stiahnuti noveho menu,
-// vysledok sa cachuje spolu s menu. Pri chybe/nezadanom kluci vrati menu bez zmien.
+// vysledok sa cachuje spolu s menu. Jazyk sa prida do menu.langs iba ak sa
+// podarilo prelozit vsetky texty; inak sa vynecha (fallback na SK).
 async function translateMenu(menu) {
   if (!menu || !menu.sekcie || !menu.sekcie.length) return menu;
-  if (!config.deeplKey) {
-    menu.langs = [];
-    return menu;
-  }
 
-  // Poskladame plochy zoznam textov + settery, aby sme prelozili vsetko naraz.
+  // Poskladame plochy zoznam textov + settery.
   const texts = [];
   const setters = [];
   if (menu.datum) {
@@ -64,11 +66,13 @@ async function translateMenu(menu) {
   });
 
   const langs = [];
-  for (const [code, deeplLang] of TARGETS) {
-    const out = await translateBatch(texts, deeplLang);
-    if (out && out.length === texts.length) {
+  for (const [code, langpair] of TARGETS) {
+    const out = await Promise.all(texts.map(t => translateOne(t, langpair)));
+    if (out.every(t => t)) {
       out.forEach((t, i) => setters[i](code, t));
       langs.push(code);
+    } else {
+      console.warn(`[Translator] Preklad do ${code} neuplny — vynechavam (fallback SK).`);
     }
   }
 
