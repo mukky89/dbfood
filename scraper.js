@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const config = require('./config');
+const { translateMenu } = require('./translator');
 
 // Cache: ukladame menu aby sme nerobili request pri kazdom nacitani stranky
 let cache = {
@@ -27,6 +28,10 @@ async function fetchMenu() {
     if (!menu.sekcie || menu.sekcie.length === 0) {
       console.warn('[Scraper] Stranka nacitana, ale nenasli sa ziadne sekcie menu (mozno sa zmenila struktura stranky).');
     }
+
+    // Preklad menu (EN/FR) — raz pri stiahnuti noveho menu, vysledok ide do cache.
+    // Chyba prekladu nesmie zhodit nacitanie menu.
+    try { await translateMenu(menu); } catch (e) { console.error('[Scraper] Preklad zlyhal:', e.message); }
 
     // Ulozime do cache
     cache.data = menu;
@@ -149,7 +154,8 @@ function parseMenu($) {
 }
 
 // Manualne nastavenie menu (ked scraping nefunguje)
-function setManualMenu(menu) {
+async function setManualMenu(menu) {
+  try { await translateMenu(menu); } catch (e) { console.error('[Scraper] Preklad manualneho menu zlyhal:', e.message); }
   cache.data = menu;
   cache.timestamp = Date.now();
   console.log('[Scraper] Manualne menu nastavene');

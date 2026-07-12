@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.16.0] — 2026-07-12
+
+### Pridané
+- **Preklad jedálneho listka do angličtiny a francúzštiny** — pri každom novom jedálničku sa názvy sekcií, jedál aj dátum automaticky preložia cez **DeepL** (SK → EN/FR) a uložia sa spolu s menu do cache (preklad prebehne raz denne, nezaťažuje bežné načítanie stránky). V jedálnom listku pribudol prepínač s **vlajkami 🇸🇰 🇬🇧 🇫🇷** — prepína iba zobrazený text jedál; ceny, hmotnosti, čísla a hodnoty objednávok (P1…, J2…) zostávajú nezmenené. Zvolený jazyk sa pamätá (localStorage). Vyžaduje bezplatný `DEEPL_KEY` v premenných prostredia; bez neho sa vlajky nezobrazia a menu ostáva v slovenčine. Ak preklad zlyhá, položka sa zobrazí v origináli (SK).
+
 ## [1.15.0] — 2026-07-08
 
 ### Pridané

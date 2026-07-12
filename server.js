@@ -591,10 +591,10 @@ app.post('/api/send-email', async (req, res) => {
 });
 
 // POST /api/manual-menu
-app.post('/api/manual-menu', (req, res) => {
+app.post('/api/manual-menu', async (req, res) => {
   const { adminPass, menu } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
-  setManualMenu(menu);
+  await setManualMenu(menu);
   res.json({ ok: true, message: 'Manualne menu nastavene' });
 });
 
