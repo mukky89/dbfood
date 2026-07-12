@@ -144,8 +144,9 @@
     .menu-lang-wrap { display:flex; justify-content:center; }
     .menu-lang-switch .mls-label { font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-right:2px; display:flex; align-items:center; gap:5px; }
     .menu-lang-switch .mls-globe { display:inline-block; font-size:16px; animation:mlsGlobeSpin 6s linear infinite; }
-    .menu-lang-btn { background:transparent; border:2px solid transparent; border-radius:999px; padding:5px 11px; font-size:21px; line-height:1;
-      cursor:pointer; filter:grayscale(.65); opacity:.65; transform:scale(1); transition:transform .22s cubic-bezier(.34,1.56,.64,1), filter .2s, opacity .2s, border-color .2s, background .2s; }
+    .menu-lang-btn { background:transparent; border:2px solid transparent; border-radius:999px; padding:4px 7px; line-height:0;
+      cursor:pointer; filter:grayscale(.7); opacity:.6; transform:scale(1); transition:transform .22s cubic-bezier(.34,1.56,.64,1), filter .2s, opacity .2s, border-color .2s, background .2s; }
+    .menu-lang-btn .flag-ico { width:26px; height:17px; display:block; border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,.18); }
     .menu-lang-btn:hover { filter:grayscale(0); opacity:1; transform:scale(1.18) translateY(-2px); }
     .menu-lang-btn.active { filter:grayscale(0); opacity:1; transform:scale(1.12); border-color:var(--accent);
       background:color-mix(in srgb, var(--accent) 14%, transparent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); animation:langBtnPop .42s cubic-bezier(.34,1.56,.64,1); }
@@ -2114,6 +2115,25 @@ const UI_T = {
 };
 function uiT(key) { const e = UI_T[key]; if (!e) return ''; return e[menuLang] || e.sk; }
 
+// Vlajky ako inline SVG — emoji vlajky (🇸🇰) sa na Windowse nezobrazia (ukazuje
+// len "SK"/"GB"/"FR"), SVG funguje spolahlivo vsade.
+const FLAG_SVG = {
+  sk: '<svg class="flag-ico" viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">'
+    + '<rect width="30" height="20" fill="#fff"/><rect y="6.667" width="30" height="13.333" fill="#0b4ea2"/><rect y="13.333" width="30" height="6.667" fill="#ee1c25"/>'
+    + '<path d="M3 3.5 H12 V11 C12 14 9.5 15.2 7.5 16 C5.5 15.2 3 14 3 11 Z" fill="#ee1c25" stroke="#fff" stroke-width="0.7"/>'
+    + '<path d="M3 12.2 C5 10.8 10 10.8 12 12.2 C12 14 9.8 15.1 7.5 16 C5.2 15.1 3 14 3 12.2 Z" fill="#0b4ea2"/>'
+    + '<rect x="7" y="5.4" width="1" height="6" fill="#fff"/><rect x="6" y="6.9" width="3" height="1" fill="#fff"/><rect x="5.4" y="8.9" width="4.2" height="1" fill="#fff"/></svg>',
+  en: '<svg class="flag-ico" viewBox="0 0 60 30" preserveAspectRatio="none" aria-hidden="true">'
+    + '<clipPath id="ukt"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>'
+    + '<rect width="60" height="30" fill="#012169"/>'
+    + '<path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>'
+    + '<path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#ukt)" stroke="#C8102E" stroke-width="4"/>'
+    + '<path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="10"/>'
+    + '<path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6"/></svg>',
+  fr: '<svg class="flag-ico" viewBox="0 0 3 2" preserveAspectRatio="none" aria-hidden="true">'
+    + '<rect width="3" height="2" fill="#fff"/><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>'
+};
+
 function parseHmotnost(raw) {
   if (!raw?.trim()) return { hmotnostText: '', alergenyHtml: '' };
   const cleaned = raw.trim();
@@ -2588,13 +2608,12 @@ function renderMenu(menu) {
 
   // Prepinac jazyka jedalneho listka (len ak server dodal preklady)
   if (menu.langs && menu.langs.length) {
-    const FLAGS = { sk:'🇸🇰', en:'🇬🇧', fr:'🇫🇷' };
-    const codes = ['sk', ...menu.langs.filter(l => FLAGS[l])];
+    const codes = ['sk', ...menu.langs.filter(l => FLAG_SVG[l])];
     const intro = langSwitchSeen ? '' : ' intro';
     langSwitchSeen = true;
     html += `<div class="menu-lang-wrap"><div class="menu-lang-switch${intro}">` +
       `<span class="mls-label"><span class="mls-globe">🌐</span></span>` +
-      codes.map((c, i) => `<button type="button" class="menu-lang-btn${menuLang === c ? ' active' : ''}" style="animation-delay:${(i * 0.12).toFixed(2)}s" title="${LANG_LABELS[c] || c.toUpperCase()}" aria-label="${LANG_LABELS[c] || c}" onclick="setMenuLang('${c}')">${FLAGS[c]}</button>`).join('') +
+      codes.map((c, i) => `<button type="button" class="menu-lang-btn${menuLang === c ? ' active' : ''}" style="animation-delay:${(i * 0.12).toFixed(2)}s" title="${LANG_LABELS[c] || c.toUpperCase()}" aria-label="${LANG_LABELS[c] || c}" onclick="setMenuLang('${c}')">${FLAG_SVG[c]}</button>`).join('') +
       `</div></div>`;
   } else if (menuLang !== 'sk') {
     // Menu bez prekladov — vratime sa na SK, aby sa nezobrazovali prazdne nazvy
