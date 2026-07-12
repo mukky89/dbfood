@@ -138,6 +138,10 @@
     .menu-section { margin-bottom: 20px; }
     .menu-section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
     .price-badge { background: var(--accent); color: white; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+    .menu-lang-switch { display:flex; gap:6px; justify-content:flex-end; align-items:center; margin:0 0 14px; }
+    .menu-lang-btn { background:var(--card, #fff); border:1.5px solid var(--border, #e0e0e0); border-radius:999px; padding:4px 10px; font-size:16px; line-height:1; cursor:pointer; opacity:.55; transition:all .18s; }
+    .menu-lang-btn:hover { opacity:.85; transform:translateY(-1px); }
+    .menu-lang-btn.active { opacity:1; border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
 
     .menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all .15s; margin-bottom: 6px; background: var(--bg); position: relative; }
     .menu-item:hover { border-color: var(--accent); background: #fff5f5; }
@@ -2039,6 +2043,19 @@ let currentUser = loadUserFromCookiesEarly();
 let currentEmail = null;
 let adminPassword = null;
 let menuData = null;
+// Jazyk zobrazenia jedalneho listka (sk/en/fr). Preklady dodava server (DeepL).
+// Prepina LEN zobrazeny text — hodnoty objednavok (P1 …, J2 …) ostavaju v SK.
+let menuLang = (() => { try { return localStorage.getItem('menuLang') || 'sk'; } catch(e) { return 'sk'; } })();
+function tName(obj) {
+  if (!obj) return '';
+  if (menuLang === 'sk') return obj.nazov;
+  return obj['nazov_' + menuLang] || obj.nazov;
+}
+function setMenuLang(code) {
+  menuLang = code;
+  try { localStorage.setItem('menuLang', code); } catch(e) {}
+  if (menuData) renderMenu(menuData);
+}
 let isEditMode = false;
 let isAdmin = window.location.pathname === '/admin';
 let orderingOpen = true;
@@ -2537,12 +2554,26 @@ function renderMenu(menu) {
   // Toto sa resi v loadOrders
 
   let html = '';
+
+  // Prepinac jazyka jedalneho listka (len ak server dodal preklady)
+  if (menu.langs && menu.langs.length) {
+    const FLAGS = { sk:'🇸🇰', en:'🇬🇧', fr:'🇫🇷' };
+    const codes = ['sk', ...menu.langs.filter(l => FLAGS[l])];
+    html += `<div class="menu-lang-switch">` +
+      codes.map(c => `<button type="button" class="menu-lang-btn${menuLang === c ? ' active' : ''}" title="${c.toUpperCase()}" onclick="setMenuLang('${c}')">${FLAGS[c]}</button>`).join('') +
+      `</div>`;
+  } else if (menuLang !== 'sk') {
+    // Menu bez prekladov — vratime sa na SK, aby sa nezobrazovali prazdne nazvy
+    menuLang = 'sk';
+  }
+
+  const datumDisplay = menuLang === 'sk' ? menu.datum : (menu['datum_' + menuLang] || menu.datum);
   if (menu.datum) html += `
     <div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;padding:14px 18px;margin-bottom:20px">
       <div style="font-size:36px;line-height:1">📅</div>
       <div>
         <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Denné menu</div>
-        <div style="font-size:20px;font-weight:800;color:white;line-height:1.2">${menu.datum}</div>
+        <div style="font-size:20px;font-weight:800;color:white;line-height:1.2">${datumDisplay}</div>
         <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Objednávky do ${config_deadline || '10:00'}</div>
       </div>
     </div>`;
@@ -2558,7 +2589,7 @@ function renderMenu(menu) {
 
     const isHotSekcia = isPizza || isJedlo;
 
-    html += `<div class="menu-section"><div class="menu-section-title">${sekcia.nazov.toUpperCase()}`;
+    html += `<div class="menu-section"><div class="menu-section-title">${tName(sekcia).toUpperCase()}`;
     if (sekcia.cena) html += ` <span class="price-badge">${sekcia.cena}</span>`;
     html += `</div>`;
 
@@ -2567,6 +2598,8 @@ function renderMenu(menu) {
       const { varianty, nazovClean } = parseVarianty(p.nazov);
       const hasVariants = varianty.length >= 2;
       const value = `${prefix}${p.cislo} ${nazovClean}`;
+      // Zobrazeny nazov moze byt prelozeny; hodnota objednavky (value) ostava v SK
+      const nazovDisplay = menuLang === 'sk' ? nazovClean : parseVarianty(tName(p)).nazovClean;
       const { hmotnostText, alergenyHtml } = parseHmotnost(p.hmotnost);
       const isHot = topJedlo && (topJedlo.startsWith(value) || topJedlo === value) && isHotSekcia;
 
@@ -2589,7 +2622,7 @@ function renderMenu(menu) {
           <input type="${inputType}" name="${groupName}" id="${id}" value="${value}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
           <span class="menu-item-num">${prefix}${p.cislo}</span>
           <span class="menu-item-text">
-            <span class="menu-item-name">${nazovClean}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
+            <span class="menu-item-name">${nazovDisplay}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
             ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">⚠️ Pozor: môže obsahovať cibuľu</span>` : ''}
             <span class="menu-item-weight">${hmotnostText}</span>
             ${alergenyHtml}
