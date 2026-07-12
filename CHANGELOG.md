@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.17.0] — 2026-07-12
+
+### Pridané
+- **Animovaný prepínač jazykov** — vlajky 🇸🇰 🇬🇧 🇫🇷 sú teraz vycentrované do výrazného „pill" prepínača s glóbusom 🌐. Pri prvom zobrazení prepínač vyskočí (bounce), krátko sa rozžiari a neaktívne vlajky poskočia (staggered), aby si preklad hneď všimol. Aktívna vlajka je farebne zvýraznená a pri kliknutí „popne". Rešpektuje `prefers-reduced-motion`.
+- **Preklad alergénov, poznámok a označenia „výber"** — do EN/FR sa teraz prekladajú aj názvy alergénov (chipy pri jedle aj legenda „Zoznam alergénov", vrátane popisu po najazdení), placeholder poznámky k položke („note for this item…" / „note pour ce plat…"), label výberu druhu pri špeciálnych jedlách („🎨 Choose a variant…"), štítok „výber"/„choice"/„choix" a upozornenie na cibuľu pri gyrose. Fixné UI reťazce sú preložené staticky (kvalitne a bez API volaní).
+
+### Opravené
+- **Vlajky už nemiznú pri jednom problematickom názve** — jazyk sa zobrazí, ak sa preloží aspoň polovica textov; nepreložené položky (napr. netypický dátum) padnú na slovenčinu namiesto skrytia celého jazyka.
+
 ## [1.16.0] — 2026-07-12
 
 ### Pridané

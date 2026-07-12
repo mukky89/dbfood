@@ -44,8 +44,9 @@ async function translateOne(text, langpair) {
 
 // Obohati menu o preklady: k sekciam/polozkam/datumu prida nazov_en/nazov_fr
 // (resp. datum_en/datum_fr). Preklad prebehne raz pri stiahnuti noveho menu,
-// vysledok sa cachuje spolu s menu. Jazyk sa prida do menu.langs iba ak sa
-// podarilo prelozit vsetky texty; inak sa vynecha (fallback na SK).
+// vysledok sa cachuje spolu s menu. Jazyk sa prida do menu.langs ak sa podarilo
+// prelozit aspon vacsinu textov; nepreslo texty ostanu v SK (fallback per polozka).
+// Takto jeden problematicky nazov (napr. cudny datum) nezhodi cely jazyk a vlajky.
 async function translateMenu(menu) {
   if (!menu || !menu.sekcie || !menu.sekcie.length) return menu;
 
@@ -68,11 +69,15 @@ async function translateMenu(menu) {
   const langs = [];
   for (const [code, langpair] of TARGETS) {
     const out = await Promise.all(texts.map(t => translateOne(t, langpair)));
-    if (out.every(t => t)) {
-      out.forEach((t, i) => setters[i](code, t));
+    const okCount = out.filter(Boolean).length;
+    // Zobraz jazyk, ak sa prelozila aspon polovica textov (pri vycerpani limitu
+    // zlyhaju vsetky -> okCount 0 -> jazyk sa vynecha).
+    if (okCount >= Math.ceil(out.length / 2)) {
+      out.forEach((t, i) => { if (t) setters[i](code, t); });
       langs.push(code);
+      if (okCount < out.length) console.warn(`[Translator] ${code}: prelozenych ${okCount}/${out.length}, zvysok fallback SK.`);
     } else {
-      console.warn(`[Translator] Preklad do ${code} neuplny — vynechavam (fallback SK).`);
+      console.warn(`[Translator] Preklad do ${code} zlyhal (${okCount}/${out.length}) — vynechavam.`);
     }
   }
 

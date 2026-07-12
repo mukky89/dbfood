@@ -138,10 +138,26 @@
     .menu-section { margin-bottom: 20px; }
     .menu-section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
     .price-badge { background: var(--accent); color: white; font-size: 12px; padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: none; letter-spacing: 0; }
-    .menu-lang-switch { display:flex; gap:6px; justify-content:flex-end; align-items:center; margin:0 0 14px; }
-    .menu-lang-btn { background:var(--card, #fff); border:1.5px solid var(--border, #e0e0e0); border-radius:999px; padding:4px 10px; font-size:16px; line-height:1; cursor:pointer; opacity:.55; transition:all .18s; }
-    .menu-lang-btn:hover { opacity:.85; transform:translateY(-1px); }
-    .menu-lang-btn.active { opacity:1; border-color:var(--accent); box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+    .menu-lang-switch { display:inline-flex; gap:6px; align-items:center; margin:0 auto 16px; padding:6px 10px 6px 12px; width:fit-content;
+      background:var(--card, #fff); border:1.5px solid var(--border, #e0e0e0); border-radius:999px; box-shadow:0 6px 18px rgba(0,0,0,.10);
+      position:relative; z-index:1; animation:langSwitchIn .6s cubic-bezier(.34,1.56,.64,1) both; }
+    .menu-lang-wrap { display:flex; justify-content:center; }
+    .menu-lang-switch .mls-label { font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-right:2px; display:flex; align-items:center; gap:5px; }
+    .menu-lang-switch .mls-globe { display:inline-block; font-size:16px; animation:mlsGlobeSpin 6s linear infinite; }
+    .menu-lang-btn { background:transparent; border:2px solid transparent; border-radius:999px; padding:5px 11px; font-size:21px; line-height:1;
+      cursor:pointer; filter:grayscale(.65); opacity:.65; transform:scale(1); transition:transform .22s cubic-bezier(.34,1.56,.64,1), filter .2s, opacity .2s, border-color .2s, background .2s; }
+    .menu-lang-btn:hover { filter:grayscale(0); opacity:1; transform:scale(1.18) translateY(-2px); }
+    .menu-lang-btn.active { filter:grayscale(0); opacity:1; transform:scale(1.12); border-color:var(--accent);
+      background:color-mix(in srgb, var(--accent) 14%, transparent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); animation:langBtnPop .42s cubic-bezier(.34,1.56,.64,1); }
+    /* Prvé zobrazenie: nepasívne vlajky poskočia (staggered), aby si ich hneď všimol */
+    .menu-lang-switch.intro { animation:langSwitchIn .6s cubic-bezier(.34,1.56,.64,1) both, langSwitchGlow 1.6s ease-in-out .5s 2; }
+    .menu-lang-switch.intro .menu-lang-btn:not(.active) { animation:flagAttn 1.05s ease-in-out .55s 3; }
+    @keyframes langSwitchIn { 0%{opacity:0; transform:translateY(-16px) scale(.82)} 100%{opacity:1; transform:translateY(0) scale(1)} }
+    @keyframes langSwitchGlow { 0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.10)} 50%{box-shadow:0 6px 26px color-mix(in srgb, var(--accent) 55%, transparent)} }
+    @keyframes langBtnPop { 0%{transform:scale(.8)} 55%{transform:scale(1.28)} 100%{transform:scale(1.12)} }
+    @keyframes flagAttn { 0%,100%{transform:translateY(0) rotate(0) scale(1)} 25%{transform:translateY(-7px) rotate(-8deg) scale(1.16)} 55%{transform:translateY(0) rotate(6deg) scale(1.08)} 75%{transform:translateY(-2px) rotate(-3deg) scale(1.04)} }
+    @keyframes mlsGlobeSpin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    @media (prefers-reduced-motion: reduce) { .menu-lang-switch, .menu-lang-switch.intro, .menu-lang-switch.intro .menu-lang-btn, .menu-lang-switch .mls-globe, .menu-lang-btn.active { animation:none !important; } }
 
     .menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; transition: all .15s; margin-bottom: 6px; background: var(--bg); position: relative; }
     .menu-item:hover { border-color: var(--accent); background: #fff5f5; }
@@ -2046,6 +2062,8 @@ let menuData = null;
 // Jazyk zobrazenia jedalneho listka (sk/en/fr). Preklady dodava server (DeepL).
 // Prepina LEN zobrazeny text — hodnoty objednavok (P1 …, J2 …) ostavaju v SK.
 let menuLang = (() => { try { return localStorage.getItem('menuLang') || 'sk'; } catch(e) { return 'sk'; } })();
+let langSwitchSeen = false; // intro animacia prepinaca len pri prvom zobrazeni
+const LANG_LABELS = { sk:'Slovensky', en:'English', fr:'Français' };
 function tName(obj) {
   if (!obj) return '';
   if (menuLang === 'sk') return obj.nazov;
@@ -2067,21 +2085,34 @@ let config_deadline = '10:00';
 
 // ── Alergeny ──────────────────────────────────────────────────────────────
 const ALERGENY = {
-  '1':  { icon:'🌾', kratky:'Lepok',    plny:'Obilniny obsahujúce lepok', cls:'a-gluten' },
-  '2':  { icon:'🦐', kratky:'Kôrovce',  plny:'Kôrovce a výrobky',         cls:'a-krusty' },
-  '3':  { icon:'🥚', kratky:'Vajcia',   plny:'Vajcia a výrobky z vajec',   cls:'a-vajcia' },
-  '4':  { icon:'🐟', kratky:'Ryby',     plny:'Ryby a výrobky z rýb',       cls:'a-ryby' },
-  '5':  { icon:'🥜', kratky:'Arašidy',  plny:'Arašidy a výrobky',          cls:'a-arasisdy' },
-  '6':  { icon:'🌱', kratky:'Sója',     plny:'Sójové bôby a výrobky',      cls:'a-soja' },
-  '7':  { icon:'🥛', kratky:'Mlieko',   plny:'Mlieko a mliečne výrobky',   cls:'a-mlieko' },
-  '8':  { icon:'🌰', kratky:'Orechy',   plny:'Orechy a výrobky z nich',    cls:'a-orechy' },
-  '9':  { icon:'🌿', kratky:'Zeler',    plny:'Zeler a výrobky',            cls:'a-zeler' },
-  '10': { icon:'🟡', kratky:'Horčica',  plny:'Horčica a výrobky',          cls:'a-horcica' },
-  '11': { icon:'🫘', kratky:'Sezam',    plny:'Sezamové semená',            cls:'a-sezam' },
-  '12': { icon:'🍷', kratky:'SO₂',      plny:'Oxid siričitý a siričitany', cls:'a-so2' },
-  '13': { icon:'🌸', kratky:'Vlčí bôb', plny:'Vlčí bôb a výrobky',        cls:'a-vlci' },
-  '14': { icon:'🐙', kratky:'Mäkkýše',  plny:'Mäkkýše a výrobky',         cls:'a-makkyce' },
+  '1':  { icon:'🌾', kratky:'Lepok',    plny:'Obilniny obsahujúce lepok', cls:'a-gluten',   en:{k:'Gluten',    p:'Cereals containing gluten'},          fr:{k:'Gluten',       p:'Céréales contenant du gluten'} },
+  '2':  { icon:'🦐', kratky:'Kôrovce',  plny:'Kôrovce a výrobky',         cls:'a-krusty',   en:{k:'Crustaceans',p:'Crustaceans and products thereof'},   fr:{k:'Crustacés',    p:'Crustacés et produits à base de crustacés'} },
+  '3':  { icon:'🥚', kratky:'Vajcia',   plny:'Vajcia a výrobky z vajec',   cls:'a-vajcia',   en:{k:'Eggs',      p:'Eggs and products thereof'},           fr:{k:'Œufs',         p:'Œufs et produits à base d’œufs'} },
+  '4':  { icon:'🐟', kratky:'Ryby',     plny:'Ryby a výrobky z rýb',       cls:'a-ryby',     en:{k:'Fish',      p:'Fish and products thereof'},           fr:{k:'Poisson',      p:'Poisson et produits à base de poisson'} },
+  '5':  { icon:'🥜', kratky:'Arašidy',  plny:'Arašidy a výrobky',          cls:'a-arasisdy', en:{k:'Peanuts',   p:'Peanuts and products thereof'},        fr:{k:'Arachides',    p:'Arachides et produits à base d’arachides'} },
+  '6':  { icon:'🌱', kratky:'Sója',     plny:'Sójové bôby a výrobky',      cls:'a-soja',     en:{k:'Soy',       p:'Soybeans and products thereof'},       fr:{k:'Soja',         p:'Soja et produits à base de soja'} },
+  '7':  { icon:'🥛', kratky:'Mlieko',   plny:'Mlieko a mliečne výrobky',   cls:'a-mlieko',   en:{k:'Milk',      p:'Milk and dairy products'},             fr:{k:'Lait',         p:'Lait et produits laitiers'} },
+  '8':  { icon:'🌰', kratky:'Orechy',   plny:'Orechy a výrobky z nich',    cls:'a-orechy',   en:{k:'Nuts',      p:'Tree nuts and products thereof'},      fr:{k:'Fruits à coque',p:'Fruits à coque et produits dérivés'} },
+  '9':  { icon:'🌿', kratky:'Zeler',    plny:'Zeler a výrobky',            cls:'a-zeler',    en:{k:'Celery',    p:'Celery and products thereof'},         fr:{k:'Céleri',       p:'Céleri et produits à base de céleri'} },
+  '10': { icon:'🟡', kratky:'Horčica',  plny:'Horčica a výrobky',          cls:'a-horcica',  en:{k:'Mustard',   p:'Mustard and products thereof'},        fr:{k:'Moutarde',     p:'Moutarde et produits à base de moutarde'} },
+  '11': { icon:'🫘', kratky:'Sezam',    plny:'Sezamové semená',            cls:'a-sezam',    en:{k:'Sesame',    p:'Sesame seeds'},                        fr:{k:'Sésame',       p:'Graines de sésame'} },
+  '12': { icon:'🍷', kratky:'SO₂',      plny:'Oxid siričitý a siričitany', cls:'a-so2',      en:{k:'SO₂',       p:'Sulphur dioxide and sulphites'},       fr:{k:'SO₂',          p:'Dioxyde de soufre et sulfites'} },
+  '13': { icon:'🌸', kratky:'Vlčí bôb', plny:'Vlčí bôb a výrobky',        cls:'a-vlci',     en:{k:'Lupin',     p:'Lupin and products thereof'},          fr:{k:'Lupin',        p:'Lupin et produits à base de lupin'} },
+  '14': { icon:'🐙', kratky:'Mäkkýše',  plny:'Mäkkýše a výrobky',         cls:'a-makkyce',  en:{k:'Molluscs',  p:'Molluscs and products thereof'},       fr:{k:'Mollusques',   p:'Mollusques et produits à base de mollusques'} },
 };
+// Preklad nazvu alergenu podla zvoleneho jazyka menu (fallback SK)
+function aShort(a) { const m = menuLang !== 'sk' && a[menuLang]; return m ? m.k : a.kratky; }
+function aFull(a)  { const m = menuLang !== 'sk' && a[menuLang]; return m ? m.p : a.plny; }
+
+// Fixne UI retazce jedalneho listka (staticky preklad — kvalitne a bez API volani)
+const UI_T = {
+  vyber:          { sk:'výber',                         en:'choice',                     fr:'choix' },
+  vyberteDruh:    { sk:'🎨 Vyberte druh (povinné)',     en:'🎨 Choose a variant (required)', fr:'🎨 Choisissez une variante (obligatoire)' },
+  poznamka:       { sk:'poznámka k tejto položke...',   en:'note for this item...',      fr:'note pour ce plat...' },
+  gyros:          { sk:'⚠️ Pozor: môže obsahovať cibuľu', en:'⚠️ Warning: may contain onion', fr:'⚠️ Attention : peut contenir de l’oignon' },
+  alergenyLegend: { sk:'ℹ️ Zoznam alergénov',           en:'ℹ️ Allergen list',           fr:'ℹ️ Liste des allergènes' },
+};
+function uiT(key) { const e = UI_T[key]; if (!e) return ''; return e[menuLang] || e.sk; }
 
 function parseHmotnost(raw) {
   if (!raw?.trim()) return { hmotnostText: '', alergenyHtml: '' };
@@ -2093,7 +2124,7 @@ function parseHmotnost(raw) {
   const chips = nums.map(num => {
     const a = ALERGENY[num];
     if (!a) return `<span class="allergen-chip" style="background:#eee;color:#666">${num}</span>`;
-    return `<span class="allergen-chip ${a.cls}" title="${a.plny}">${a.icon} <span class="a-num">${num}</span> ${a.kratky}</span>`;
+    return `<span class="allergen-chip ${a.cls}" title="${aFull(a)}">${a.icon} <span class="a-num">${num}</span> ${aShort(a)}</span>`;
   }).join('');
   return { hmotnostText, alergenyHtml: chips ? `<span class="allergen-row">${chips}</span>` : '' };
 }
@@ -2559,9 +2590,12 @@ function renderMenu(menu) {
   if (menu.langs && menu.langs.length) {
     const FLAGS = { sk:'🇸🇰', en:'🇬🇧', fr:'🇫🇷' };
     const codes = ['sk', ...menu.langs.filter(l => FLAGS[l])];
-    html += `<div class="menu-lang-switch">` +
-      codes.map(c => `<button type="button" class="menu-lang-btn${menuLang === c ? ' active' : ''}" title="${c.toUpperCase()}" onclick="setMenuLang('${c}')">${FLAGS[c]}</button>`).join('') +
-      `</div>`;
+    const intro = langSwitchSeen ? '' : ' intro';
+    langSwitchSeen = true;
+    html += `<div class="menu-lang-wrap"><div class="menu-lang-switch${intro}">` +
+      `<span class="mls-label"><span class="mls-globe">🌐</span></span>` +
+      codes.map((c, i) => `<button type="button" class="menu-lang-btn${menuLang === c ? ' active' : ''}" style="animation-delay:${(i * 0.12).toFixed(2)}s" title="${LANG_LABELS[c] || c.toUpperCase()}" aria-label="${LANG_LABELS[c] || c}" onclick="setMenuLang('${c}')">${FLAGS[c]}</button>`).join('') +
+      `</div></div>`;
   } else if (menuLang !== 'sk') {
     // Menu bez prekladov — vratime sa na SK, aby sa nezobrazovali prazdne nazvy
     menuLang = 'sk';
@@ -2605,7 +2639,7 @@ function renderMenu(menu) {
 
       const variantRadios = hasVariants ? `
         <div class="variant-options" id="variants_${id}">
-          <div class="variant-options-label">🎨 Vyberte druh (povinné)</div>
+          <div class="variant-options-label">${uiT('vyberteDruh')}</div>
           <div class="variant-radio-row">
             ${varianty.map(v => `
               <label class="variant-radio-btn" id="variant_label_${id}_${v}" onclick="event.stopPropagation()">
@@ -2622,12 +2656,12 @@ function renderMenu(menu) {
           <input type="${inputType}" name="${groupName}" id="${id}" value="${value}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
           <span class="menu-item-num">${prefix}${p.cislo}</span>
           <span class="menu-item-text">
-            <span class="menu-item-name">${nazovDisplay}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">výber</span>` : ''}</span>
-            ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">⚠️ Pozor: môže obsahovať cibuľu</span>` : ''}
+            <span class="menu-item-name">${nazovDisplay}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">${uiT('vyber')}</span>` : ''}</span>
+            ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">${uiT('gyros')}</span>` : ''}
             <span class="menu-item-weight">${hmotnostText}</span>
             ${alergenyHtml}
             ${variantRadios}
-            ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="poznámka k tejto položke..." maxlength="120"
+            ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="${uiT('poznamka')}" maxlength="120"
               onclick="event.stopPropagation()" onfocus="event.stopPropagation()" onkeydown="event.stopPropagation()">` : ''}
           </span>
         </label>`;
@@ -2635,10 +2669,10 @@ function renderMenu(menu) {
     html += `</div>`;
   });
 
-  html += `<details class="allergen-legend"><summary>ℹ️ Zoznam alergenov</summary>
+  html += `<details class="allergen-legend"><summary>${uiT('alergenyLegend')}</summary>
     <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px">
       ${Object.entries(ALERGENY).map(([num, a]) =>
-        `<div><span class="allergen-chip ${a.cls}" style="margin:2px 0">${a.icon} <span class="a-num">${num}</span> ${a.kratky}</span></div>`
+        `<div><span class="allergen-chip ${a.cls}" style="margin:2px 0" title="${aFull(a)}">${a.icon} <span class="a-num">${num}</span> ${aShort(a)}</span></div>`
       ).join('')}
     </div></details>`;
 
