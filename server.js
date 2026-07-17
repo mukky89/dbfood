@@ -94,6 +94,15 @@ const nastaveniaVzhladSchema = new mongoose.Schema({
 });
 const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
 
+// Feedback od používateľov (💬 plávajúce okno na stránke)
+const feedbackSchema = new mongoose.Schema({
+  meno:   { type: String, default: 'Anonym' },
+  typ:    { type: String, default: 'pokec' }, // napad | chyba | pokec
+  sprava: { type: String, required: true },
+  cas:    { type: String, default: () => new Date().toISOString() }
+});
+const Feedback = mongoose.model('Feedback', feedbackSchema);
+
 
 mongoose.connect(config.mongoUri)
   .then(() => console.log('[DB] Pripojeny na MongoDB'))
@@ -547,6 +556,43 @@ app.delete('/api/users/:meno', async (req, res) => {
     const meno = decodeURIComponent(req.params.meno);
     delete users[meno];
     await saveUsers(users);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// ── Feedback ──────────────────────────────────────────────────────────────────
+
+// POST /api/feedback — verejné odoslanie správy z plávajúceho okna
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const { meno, typ, sprava } = req.body || {};
+    const text = String(sprava || '').trim();
+    if (!text) return res.status(400).json({ ok: false, error: 'Prázdna správa' });
+    if (text.length > 2000) return res.status(400).json({ ok: false, error: 'Správa je pridlhá (max 2000 znakov)' });
+    const TYPY = ['napad', 'chyba', 'pokec'];
+    await Feedback.create({
+      meno: String(meno || 'Anonym').trim().slice(0, 60) || 'Anonym',
+      typ: TYPY.includes(typ) ? typ : 'pokec',
+      sprava: text
+    });
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// GET /api/feedback — zoznam pre admina (najnovšie prvé)
+app.get('/api/feedback', async (req, res) => {
+  if (req.query.adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
+  try {
+    const items = await Feedback.find().sort({ cas: -1 }).limit(300).lean();
+    res.json({ ok: true, items });
+  } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+
+// DELETE /api/feedback/:id — zmazanie správy adminom
+app.delete('/api/feedback/:id', async (req, res) => {
+  if (req.query.adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
+  try {
+    await Feedback.deleteOne({ _id: req.params.id });
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });

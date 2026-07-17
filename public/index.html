@@ -219,18 +219,21 @@
     .loading { text-align: center; padding: 40px; color: var(--muted); }
 
     /* Summary table */
-    .summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .summary-table th { background: var(--brand); color: white; padding: 8px 10px; text-align: left; font-size: 12px; font-weight: 600; }
-    .summary-table th:last-child { text-align: center; width: 48px; }
-    .summary-table td { padding: 7px 10px; border-bottom: 1px solid var(--bg); vertical-align: middle; }
+    .summary-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .summary-table td { padding: 9px 10px; border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent); vertical-align: middle; }
     .summary-table tr:last-child td { border-bottom: none; }
-    .summary-table tr:nth-child(even) td { background: #fafbfc; }
-    .summary-count { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; font-weight: 700; font-size: 13px; }
-    .summary-section-header td { background: var(--bg) !important; font-weight: 700; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 6px 10px 4px; }
-    .summary-num { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--brand); color: white; font-size: 10px; font-weight: 700; margin-right: 5px; flex-shrink: 0; }
+    .summary-table td:last-child { text-align: center; width: 52px; }
+    .summary-item-name { display: flex; align-items: center; gap: 8px; line-height: 1.35; }
+    .summary-count { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 22px; padding: 0 9px; border-radius: 12px; background: var(--accent); color: white; font-weight: 800; font-size: 12px; letter-spacing: .3px; }
+    .summary-section-header td { background: transparent !important; border-bottom: none; padding: 14px 10px 5px; }
+    .summary-table tbody tr:first-child.summary-section-header td { padding-top: 4px; }
+    .summary-section-title { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .summary-section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, currentColor, transparent); opacity: .35; }
+    .summary-num { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--brand); color: white; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .summary-total-row td { border-top: 2px solid var(--border); border-bottom: none; padding-top: 12px; font-weight: 800; color: var(--brand); }
     .polievka-badge { color: #1565c0; }
     .jedlo-badge { color: #b71c1c; }
-    .hot-row td { background: linear-gradient(135deg, #fffbeb, #fff) !important; }
+    .hot-row td { background: linear-gradient(90deg, rgba(247,166,0,.14), transparent 75%) !important; }
 
     /* Toast */
     #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 15px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 320px; }
@@ -1460,6 +1463,44 @@
     .theme-option .t-check { position:absolute; top:10px; right:12px; font-size:16px; display:none; }
     .theme-option.selected .t-check { display:block; }
 
+    /* ── Feedback 💬 — plávajúce okno na nápady, chyby a pokec ──
+       Farby cez CSS premenné, takže sa prispôsobí všetkým témam. */
+    #feedback-fab { position:fixed; left:18px; bottom:18px; z-index:150; width:52px; height:52px; border-radius:50%;
+      border:none; cursor:pointer; font-size:24px; line-height:1; background:var(--accent); color:#fff;
+      box-shadow:0 10px 26px rgba(0,0,0,.3); transition:transform .2s ease, box-shadow .2s ease; }
+    #feedback-fab:hover { transform:scale(1.1) rotate(-8deg); box-shadow:0 14px 32px rgba(0,0,0,.38); }
+    body.fob-open #feedback-fab { bottom:76px; }
+    #feedback-panel { position:fixed; left:18px; bottom:80px; z-index:151; width:302px; max-width:calc(100vw - 36px);
+      background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:14px;
+      box-shadow:0 24px 60px rgba(0,0,0,.35); padding:14px 14px 12px; display:none; }
+    #feedback-panel.open { display:block; animation:fbPop .25s cubic-bezier(.34,1.56,.64,1); }
+    body.fob-open #feedback-panel { bottom:138px; }
+    @keyframes fbPop { from{transform:translateY(12px) scale(.92);opacity:0} to{transform:none;opacity:1} }
+    #feedback-panel .fb-head { display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:15px; }
+    #feedback-panel .fb-close { background:none; border:none; cursor:pointer; font-size:14px; color:var(--muted); padding:2px 6px; border-radius:6px; }
+    #feedback-panel .fb-close:hover { background:rgba(0,0,0,.08); color:var(--text); }
+    #feedback-panel .fb-sub { font-size:12px; color:var(--muted); margin:4px 0 10px; }
+    #feedback-panel .fb-types { display:flex; gap:6px; margin-bottom:10px; }
+    #feedback-panel .fb-type { flex:1; border:1.5px solid var(--border); background:var(--bg); color:var(--text);
+      border-radius:999px; padding:5px 0; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; }
+    #feedback-panel .fb-type.active { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); color:var(--accent); }
+    #feedback-panel textarea { width:100%; resize:vertical; min-height:84px; border:2px solid var(--border); border-radius:10px;
+      padding:9px 11px; font-size:13px; font-family:inherit; outline:none; background:var(--card); color:var(--text); }
+    #feedback-panel textarea:focus { border-color:var(--accent); }
+    #feedback-panel .fb-foot { display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:10px; }
+    #feedback-panel .fb-who { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    #feedback-panel .fb-send { border:none; cursor:pointer; background:var(--accent); color:#fff; font-weight:800;
+      border-radius:999px; padding:8px 18px; font-size:13px; transition:filter .15s, transform .15s; }
+    #feedback-panel .fb-send:hover { filter:brightness(1.08); transform:scale(1.03); }
+    #feedback-panel .fb-send:disabled { opacity:.55; cursor:default; transform:none; }
+    @media (max-width:640px) { #feedback-fab { width:46px; height:46px; font-size:21px; } }
+
+    /* ── Súhrn objednávok: čistý vzhľad — prepíše zebra pruhy a pozadia z tém ── */
+    html .summary-table tr:nth-child(even):not(.hot-row) td { background: transparent !important; }
+    html .summary-table tr.summary-section-header:nth-child(n) td { background: transparent !important; }
+    html .summary-table tr.summary-total-row:nth-child(n) td { background: transparent !important; }
+    html .summary-table tr.hot-row:nth-child(n) td { background: linear-gradient(90deg, rgba(247,166,0,.14), transparent 75%) !important; }
+
     /* ── Hlavička: postupné odľahčovanie na užších oknách ──
        Musí byť na konci štýlov, aby prepísalo základné aj témové pravidlá. */
     @media (max-width: 1600px) { .contact-card-sub, .hdr-weather .hw-desc, .secrets-btn, .fifa-scores .fs-demo { display:none; } }
@@ -1609,6 +1650,26 @@
     <div class="op-title">ODYSEA</div>
     <div class="op-tag">„Každý kráľ sa musí vrátiť domov."</div>
     <div class="op-date">17. júla 2026 • Len v kinách • IMAX</div>
+  </div>
+</div>
+
+<!-- Feedback 💬 — plávajúce okno na nápady, chyby a pokec -->
+<button id="feedback-fab" onclick="toggleFeedback()" title="Napíš nám — nápad, chyba alebo len tak pokec 💬">💬</button>
+<div id="feedback-panel">
+  <div class="fb-head">
+    <span>💬 Napíš nám</span>
+    <button class="fb-close" onclick="toggleFeedback(false)" aria-label="Zavrieť">✕</button>
+  </div>
+  <div class="fb-sub">Nápad na zlepšenie, nahlásenie chyby, alebo si len tak pokecáme 🙂</div>
+  <div class="fb-types">
+    <button class="fb-type active" data-typ="napad" onclick="setFbTyp(this)">💡 Nápad</button>
+    <button class="fb-type" data-typ="chyba" onclick="setFbTyp(this)">🐞 Chyba</button>
+    <button class="fb-type" data-typ="pokec" onclick="setFbTyp(this)">💬 Pokec</button>
+  </div>
+  <textarea id="fb-text" maxlength="2000" placeholder="Napíš čokoľvek…"></textarea>
+  <div class="fb-foot">
+    <span class="fb-who" id="fb-who"></span>
+    <button class="fb-send" id="fb-send" onclick="submitFeedback()">Odoslať</button>
   </div>
 </div>
 
@@ -1816,6 +1877,7 @@
       <button class="admin-tab-btn" onclick="switchAdminTab('blokovane')" id="blokovane-tab-btn">🚫 Neprítomnosť</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('platba')">💳 Platba</button>
       <button class="admin-tab-btn" onclick="switchAdminTab('vzhlad')">🎨 Vzhľad</button>
+      <button class="admin-tab-btn" onclick="switchAdminTab('feedback')">💬 Feedback</button>
     </div>
 
     <!-- Tab: dnesne -->
@@ -2119,6 +2181,15 @@
           </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
+      </div>
+    </div>
+
+    <!-- Tab: feedback -->
+    <div id="admin-tab-feedback" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">💬 Feedback od používateľov</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Správy z plávajúceho okna „Napíš nám" — nápady na zlepšenie, nahlásené chyby aj obyčajný pokec.</div>
+        <div id="feedback-admin-list"><div class="loading">Načítavam...</div></div>
       </div>
     </div>
   </div>
@@ -3539,6 +3610,45 @@ function cycleOdyseaPoster() {
   img.src = p.src; img.alt = p.alt;
 }
 
+// ── Feedback 💬 — plávajúce okno na nápady, chyby a pokec ───────────────────
+let _fbTyp = 'napad';
+function toggleFeedback(force) {
+  const panel = document.getElementById('feedback-panel');
+  const open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  if (open) {
+    document.getElementById('fb-who').textContent =
+      (typeof currentUser === 'string' && currentUser) ? `Odosielaš ako ${currentUser}` : 'Odosielaš ako Anonym';
+    setTimeout(() => document.getElementById('fb-text').focus(), 60);
+  }
+}
+function setFbTyp(btn) {
+  _fbTyp = btn.dataset.typ;
+  document.querySelectorAll('#feedback-panel .fb-type').forEach(b => b.classList.toggle('active', b === btn));
+}
+async function submitFeedback() {
+  const ta = document.getElementById('fb-text');
+  const btn = document.getElementById('fb-send');
+  const text = ta.value.trim();
+  if (!text) { showToast('✏️ Najprv niečo napíš 🙂', 'error'); ta.focus(); return; }
+  btn.disabled = true; btn.textContent = 'Odosielam…';
+  try {
+    const res = await fetch('/api/feedback', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ meno: (typeof currentUser === 'string' && currentUser) || 'Anonym', typ: _fbTyp, sprava: text })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Chyba');
+    ta.value = '';
+    toggleFeedback(false);
+    showToast(_fbTyp === 'pokec' ? '💬 Správa odoslaná — pokecáme! 🙂' : '💌 Ďakujeme za feedback!', 'success');
+  } catch(e) {
+    showToast('❌ Nepodarilo sa odoslať: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Odoslať';
+  }
+}
+
 // Vzdy zobrazi spravny prefix podla typu: P=polievka, J=jedlo, PZ=pizza, D=dezert
 // Funguje aj pre stare objednavky ulozene s "č.N"
 function relabel(val, prefix) {
@@ -3594,14 +3704,18 @@ function renderSummary(entries) {
     if (o.dezert)   dezertMap[o.dezert]      = (dezertMap[o.dezert]    ||0)+1;
   });
 
-  function skrat(text, max=36) { return text.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'').slice(0,max); }
+  function skrat(text) { return text.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''); }
   function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
 
   function buildRows(map, color, prefix) {
     return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
       const isTop = topJedlo && k === topJedlo;
-      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span style="color:${color}">${isTop?'🔥 ':''}<strong style="color:var(--text)">${skrat(k)}</strong></span></td><td style="text-align:center"><span class="summary-count" style="background:${color}">${v}</span></td></tr>`;
+      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span>${isTop?'🔥 ':''}<strong>${skrat(k)}</strong></span></span></td><td><span class="summary-count" style="background:${color}">${v}×</span></td></tr>`;
     }).join('');
+  }
+
+  function sekcia(emoji, nazov, color) {
+    return `<tr class="summary-section-header"><td colspan="2"><span class="summary-section-title" style="color:${color}">${emoji} ${nazov}</span></td></tr>`;
   }
 
   const hasJedlo  = Object.keys(jedlaMap).length > 0;
@@ -3609,12 +3723,12 @@ function renderSummary(entries) {
   const hasDezert = Object.keys(dezertMap).length > 0;
   const hasPol    = Object.keys(polievkyMap).length > 0;
 
-  el.innerHTML = `<table class="summary-table"><thead><tr><th>Položka</th><th style="text-align:center">Počet</th></tr></thead><tbody>
-    ${hasPol ? `<tr class="summary-section-header"><td colspan="2">🍲 Polievky</td></tr>${buildRows(polievkyMap,'#1565c0','P')}` : ''}
-    ${hasJedlo ? `<tr class="summary-section-header"><td colspan="2">🍽️ Hlavné jedlá</td></tr>${buildRows(jedlaMap,'#c0392b','J')}` : ''}
-    ${hasPizza ? `<tr class="summary-section-header"><td colspan="2">🍕 Pizza</td></tr>${buildRows(pizzaMap,'#e67e22','PZ')}` : ''}
-    ${hasDezert ? `<tr class="summary-section-header"><td colspan="2">🍮 Dezert</td></tr>${buildRows(dezertMap,'#8e44ad','D')}` : ''}
-    <tr style="border-top:2px solid var(--border)"><td style="font-weight:700;color:var(--brand)">Celkom</td><td style="text-align:center"><span class="summary-count" style="background:var(--brand)">${entries.length}</span></td></tr>
+  el.innerHTML = `<table class="summary-table"><tbody>
+    ${hasPol ? sekcia('🍲','Polievky','#1565c0') + buildRows(polievkyMap,'#1565c0','P') : ''}
+    ${hasJedlo ? sekcia('🍽️','Hlavné jedlá','#c0392b') + buildRows(jedlaMap,'#c0392b','J') : ''}
+    ${hasPizza ? sekcia('🍕','Pizza','#e67e22') + buildRows(pizzaMap,'#e67e22','PZ') : ''}
+    ${hasDezert ? sekcia('🍮','Dezert','#8e44ad') + buildRows(dezertMap,'#8e44ad','D') : ''}
+    <tr class="summary-total-row"><td>Celkom objednávok</td><td><span class="summary-count" style="background:var(--brand)">${entries.length}</span></td></tr>
   </tbody></table>`;
 }
 
@@ -3784,7 +3898,7 @@ async function doSetDeadline(deadline) {
 
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-tab-btn').forEach((btn, i) => {
-    const tabs = ['dnes','historia','pouzivatelia','qrtest','blokovane','platba','vzhlad'];
+    const tabs = ['dnes','historia','pouzivatelia','qrtest','blokovane','platba','vzhlad','feedback'];
     btn.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.remove('active'));
@@ -3794,6 +3908,44 @@ function switchAdminTab(tab) {
   if (tab === 'blokovane') loadBlokovaneObdobia();
   if (tab === 'platba') loadPlatbaAdminConfig();
   if (tab === 'vzhlad') loadDesignConfig();
+  if (tab === 'feedback') loadFeedbackAdmin();
+}
+
+// ── Feedback v admin paneli ─────────────────────────────────────────────────
+const FB_TYP_LABELS = { napad: ['💡 Nápad', '#2e7d5b'], chyba: ['🐞 Chyba', '#c0392b'], pokec: ['💬 Pokec', '#2980b9'] };
+async function loadFeedbackAdmin() {
+  const box = document.getElementById('feedback-admin-list');
+  box.innerHTML = '<div class="loading">Načítavam...</div>';
+  try {
+    const res = await fetch(`/api/feedback?adminPass=${encodeURIComponent(adminPassword)}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Chyba');
+    if (!data.items.length) { box.innerHTML = '<div class="empty-state">Zatiaľ žiadny feedback</div>'; return; }
+    box.innerHTML = data.items.map(f => {
+      const [label, color] = FB_TYP_LABELS[f.typ] || FB_TYP_LABELS.pokec;
+      const kedy = f.cas ? new Date(f.cas).toLocaleString('sk-SK') : '';
+      return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:800;color:#fff;background:${color};border-radius:10px;padding:2px 9px">${label}</span>
+            <strong style="font-size:13px">${esc(f.meno || 'Anonym')}</strong>
+            <span style="font-size:11px;color:var(--muted)">${kedy}</span>
+          </div>
+          <button onclick="deleteFeedback('${f._id}')" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:.6" title="Zmazať správu">🗑️</button>
+        </div>
+        <div style="font-size:13.5px;white-space:pre-wrap">${esc(f.sprava)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = `<div class="empty-state">❌ ${e.message}</div>`; }
+}
+async function deleteFeedback(id) {
+  if (!confirm('Zmazať túto správu?')) return;
+  try {
+    const res = await fetch(`/api/feedback/${encodeURIComponent(id)}?adminPass=${encodeURIComponent(adminPassword)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Chyba');
+    loadFeedbackAdmin();
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
