@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.19.0] — 2026-07-17
+
+### Pridané
+- **Plávajúce okno na feedback 💬** — vľavo dole pribudla bublina „Napíš nám": nápad na zlepšenie stránky, nahlásenie chyby, alebo len tak pokec. Správa sa odošle s menom prihláseného používateľa (inak ako Anonym) a uloží sa do databázy (`POST /api/feedback`). Okno sa farebne prispôsobuje všetkým témam.
+- **Admin → Feedback** — nový tab v admin paneli so zoznamom prijatých správ (typ, meno, čas, text) a možnosťou mazania.
+
+### Zmenené
+- **Krajší súhrn objednávok** — názvy jedál sa už neorezávajú v strede slova, zmizla nadbytočná hlavička tabuľky „Položka/Počet" aj zebra pruhovanie. Sekcie (🍲 Polievky, 🍽️ Hlavné jedlá…) majú farebné nadpisy s jemnou linkou, počty sú kompaktné pilulky „2×" vo farbe sekcie a riadok „Celkom objednávok" je oddelený. Najobjednávanejšie jedlo 🔥 má jemné jantárové podfarbenie.
+
 ## [1.18.1] — 2026-07-17
 
 ### Zmenené
