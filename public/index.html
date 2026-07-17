@@ -31,7 +31,7 @@
     body.fob-open { padding-bottom: 62px; }
 
     /* Header */
-    header { background: linear-gradient(135deg, #1a2637 0%, #2c3e50 50%, #1e3a5f 100%); color: white; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,.35); }
+    header { background: linear-gradient(135deg, #1a2637 0%, #2c3e50 50%, #1e3a5f 100%); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,.35); }
     header h1 { font-size: 21px; font-weight: 800; display:flex; align-items:center; gap:4px; line-height:1; }
 
     @keyframes brandFire {
@@ -77,7 +77,7 @@
 
     /* Telefónne čísla dropdown */
     .phone-wrap { position: relative; }
-    .phone-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 20px; padding: 5px 13px; font-size: 13px; color: white; cursor: pointer; transition: background .2s, transform .15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .phone-btn { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 20px; height: 34px; padding: 0 13px; font-size: 13px; color: white; cursor: pointer; transition: background .2s, transform .15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .phone-btn:hover { background: rgba(255,255,255,.22); transform: scale(1.03); }
     .phone-btn-label { font-weight: 600; }
     @media (max-width: 640px) { .phone-btn-label { display: none; } }
@@ -89,9 +89,9 @@
     .phone-item:hover { background: #fff5f5; color: var(--accent); }
     .phone-item-icon { font-size: 16px; flex-shrink: 0; }
     .phone-drop-addr { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
-    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-right { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
     /* FIFA 2026 — ticker s výsledkami v hlavičke */
-    .fifa-scores { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:20px; padding:5px 14px; font-size:14px; color:#fff; cursor:pointer; white-space:nowrap; transition:background .2s, transform .15s; max-width:42vw; overflow:hidden; }
+    .fifa-scores { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:20px; height:34px; padding:0 14px; font-size:14px; color:#fff; cursor:pointer; white-space:nowrap; transition:background .2s, transform .15s; max-width:42vw; overflow:hidden; min-width:0; flex:0 1 auto; }
     .fifa-scores:hover { background:rgba(255,255,255,.2); transform:scale(1.02); }
     .fifa-scores .fs-team { display:inline-flex; align-items:center; gap:5px; font-weight:600; }
     .fifa-scores .fs-flag { font-size:17px; line-height:1; }
@@ -106,17 +106,15 @@
     @media (max-width: 980px) { .fifa-scores { display:none !important; } }
     html.theme-fifa .fifa-scores { background:rgba(255,255,255,.14); border-color:#f7a600; }
     /* Predpoveď počasia pre Bratislavu Ružinov — vždy v hlavičke, nezávisle od témy */
-    .hdr-weather { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:5px 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
+    .hdr-weather { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; height:34px; padding:0 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
     .hdr-weather:hover { background:rgba(255,255,255,.2); }
     .hdr-weather .hw-icon { font-size:17px; line-height:1; }
     .hdr-weather .hw-temp { font-weight:800; letter-spacing:.3px; }
     .hdr-weather .hw-desc { font-size:12px; opacity:.85; }
-    .hdr-weather .hw-loc { font-size:11px; opacity:.6; }
-    @media (max-width: 860px) { .hdr-weather .hw-desc, .hdr-weather .hw-loc { display:none; } }
-    @media (max-width: 640px) { .hdr-weather { padding:4px 10px; } }
-    #user-badge { background: rgba(255,255,255,.15); border-radius: 20px; padding: 4px 14px; font-size: 14px; cursor: pointer; transition: background .2s; }
+    @media (max-width: 640px) { .hdr-weather { padding:0 10px; } }
+    #user-badge { background: rgba(255,255,255,.15); border-radius: 20px; height: 34px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; font-size: 14px; cursor: pointer; transition: background .2s; white-space: nowrap; }
     #user-badge:hover { background: rgba(255,255,255,.25); }
-    .nav-link { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; transition: all .2s; }
+    .nav-link { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; padding: 4px 10px; border-radius: 6px; transition: all .2s; white-space: nowrap; }
     .nav-link:hover { background: rgba(255,255,255,.15); color: white; }
 
     /* Countdown */
@@ -409,16 +407,15 @@
     .fob-price { font-size: 22px; font-weight: 900; color: var(--green); letter-spacing: -0.5px; white-space: nowrap; flex-shrink: 0; }
     @media (max-width: 600px) { .fob-inner { padding: 8px 12px; gap: 8px; } .fob-price { font-size: 18px; } }
 
-    /* Discord contact card */
-    .contact-card { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none;
+    /* Discord contact card — kompaktná pilulka v jednotnej výške hlavičky */
+    .contact-card { display: flex; align-items: center; gap: 8px; color: white; text-decoration: none;
       background: linear-gradient(135deg, rgba(88,101,242,.4), rgba(88,101,242,.2));
-      border: 1px solid rgba(88,101,242,.55); border-radius: 10px; padding: 6px 14px;
-      transition: background .2s; animation: discord-glow 2.5s ease-in-out infinite; height: 44px; }
+      border: 1px solid rgba(88,101,242,.55); border-radius: 20px; height: 34px; padding: 0 13px;
+      transition: background .2s; animation: discord-glow 2.5s ease-in-out infinite; white-space: nowrap; }
     .contact-card:hover { background: linear-gradient(135deg, rgba(88,101,242,.65), rgba(88,101,242,.4)); }
-    .contact-card-text { line-height: 1.2; }
-    .contact-card-label { font-size: 9px; font-weight: 700; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
-    .contact-card-name { font-size: 14px; font-weight: 800; }
-    .contact-card-sub { font-size: 10px; opacity: .65; }
+    .contact-card-text { line-height: 1.15; }
+    .contact-card-name { font-size: 12.5px; font-weight: 800; }
+    .contact-card-sub { font-size: 9px; opacity: .65; }
 
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
     .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
@@ -487,7 +484,7 @@
     #pizza-typing-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     /* Header Secrets tlačidlo */
-    .secrets-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:20px; padding:5px 11px; font-size:16px; color:white; cursor:pointer; transition:background .2s,transform .2s; line-height:1; }
+    .secrets-btn { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:20px; height:34px; display:flex; align-items:center; padding:0 11px; font-size:16px; color:white; cursor:pointer; transition:background .2s,transform .2s; line-height:1; }
     .secrets-btn:hover { background:rgba(255,255,255,.25); transform:scale(1.1) rotate(-10deg); }
 
     /* Secrets modal */
@@ -1332,6 +1329,20 @@
     html.theme-odysea .phone-item:hover { background:#f1e7d0; color:#7c5b12; }
     html.theme-odysea #user-badge { background:rgba(201,162,39,.18); border:1px solid rgba(201,162,39,.4); }
     html.theme-odysea .fifa-scores { background:rgba(201,162,39,.12); border-color:rgba(201,162,39,.45); }
+    /* Header pilulky zladené so zlato-bronzovou paletou */
+    html.theme-odysea .hdr-weather,
+    html.theme-odysea .phone-btn,
+    html.theme-odysea .secrets-btn { background:rgba(201,162,39,.1); border-color:rgba(201,162,39,.35); }
+    html.theme-odysea .hdr-weather:hover,
+    html.theme-odysea .phone-btn:hover,
+    html.theme-odysea .secrets-btn:hover { background:rgba(201,162,39,.22); }
+    html.theme-odysea .contact-card {
+      background:linear-gradient(180deg,#0e1c2c,#16293d);
+      border-color:rgba(201,162,39,.45); animation:none;
+    }
+    html.theme-odysea .contact-card:hover { background:linear-gradient(180deg,#14273a,#1d3445); }
+    html.theme-odysea .nav-link { color:#b8c5d1; }
+    html.theme-odysea .nav-link:hover { background:rgba(201,162,39,.18); color:#f4d97b; }
 
     /* Karty — zostarnutý pergamen s bronzovým lemom (plagát v ráme) */
     html.theme-odysea .card {
@@ -1448,6 +1459,14 @@
     .theme-dots span { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); display:inline-block; }
     .theme-option .t-check { position:absolute; top:10px; right:12px; font-size:16px; display:none; }
     .theme-option.selected .t-check { display:block; }
+
+    /* ── Hlavička: postupné odľahčovanie na užších oknách ──
+       Musí byť na konci štýlov, aby prepísalo základné aj témové pravidlá. */
+    @media (max-width: 1600px) { .contact-card-sub, .hdr-weather .hw-desc, .secrets-btn, .fifa-scores .fs-demo { display:none; } }
+    @media (max-width: 1500px) { .contact-card-text { display:none; } .contact-card { padding: 0 10px; } }
+    @media (max-width: 1380px) { .logout-label { display:none; } html.theme-fifa .fifa-logo, html.theme-odysea .odysea-logo { display:none; } }
+    @media (max-width: 1240px) { .contact-card { display:none; } }
+    @media (max-width: 1150px) { .fifa-scores { max-width:30vw; } }
   </style>
 </head>
 <body>
@@ -1470,7 +1489,6 @@
       <span class="hw-icon" id="hw-icon">⏳</span>
       <span class="hw-temp" id="hw-temp">–°C</span>
       <span class="hw-desc" id="hw-desc"></span>
-      <span class="hw-loc">Ružinov</span>
     </div>
     <div class="phone-wrap">
       <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
@@ -1484,17 +1502,16 @@
         <div class="phone-drop-addr">📍 Ipeľská 4, Bratislava</div>
       </div>
     </div>
-    <a href="https://discord.com/users/1359038724956098771" target="_blank" class="contact-card">
-      <svg width="22" height="22" viewBox="0 0 71 55" fill="white" style="flex-shrink:0"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.7 40.7 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.6 37.6 0 0 0 25.5.5a.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.6 5.3 24.1 5.3 35.5 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.2 36.2 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.7-8.9.2.2 0 0 0 .1-.2c1.5-15.2-2.5-28-10.5-39.6a.2.2 0 0 0-.1-.2zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
+    <a href="https://discord.com/users/1359038724956098771" target="_blank" class="contact-card" title="Hlavný kontakt — Filip Švolík (Discord · mimosvk)">
+      <svg width="18" height="18" viewBox="0 0 71 55" fill="white" style="flex-shrink:0"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a.2.2 0 0 0-.2.1 40.7 40.7 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.6 37.6 0 0 0 25.5.5a.2.2 0 0 0-.2-.1A58.3 58.3 0 0 0 10.8 4.9a.2.2 0 0 0-.1.1C1.6 18.1-.9 31 .3 43.7a.2.2 0 0 0 .1.2 58.8 58.8 0 0 0 17.7 8.9.2.2 0 0 0 .2-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.7 38.7 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.8a.2.2 0 0 1 .2 0c11.6 5.3 24.1 5.3 35.5 0a.2.2 0 0 1 .2 0l1.1.8a.2.2 0 0 1 0 .4 36.2 36.2 0 0 1-5.5 2.6.2.2 0 0 0-.1.3 47.1 47.1 0 0 0 3.6 5.9.2.2 0 0 0 .2.1 58.6 58.6 0 0 0 17.7-8.9.2.2 0 0 0 .1-.2c1.5-15.2-2.5-28-10.5-39.6a.2.2 0 0 0-.1-.2zM23.7 36c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2zm23.6 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 4-2.8 7.2-6.4 7.2z"/></svg>
       <div class="contact-card-text">
-        <div class="contact-card-label">Hlavný kontakt</div>
         <div class="contact-card-name">Filip Švolík</div>
         <div class="contact-card-sub">Discord · mimosvk</div>
       </div>
     </a>
     <button class="secrets-btn" onclick="openSecrets()" title="Tajné Easter Eggy 🥚">🥚</button>
     <span id="user-badge" onclick="userBadgeClick()" title="Klikni pre zmenu · 2× rýchlo = Kríza Identity 👤">👤 <span id="username-display">...</span></span>
-    <button id="logout-btn" class="nav-link" onclick="changeUser()" title="Odhlásiť sa" style="display:none;background:none;border:none;cursor:pointer;font-family:inherit">🚪 Odhlásiť sa</button>
+    <button id="logout-btn" class="nav-link" onclick="changeUser()" title="Odhlásiť sa" style="display:none;background:none;border:none;cursor:pointer;font-family:inherit">🚪<span class="logout-label"> Odhlásiť sa</span></button>
     <a href="/admin" class="nav-link">Admin</a>
   </div>
 </header>
