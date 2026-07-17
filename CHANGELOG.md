@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.18.1] — 2026-07-17
+
+### Zmenené
+- **Optimalizácia horného menu** — všetky prvky hlavičky (počasie, telefón, Discord kontakt, vajíčko, používateľ, FIFA ticker) majú teraz **jednotnú výšku 34 px** a konzistentný „pill" tvar. Discord karta je kompaktnejšia (label „Hlavný kontakt" sa presunul do tooltipu) a v téme Odysea je zladená do tmavo-zlatej namiesto modrej. Z počasia zmizol nadbytočný text „Ružinov" (ostáva v tooltipe). „Odhlásiť sa" sa už nezalamuje na dva riadky.
+- **Hlavička sa prispôsobuje šírke okna** — na užších oknách sa postupne skrývajú najmenej dôležité prvky (popis počasia → text Discord karty → vajíčko → text „Odhlásiť sa" → kino/FIFA odznak → Discord karta), takže Admin a odhlásenie už nikdy nepretečú mimo obrazovku; FIFA ticker sa pružne skracuje.
+
 ## [1.18.0] — 2026-07-17
 
 ### Pridané
