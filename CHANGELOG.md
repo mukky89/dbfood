@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.18.0] — 2026-07-17
+
+### Pridané
+- **Nová téma „Odysea" 🏛️** — filmové promo v duchu eposu *Odysea* Christophera Nolana, ako plagát v kine: nočné búrlivé more (Ajvazovského *Deviata vlna* ako pozadie s filmovým „letterbox" stmavením), pergamenové karty s bronzovo-zlatými akcentmi, serifová typografia, kino odznak „ODYSEA — už v kinách" v hlavičke a **filmový plagát** vpravo dole s reálnymi public domain maľbami z Wikimedia Commons (Draper, Waterhouse, Ajvazovskij — klik strieda zábery), s premiérou „17. júla 2026 • Len v kinách • IMAX". Prepína sa v Admin → Vzhľad.
+
+### Opravené
+- **Vlajky vo FIFA tickeri sa nezobrazovali na Windowse** — výsledkové okno FIFA 2026 v hlavičke používalo emoji vlajky krajín (🇲🇽 🇺🇸 …), ktoré Windows nevykresľuje (ukazoval len písmená „MX/US"). Emoji sa teraz automaticky dekóduje na ISO kód krajiny a vykreslí sa ako **SVG vlajka** (flagcdn.com) pre všetkých ~50 účastníkov MS; ak sa obrázok nenačíta, zobrazí sa pôvodné emoji.
+
 ## [1.17.1] — 2026-07-12
 
 ### Opravené
