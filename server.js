@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 const cron = require('node-cron');
@@ -709,85 +708,6 @@ app.post('/api/admin/design', async (req, res) => {
     const vzhlad = await getVzhlad();
     res.json({ ok: true, theme: vzhlad.tema, futuristic: vzhlad.tema === 'futuristic' });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
-});
-
-// ── FIFA 2026 — živé výsledky (ticker v hlavičke) ──────────────────────────
-// Zdroj: TheSportsDB (free key "3", liga 4429 = FIFA World Cup). Ak fetch
-// zlyhá (napr. blokovaná sieť), vracia sa ukážková sada zápasov.
-const FIFA_WC_LEAGUE = 4429;
-const FIFA_CACHE_MS = 5 * 60 * 1000; // 5 minút
-let _fifaCache = { ts: 0, matches: null, source: null };
-
-// Krajina -> vlajka emoji (účastníci MS 2026 a bežní kvalifikanti)
-const FIFA_FLAGS = {
-  'usa':'🇺🇸','united states':'🇺🇸','canada':'🇨🇦','mexico':'🇲🇽',
-  'argentina':'🇦🇷','brazil':'🇧🇷','france':'🇫🇷','spain':'🇪🇸','portugal':'🇵🇹',
-  'germany':'🇩🇪','netherlands':'🇳🇱','belgium':'🇧🇪','italy':'🇮🇹','croatia':'🇭🇷',
-  'england':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿',
-  'uruguay':'🇺🇾','colombia':'🇨🇴','ecuador':'🇪🇨','peru':'🇵🇪','chile':'🇨🇱',
-  'paraguay':'🇵🇾','venezuela':'🇻🇪','bolivia':'🇧🇴',
-  'japan':'🇯🇵','south korea':'🇰🇷','korea republic':'🇰🇷','iran':'🇮🇷',
-  'saudi arabia':'🇸🇦','qatar':'🇶🇦','australia':'🇦🇺','iraq':'🇮🇶','uzbekistan':'🇺🇿',
-  'morocco':'🇲🇦','senegal':'🇸🇳','ghana':'🇬🇭','nigeria':'🇳🇬','cameroon':'🇨🇲',
-  'tunisia':'🇹🇳','algeria':'🇩🇿','egypt':'🇪🇬','ivory coast':'🇨🇮','mali':'🇲🇱',
-  'south africa':'🇿🇦','dr congo':'🇨🇩',
-  'switzerland':'🇨🇭','denmark':'🇩🇰','poland':'🇵🇱','serbia':'🇷🇸','austria':'🇦🇹',
-  'ukraine':'🇺🇦','turkey':'🇹🇷','türkiye':'🇹🇷','greece':'🇬🇷','sweden':'🇸🇪',
-  'norway':'🇳🇴','czech republic':'🇨🇿','czechia':'🇨🇿','hungary':'🇭🇺','romania':'🇷🇴',
-  'slovakia':'🇸🇰','slovenia':'🇸🇮','scotland ':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'costa rica':'🇨🇷','panama':'🇵🇦','jamaica':'🇯🇲','honduras':'🇭🇳','new zealand':'🇳🇿'
-};
-function fifaFlag(name) {
-  if (!name) return '🏳️';
-  return FIFA_FLAGS[name.trim().toLowerCase()] || '🏳️';
-}
-
-// Ukážková sada (keď nie je dostupný live zdroj)
-const FIFA_FALLBACK = [
-  { home:'Mexico', away:'USA',       homeScore:'2', awayScore:'1', status:'FT' },
-  { home:'Canada', away:'Argentina', homeScore:'0', awayScore:'3', status:'FT' },
-  { home:'Brazil', away:'France',    homeScore:null, awayScore:null, status:'UP' },
-  { home:'England',away:'Spain',     homeScore:'1', awayScore:'1', status:'LIVE' },
-  { home:'Germany',away:'Portugal',  homeScore:null, awayScore:null, status:'UP' },
-].map(m => ({ ...m, homeFlag: fifaFlag(m.home), awayFlag: fifaFlag(m.away) }));
-
-async function fetchFifaMatches() {
-  const base = 'https://www.thesportsdb.com/api/v1/json/3';
-  const [pastR, nextR] = await Promise.allSettled([
-    axios.get(`${base}/eventspastleague.php?id=${FIFA_WC_LEAGUE}`, { timeout: 7000 }),
-    axios.get(`${base}/eventsnextleague.php?id=${FIFA_WC_LEAGUE}`, { timeout: 7000 }),
-  ]);
-  const out = [];
-  const add = (events, finished) => (events || []).forEach(e => out.push({
-    home: e.strHomeTeam, away: e.strAwayTeam,
-    homeScore: e.intHomeScore != null ? String(e.intHomeScore) : null,
-    awayScore: e.intAwayScore != null ? String(e.intAwayScore) : null,
-    homeFlag: fifaFlag(e.strHomeTeam), awayFlag: fifaFlag(e.strAwayTeam),
-    date: e.dateEvent, time: e.strTime, status: finished ? 'FT' : 'UP',
-  }));
-  if (pastR.status === 'fulfilled') add(pastR.value.data?.events, true);
-  if (nextR.status === 'fulfilled') add(nextR.value.data?.events, false);
-  // Najnovšie odohrané najprv, potom najbližšie nadchádzajúce
-  return out.slice(0, 20);
-}
-
-// GET /api/fifa-scores — výsledky MS 2026 pre ticker (cache 5 min, fallback)
-app.get('/api/fifa-scores', async (req, res) => {
-  const now = Date.now();
-  if (_fifaCache.matches && now - _fifaCache.ts < FIFA_CACHE_MS) {
-    return res.json({ ok: true, source: _fifaCache.source, matches: _fifaCache.matches });
-  }
-  try {
-    const matches = await fetchFifaMatches();
-    if (matches.length) {
-      _fifaCache = { ts: now, matches, source: 'thesportsdb' };
-      return res.json({ ok: true, source: 'thesportsdb', matches });
-    }
-    throw new Error('empty');
-  } catch (e) {
-    _fifaCache = { ts: now, matches: FIFA_FALLBACK, source: 'fallback' };
-    return res.json({ ok: true, source: 'fallback', matches: FIFA_FALLBACK });
-  }
 });
 
 // POST /api/qr

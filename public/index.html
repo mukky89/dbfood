@@ -90,21 +90,6 @@
     .phone-item-icon { font-size: 16px; flex-shrink: 0; }
     .phone-drop-addr { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
     .header-right { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
-    /* FIFA 2026 — ticker s výsledkami v hlavičke */
-    .fifa-scores { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:20px; height:34px; padding:0 14px; font-size:14px; color:#fff; cursor:pointer; white-space:nowrap; transition:background .2s, transform .15s; max-width:42vw; overflow:hidden; min-width:0; flex:0 1 auto; }
-    .fifa-scores:hover { background:rgba(255,255,255,.2); transform:scale(1.02); }
-    .fifa-scores .fs-team { display:inline-flex; align-items:center; gap:5px; font-weight:600; }
-    .fifa-scores .fs-flag { font-size:17px; line-height:1; }
-    .fifa-scores .fs-flag-img { width:21px; height:14px; border-radius:2px; object-fit:cover; box-shadow:0 0 0 1px rgba(0,0,0,.3); display:inline-block; }
-    .fifa-scores .fs-score { font-weight:800; letter-spacing:1px; padding:0 4px; }
-    .fifa-scores .fs-status { font-size:10px; font-weight:800; text-transform:uppercase; border-radius:10px; padding:2px 7px; letter-spacing:.5px; }
-    .fifa-scores .fs-status.live { background:#e30613; color:#fff; animation:pulse-badge 1.4s ease-in-out infinite; }
-    .fifa-scores .fs-status.ft   { background:rgba(255,255,255,.22); color:#fff; }
-    .fifa-scores .fs-status.up   { background:#f7a600; color:#241500; }
-    .fifa-scores .fs-label { font-size:14px; opacity:.85; }
-    .fifa-scores .fs-demo { font-size:10px; opacity:.7; font-style:italic; }
-    @media (max-width: 980px) { .fifa-scores { display:none !important; } }
-    html.theme-fifa .fifa-scores { background:rgba(255,255,255,.14); border-color:#f7a600; }
     /* Predpoveď počasia pre Bratislavu Ružinov — vždy v hlavičke, nezávisle od témy */
     .hdr-weather { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; height:34px; padding:0 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
     .hdr-weather:hover { background:rgba(255,255,255,.2); }
@@ -1331,7 +1316,6 @@
     html.theme-odysea .phone-item { color:var(--text); }
     html.theme-odysea .phone-item:hover { background:#f1e7d0; color:#7c5b12; }
     html.theme-odysea #user-badge { background:rgba(201,162,39,.18); border:1px solid rgba(201,162,39,.4); }
-    html.theme-odysea .fifa-scores { background:rgba(201,162,39,.12); border-color:rgba(201,162,39,.45); }
     /* Header pilulky zladené so zlato-bronzovou paletou */
     html.theme-odysea .hdr-weather,
     html.theme-odysea .phone-btn,
@@ -1533,11 +1517,10 @@
 
     /* ── Hlavička: postupné odľahčovanie na užších oknách ──
        Musí byť na konci štýlov, aby prepísalo základné aj témové pravidlá. */
-    @media (max-width: 1600px) { .contact-card-sub, .hdr-weather .hw-desc, .secrets-btn, .fifa-scores .fs-demo { display:none; } }
+    @media (max-width: 1600px) { .contact-card-sub, .hdr-weather .hw-desc, .secrets-btn { display:none; } }
     @media (max-width: 1500px) { .contact-card-text { display:none; } .contact-card { padding: 0 10px; } }
     @media (max-width: 1380px) { .logout-label { display:none; } html.theme-fifa .fifa-logo, html.theme-odysea .odysea-logo { display:none; } }
     @media (max-width: 1240px) { .contact-card { display:none; } }
-    @media (max-width: 1150px) { .fifa-scores { max-width:30vw; } }
   </style>
 </head>
 <body>
@@ -1554,7 +1537,6 @@
     <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
     <span class="odysea-logo" aria-hidden="true" title="Odysea — už v kinách"><span class="ol-mark">🏺</span><span class="ol-text"><span class="ol-title">ODYSEA</span><span class="ol-sub">Už v kinách</span></span></span>
   </h1>
-  <div id="fifa-scores" class="fifa-scores" onclick="cycleFifaScore(1)" title="FIFA 2026 — klikni pre ďalší zápas" style="display:none"></div>
   <div class="header-right">
     <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
       <span class="hw-icon" id="hw-icon">⏳</span>
@@ -2461,8 +2443,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadHistory();
   await loadOrders();
   setInterval(loadOrders, 30000);
-  loadFifaScores();
-  setInterval(loadFifaScores, 5 * 60 * 1000);
   loadWeather();
   setInterval(loadWeather, 15 * 60 * 1000);
 
@@ -3580,69 +3560,6 @@ async function loadWeather() {
   }
 }
 
-// ── FIFA 2026 — výsledky v hlavičke (ticker) ───────────────────────────────
-let _fifaMatches = [];
-let _fifaIdx = 0;
-let _fifaSource = '';
-let _fifaRotateTimer = null;
-async function loadFifaScores() {
-  try {
-    const res = await fetch('/api/fifa-scores');
-    const data = await res.json();
-    if (!data || !data.ok || !Array.isArray(data.matches) || !data.matches.length) return;
-    _fifaMatches = data.matches;
-    _fifaSource = data.source || '';
-    if (_fifaIdx >= _fifaMatches.length) _fifaIdx = 0;
-    renderFifaScore();
-    // Auto-rotácia každých 5s
-    clearInterval(_fifaRotateTimer);
-    _fifaRotateTimer = setInterval(() => cycleFifaScore(1), 5000);
-  } catch (e) { /* ticker je nepovinný — ticho ignoruj */ }
-}
-function cycleFifaScore(dir) {
-  if (!_fifaMatches.length) return;
-  _fifaIdx = (_fifaIdx + dir + _fifaMatches.length) % _fifaMatches.length;
-  renderFifaScore();
-}
-// Emoji vlajka -> ISO kod krajiny (napr. 🇸🇰 -> "sk", 🏴󠁧󠁢󠁥󠁮󠁧󠁿 -> "gb-eng").
-// Emoji vlajky Windows nevykresluje (ukazuje len pismena), preto sa z kodu
-// sklada <img> s SVG vlajkou z flagcdn.com; pri chybe sa vrati emoji.
-function flagEmojiToCode(emoji) {
-  if (!emoji) return null;
-  const cps = [...emoji].map(c => c.codePointAt(0));
-  if (cps[0] === 0x1F3F4 && cps.length > 3) { // tag-sekvencia (Anglicko, Skotsko, Wales)
-    const s = cps.slice(1).filter(c => c >= 0xE0061 && c <= 0xE007A)
-      .map(c => String.fromCharCode(c - 0xE0000)).join('');
-    return s.length > 2 ? s.slice(0, 2) + '-' + s.slice(2) : null;
-  }
-  const ri = cps.filter(c => c >= 0x1F1E6 && c <= 0x1F1FF); // regionalne indikatory
-  if (ri.length === 2) return ri.map(c => String.fromCodePoint(c - 0x1F1E6 + 0x61)).join('');
-  return null;
-}
-function fifaFlagHtml(emoji) {
-  const code = flagEmojiToCode(emoji);
-  if (!code) return `<span class="fs-flag">${emoji || '🏳️'}</span>`;
-  return `<img class="fs-flag-img" src="https://flagcdn.com/${code}.svg" alt="${emoji}" loading="lazy" onerror="this.replaceWith(this.alt)">`;
-}
-function renderFifaScore() {
-  const box = document.getElementById('fifa-scores');
-  if (!box || !_fifaMatches.length) return;
-  const m = _fifaMatches[_fifaIdx];
-  const live = m.status === 'LIVE';
-  const finished = m.status === 'FT';
-  const scoreTxt = (m.homeScore != null && m.awayScore != null)
-    ? `${m.homeScore} : ${m.awayScore}` : 'vs';
-  const statusCls = live ? 'live' : finished ? 'ft' : 'up';
-  const statusTxt = live ? '🔴 Live' : finished ? 'Koniec' : 'Čoskoro';
-  box.innerHTML =
-    `<span class="fs-label">⚽</span>` +
-    `<span class="fs-team">${fifaFlagHtml(m.homeFlag)}${esc(m.home || '?')}</span>` +
-    `<span class="fs-score">${scoreTxt}</span>` +
-    `<span class="fs-team">${esc(m.away || '?')}${fifaFlagHtml(m.awayFlag)}</span>` +
-    `<span class="fs-status ${statusCls}">${statusTxt}</span>` +
-    (_fifaSource === 'fallback' ? `<span class="fs-demo">(ukážka)</span>` : '');
-  box.style.display = 'flex';
-}
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }

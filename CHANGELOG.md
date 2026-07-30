@@ -10,6 +10,9 @@ projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 ### Pridané
 - **Odysea 🏛️ — kino, tržby a činčila** — filmový plagát v téme Odysea má teraz **odkaz do kina CineMax IMAX** („🎟️ CineMax IMAX — kúpiť lístok", otvára sa v novom okne) a **živé počítadlo tržieb v kinách** („🎬 Tržby v kinách"), ktoré po prepnutí témy vyskočí zo `$0` na svetovú tržbu a ďalej pomaly rastie. Do skinu pribudla **jedna kino-činčila uvádzačka** 🐭🍿 (vľavo dole), ktorá po kliknutí vydáva roztomilé zvuky (zdieľa WebAudio z témy Činčily) a ukazuje filmové bublinky. Činčila **zapíska aj po úspešnom odoslaní objednávky obeda** (v téme Odysea aj Činčily).
 
+### Odstránené
+- **FIFA výsledky (ticker v hlavičke)** — z celého webu bol odstránený výsledkový ticker MS 2026, ktorý sa zobrazoval v hlavičke naprieč všetkými témami: vrátane frontend widgetu, jeho štýlov a auto-rotácie, backend endpointu `GET /api/fifa-scores` (zdroj TheSportsDB, cache, ukážkové dáta a mapovanie vlajok) aj nepoužívaného importu `axios` v `server.js`. Vizuálna **téma FIFA 2026** (futbalový skin, logo v hlavičke, plávajúce lopty aj easter egg „lopta") **ostáva zachovaná**.
+
 ## [1.19.0] — 2026-07-17
 
 ### Pridané
