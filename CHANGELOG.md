@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.20.0] — 2026-07-30
+
+### Pridané
+- **Odysea 🏛️ — kino, tržby a činčila** — filmový plagát v téme Odysea má teraz **odkaz do kina CineMax IMAX** („🎟️ CineMax IMAX — kúpiť lístok", otvára sa v novom okne) a **živé počítadlo tržieb v kinách** („🎬 Tržby v kinách"), ktoré po prepnutí témy vyskočí zo `$0` na svetovú tržbu a ďalej pomaly rastie. Do skinu pribudla **jedna kino-činčila uvádzačka** 🐭🍿 (vľavo dole), ktorá po kliknutí vydáva roztomilé zvuky (zdieľa WebAudio z témy Činčily) a ukazuje filmové bublinky. Činčila **zapíska aj po úspešnom odoslaní objednávky obeda** (v téme Odysea aj Činčily).
+
 ## [1.19.0] — 2026-07-17
 
 ### Pridané

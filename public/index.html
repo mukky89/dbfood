@@ -1449,7 +1449,37 @@
     #odysea-promo .op-title { font-family:Georgia,serif; font-size:27px; letter-spacing:7px; color:#e8c95c; margin:4px 0 2px; text-shadow:0 0 18px rgba(201,162,39,.4); }
     #odysea-promo .op-tag { font-size:11px; font-style:italic; color:#cfd8e3; }
     #odysea-promo .op-date { margin-top:9px; font-size:9.5px; letter-spacing:1.5px; color:#c9a227; text-transform:uppercase; border-top:1px solid rgba(201,162,39,.35); padding-top:8px; }
+    /* Box office — tržby v kinách (živé počítadlo) */
+    #odysea-promo .op-boxoffice { margin-top:9px; display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+      padding-top:8px; border-top:1px solid rgba(201,162,39,.35); }
+    #odysea-promo .op-bo-label { font-size:8.5px; letter-spacing:1.5px; color:#9fb2c4; text-transform:uppercase; }
+    #odysea-promo .op-bo-value { font-family:Georgia,serif; font-weight:700; font-size:15px; color:#7bd0a0;
+      letter-spacing:.5px; text-shadow:0 0 12px rgba(46,125,91,.5); font-variant-numeric:tabular-nums; }
+    /* CTA — odkaz do kina CineMax IMAX */
+    #odysea-promo .op-cta { display:block; margin-top:11px; padding:9px 12px; border-radius:5px; text-align:center;
+      font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none;
+      color:#1b1608; background:linear-gradient(135deg,#f4d97b,#c9a227,#8f6d1c); box-shadow:inset 0 -3px 0 rgba(0,0,0,.28);
+      transition:filter .2s ease, transform .12s ease; }
+    #odysea-promo .op-cta:hover { filter:brightness(1.08); }
+    #odysea-promo .op-cta:active { transform:translateY(1px); }
     @media (max-width:800px) { html.theme-odysea #odysea-promo { display:none; } }
+
+    /* Kino-činčila — jediná uvádzačka, viditeľná len v téme Odysea. Klik = zvuky. */
+    #odysea-chin { display:none; }
+    html.theme-odysea #odysea-chin { display:block; position:fixed; left:18px; bottom:20px; z-index:141; width:112px;
+      cursor:pointer; user-select:none; -webkit-user-select:none; filter:drop-shadow(0 8px 14px rgba(0,0,0,.55));
+      animation:chinBob 3.4s ease-in-out infinite; }
+    html.theme-odysea #odysea-chin:hover { animation:none; transform:scale(1.06) rotate(-3deg); }
+    html.theme-odysea #odysea-chin.squeaking { animation:chinSqueak .45s ease; }
+    #odysea-chin .chin-svg { width:100%; height:auto; display:block; }
+    #odysea-chin .oc-pop { position:absolute; top:-6px; right:-4px; font-size:26px; transform:rotate(12deg);
+      filter:drop-shadow(0 3px 5px rgba(0,0,0,.4)); pointer-events:none; }
+    #odysea-chin-bubble { position:absolute; left:104px; bottom:70px; z-index:142; background:#f8f2e3; color:#7c5b12;
+      padding:8px 13px; border-radius:16px 16px 16px 4px; font-weight:800; font-size:13px; border:1px solid #d9c9a6;
+      box-shadow:0 8px 22px rgba(0,0,0,.4); display:none; white-space:nowrap; }
+    #odysea-chin-bubble.show { display:block; animation:bubblePop .3s ease; }
+    @media (max-width:640px) { html.theme-odysea #odysea-chin { width:84px; left:10px; bottom:14px; }
+      #odysea-chin-bubble { left:80px; bottom:56px; font-size:12px; } }
 
     /* ── Výber témy v admin paneli ── */
     .theme-option { border:2px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
@@ -1650,7 +1680,23 @@
     <div class="op-title">ODYSEA</div>
     <div class="op-tag">„Každý kráľ sa musí vrátiť domov."</div>
     <div class="op-date">17. júla 2026 • Len v kinách • IMAX</div>
+    <div class="op-boxoffice" title="Tržby vo svetových kinách">
+      <span class="op-bo-label">🎬 Tržby v kinách</span>
+      <span class="op-bo-value" id="odysea-bo-value">$0</span>
+    </div>
+    <a class="op-cta" href="https://www.cine-max.sk/" target="_blank" rel="noopener noreferrer"
+       onclick="event.stopPropagation()" title="Kúp si lístok na Odyseu v CineMax IMAX">
+      🎟️ CineMax IMAX — kúpiť lístok
+    </a>
   </div>
+</div>
+
+<!-- Odysea 🏛️ — jedna kino-činčila uvádzačka (viditeľná len v téme .theme-odysea).
+     Klik = roztomilé zvuky (WebAudio); zapíska aj po odoslaní objednávky. -->
+<div id="odysea-chin" onclick="odyseaChinSqueak(this)" title="Pohlaď kino-činčilu 🐭🍿">
+  <span class="oc-pop" aria-hidden="true">🍿</span>
+  <svg class="chin-svg" viewBox="0 0 140 152" aria-hidden="true"><use href="#chinchilla-symbol"/></svg>
+  <div id="odysea-chin-bubble"></div>
 </div>
 
 <!-- Feedback 💬 — plávajúce okno na nápady, chyby a pokec -->
@@ -2176,7 +2222,7 @@
             <span class="t-check">✅</span>
             <div class="t-emoji">🏛️</div>
             <div class="t-name">Odysea</div>
-            <div class="t-desc">Filmové promo v duchu eposu Christophera Nolana — búrlivé more, bronz a zlato, kino plagát.</div>
+            <div class="t-desc">Filmové promo v duchu eposu Christophera Nolana — búrlivé more, bronz a zlato, kino plagát s tržbami a odkazom do CineMax IMAX, plus kino-činčila so zvukmi.</div>
             <div class="theme-dots"><span style="background:#0a1622"></span><span style="background:#c9a227"></span><span style="background:#f4ecdd"></span></div>
           </div>
         </div>
@@ -3129,6 +3175,16 @@ async function submitOrder() {
     const data = await res.json();
     if (data.ok) {
       isEditMode = false;
+      // Kino-činčila zapíska po úspešnej objednávke (v téme Odysea aj Činčily)
+      try {
+        const html = document.documentElement;
+        if (html.classList.contains('theme-odysea')) {
+          odyseaChinSqueak(document.getElementById('odysea-chin'));
+        } else if (html.classList.contains('theme-chinchilla')) {
+          const mascot = document.querySelector('.chin.c-mascot');
+          if (mascot) chinchillaSqueak(mascot); else _chinPlaySound();
+        }
+      } catch(e) {}
       showToast(body.editMode ? '✏️ Objednávka upravená!' : '✅ Objednávka uložená!', 'success');
       lockOrderForm(body.polievka, body.jedlo, body.pizza, body.dezert, body.poznamka, body.porcie);
       await loadOrders();
@@ -3610,6 +3666,54 @@ function cycleOdyseaPoster() {
   img.src = p.src; img.alt = p.alt;
 }
 
+// ── Odysea — kino-činčila (jedna uvádzačka) so zvukmi (zdieľa WebAudio z témy Činčily) ─
+const ODYSEA_CHIN_BUBBLES = ['Pip pip! 🍿', 'Ideme do kina? 🎬', 'ODYSEA! ⚓', 'Chrum chrum 🌿', 'IMAX! 🎞️', 'Ticho, začína sa… 🤫', 'Bwoop! 🫧', 'Maškrtu? 😋', 'Užite si film! ✨'];
+function odyseaChinSqueak(el) {
+  if (typeof _chinPlaySound === 'function') _chinPlaySound();
+  if (el) {
+    el.classList.remove('squeaking'); void el.offsetWidth; el.classList.add('squeaking');
+    setTimeout(() => el.classList.remove('squeaking'), 480);
+  }
+  const bubble = document.getElementById('odysea-chin-bubble');
+  if (bubble) {
+    bubble.textContent = ODYSEA_CHIN_BUBBLES[Math.floor(Math.random() * ODYSEA_CHIN_BUBBLES.length)];
+    bubble.classList.add('show');
+    clearTimeout(bubble._hide);
+    bubble._hide = setTimeout(() => bubble.classList.remove('show'), 1600);
+  }
+}
+
+// ── Odysea — box office (živé počítadlo tržieb v kinách) ───────────────────
+const ODYSEA_BO_TARGET = 427850000;         // štartovacia svetová tržba ($)
+let _odyseaBoCurrent = 0, _odyseaBoRaf = null, _odyseaBoTick = null;
+function _fmtUsd(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function setupOdyseaTheme(active) {
+  const val = document.getElementById('odysea-bo-value');
+  if (_odyseaBoRaf) { cancelAnimationFrame(_odyseaBoRaf); _odyseaBoRaf = null; }
+  if (_odyseaBoTick) { clearInterval(_odyseaBoTick); _odyseaBoTick = null; }
+  if (!active || !val) return;
+  // Odomkni audio po prvom geste (aby zvuky išli hneď po prepnutí témy)
+  document.addEventListener('pointerdown', () => { if (typeof _chinCtx === 'function') _chinCtx(); }, { once: true });
+  // Animuj počítadlo od 0 po cieľovú tržbu
+  const start = performance.now(), from = 0, to = ODYSEA_BO_TARGET, dur = 1800;
+  function step(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    _odyseaBoCurrent = from + (to - from) * eased;
+    val.textContent = _fmtUsd(_odyseaBoCurrent);
+    if (t < 1) { _odyseaBoRaf = requestAnimationFrame(step); }
+    else {
+      _odyseaBoCurrent = to; val.textContent = _fmtUsd(to);
+      // Ďalej pomaly „rastie" — tržby stále pribúdajú
+      _odyseaBoTick = setInterval(() => {
+        _odyseaBoCurrent += 1000 + Math.floor(Math.random() * 9000);
+        val.textContent = _fmtUsd(_odyseaBoCurrent);
+      }, 2500);
+    }
+  }
+  _odyseaBoRaf = requestAnimationFrame(step);
+}
+
 // ── Feedback 💬 — plávajúce okno na nápady, chyby a pokec ───────────────────
 let _fbTyp = 'napad';
 function toggleFeedback(force) {
@@ -3968,6 +4072,7 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-chinchilla', theme === 'chinchilla');
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
+  if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
   try { localStorage.setItem('fob_theme', theme); } catch(e) {}
   return theme;
 }
