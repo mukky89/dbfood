@@ -8,7 +8,11 @@ projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 ## [1.20.0] — 2026-07-30
 
 ### Pridané
-- **Odysea 🏛️ — kino, tržby a činčila** — filmový plagát v téme Odysea má teraz **odkaz do kina CineMax IMAX** („🎟️ CineMax IMAX — kúpiť lístok", otvára sa v novom okne) a **živé počítadlo tržieb v kinách** („🎬 Tržby v kinách"), ktoré po prepnutí témy vyskočí zo `$0` na svetovú tržbu a ďalej pomaly rastie. Do skinu pribudla **jedna kino-činčila uvádzačka** 🐭🍿 (vľavo dole), ktorá po kliknutí vydáva roztomilé zvuky (zdieľa WebAudio z témy Činčily) a ukazuje filmové bublinky. Činčila **zapíska aj po úspešnom odoslaní objednávky obeda** (v téme Odysea aj Činčily).
+- **Odysea 🏛️ — kino, tržby a činčila** — filmový plagát v téme Odysea má teraz **odkaz do kina CineMax IMAX** („🎟️ CineMax IMAX — kúpiť lístok", otvára sa v novom okne) a **živé počítadlo tržieb v kinách** („🎬 Tržby v kinách"), ktoré po načítaní vyletí od otváracieho víkendu po aktuálnu svetovú tržbu a potom rastie v reálnom čase (každú sekundu viditeľne pripočíta ďalšie tržby a blysne). Do skinu pribudla **jedna kino-činčila uvádzačka** 🐭🍿 (vpravo dole vedľa plagátu), ktorá po kliknutí vydáva roztomilé zvuky (zdieľa WebAudio z témy Činčily) a ukazuje filmové bublinky. Činčila **zapíska aj po úspešnom odoslaní objednávky obeda** (v téme Odysea aj Činčily).
+
+### Opravené
+- **Kino-činčila už neprekrýva feedback tlačidlo** — činčila sa presunula z ľavého dolného rohu (kde sa prekrývala s bublinou feedbacku 💬) k filmovému plagátu vpravo dole; pri otvorení plávajúceho panela objednávky sa navyše zdvihne nad neho.
+- **Tržby v kinách sa na hlavnej stránke viditeľne zvyšujú** — počítadlo je teraz naviazané na reálny čas (monotónne rastie a po každom načítaní je vyššie) a každú sekundu sa citeľne posunie s krátkym blysnutím; predtým pripočítavalo len nepatrné sumy k veľkému základu, takže zmena bola takmer neviditeľná.
 
 ### Odstránené
 - **FIFA výsledky (ticker v hlavičke)** — z celého webu bol odstránený výsledkový ticker MS 2026, ktorý sa zobrazoval v hlavičke naprieč všetkými témami: vrátane frontend widgetu, jeho štýlov a auto-rotácie, backend endpointu `GET /api/fifa-scores` (zdroj TheSportsDB, cache, ukážkové dáta a mapovanie vlajok) aj nepoužívaného importu `axios` v `server.js`. Vizuálna **téma FIFA 2026** (futbalový skin, logo v hlavičke, plávajúce lopty aj easter egg „lopta") **ostáva zachovaná**.
