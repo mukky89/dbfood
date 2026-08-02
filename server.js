@@ -161,7 +161,7 @@ async function getPlatba() {
 function clearPlatbaCache() { _platbaCache = null; }
 
 // ── Nastavenia vzhladu ─────────────────────────────────────────────────────
-const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea'];
+const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
 let _vzhladCache = null;
 async function getVzhlad() {
   if (_vzhladCache) return _vzhladCache;
