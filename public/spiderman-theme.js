@@ -2,6 +2,7 @@
   const layer = document.getElementById('spider-walkers');
   const toggle = document.getElementById('sm-sound-toggle');
   const premiereDays = document.getElementById('sm-premiere-days');
+  const premiereLabel = document.getElementById('sm-premiere-label');
   if (!layer || !toggle) return;
   const spiderSvg = `<svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#050b18" stroke-width="5" stroke-linecap="round"><path d="M25 27 11 16M22 34 6 34M25 41 11 53M39 27 53 16M42 34h16M39 41l14 12"/></g><ellipse cx="32" cy="36" rx="12" ry="16" fill="#111827"/><circle cx="32" cy="20" r="9" fill="#c1121f"/><path d="m27 19 3 3m7-3-3 3" stroke="#fff" stroke-width="2"/></svg>`;
   layer.innerHTML = Array.from({ length: 3 }, (_, i) =>
@@ -45,6 +46,7 @@
     const premiere = new Date('2026-07-31T00:00:00+02:00');
     const days = Math.max(0, Math.ceil((premiere - new Date()) / 86400000));
     premiereDays.textContent = days ? `${days} dní` : 'UŽ V KINÁCH';
+    if (!days && premiereLabel) premiereLabel.textContent = 'Premiéra';
   }
   sync();
 })();
