@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -20,6 +20,7 @@
       }).catch(()=>{});
     })();
   </script>
+  <link rel="stylesheet" href="/spiderman-theme.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -446,6 +447,7 @@
     /* Odysea — kino odznak v hlavičke a filmový plagát, len v téme Odysea */
     .odysea-logo { display:none; }
     #odysea-promo { display:none; }
+    .spiderman-logo { display:none; }
     @keyframes fifaFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-16px) rotate(18deg)} }
 
     /* Blokovaný deň */
@@ -1542,6 +1544,7 @@
     <button class="easter-hdr-btn" onclick="easterHdrClick(event)" title="">⭐</button>
     <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
     <span class="odysea-logo" aria-hidden="true" title="Odysea — už v kinách"><span class="ol-mark">🏺</span><span class="ol-text"><span class="ol-title">ODYSEA</span><span class="ol-sub">Už v kinách</span></span></span>
+    <span class="spiderman-logo" aria-hidden="true"><span class="sm-mask">◉</span><span><b>SPIDER</b><small>VERSE</small></span></span>
   </h1>
   <div class="header-right">
     <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
@@ -1686,6 +1689,22 @@
   <svg class="chin-svg" viewBox="0 0 140 152" aria-hidden="true"><use href="#chinchilla-symbol"/></svg>
   <div id="odysea-chin-bubble"></div>
 </div>
+
+<!-- Spider-Man — interaktívny filmový box office a dekoratívne pavúky. -->
+<aside id="spiderman-boxoffice" aria-label="Spider-Man box office">
+  <button class="sm-sound" id="sm-sound-toggle" type="button" aria-pressed="false" title="Zapnúť alebo vypnúť zvuky pavučiny">🔊 THWIP</button>
+  <div class="sm-kicker">FANTOZZI PRESENTS</div>
+  <div class="sm-title">SPIDER‑VERSE</div>
+  <div class="sm-tagline">S veľkým hladom prichádza veľká objednávka.</div>
+  <div class="sm-total"><span>Celosvetové tržby filmov</span><strong>$3.93 mld.</strong></div>
+  <div class="sm-films">
+    <div><span>No Way Home</span><b>$1.92 mld.</b></div>
+    <div><span>Far From Home</span><b>$1.13 mld.</b></div>
+    <div><span>Homecoming</span><b>$880 mil.</b></div>
+  </div>
+  <div class="sm-source">Celosvetové kino tržby • zaokrúhlené</div>
+</aside>
+<div id="spider-walkers" aria-hidden="true"></div>
 
 <!-- Feedback 💬 — plávajúce okno na nápady, chyby a pokec -->
 <button id="feedback-fab" onclick="toggleFeedback()" title="Napíš nám — nápad, chyba alebo len tak pokec 💬">💬</button>
@@ -2212,6 +2231,13 @@
             <div class="t-name">Odysea</div>
             <div class="t-desc">Filmové promo v duchu eposu Christophera Nolana — búrlivé more, bronz a zlato, kino plagát s tržbami a odkazom do CineMax IMAX, plus kino-činčila so zvukmi.</div>
             <div class="theme-dots"><span style="background:#0a1622"></span><span style="background:#c9a227"></span><span style="background:#f4ecdd"></span></div>
+          </div>
+          <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🕷️</div>
+            <div class="t-name">Spider‑Verse</div>
+            <div class="t-desc">Komiksový New York — pavučiny, box-office panel, chodiace pavúky a interaktívny THWIP zvuk.</div>
+            <div class="theme-dots"><span style="background:#b11313"></span><span style="background:#101b3b"></span><span style="background:#f4f7fb"></span></div>
           </div>
         </div>
         <div style="margin-top:16px;font-size:13px;color:var(--muted)" id="vzhlad-state-label">Načítavam…</div>
@@ -3984,7 +4010,7 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -3992,7 +4018,8 @@ const THEME_LABELS = {
   starwars:   { name: '🌌 Galaxy Far Away',  toast: '🌌 May the Food be with you!',   state: 'Aktívna téma: Galaxy Far Away — Star Wars.' },
   fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' },
   chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' },
-  odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' }
+  odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
+  spiderman:  { name: '🕷️ Spider‑Verse',      toast: '🕸️ THWIP! Spider‑Verse zapnutý', state: 'Aktívna téma: Spider‑Verse — komiks, box office a interaktívne pavúky.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -4002,8 +4029,10 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-fifa',       theme === 'fifa');
   document.documentElement.classList.toggle('theme-chinchilla', theme === 'chinchilla');
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
+  document.documentElement.classList.toggle('theme-spiderman',  theme === 'spiderman');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
+  if (typeof setupSpiderTheme === 'function') setupSpiderTheme(theme === 'spiderman');
   try { localStorage.setItem('fob_theme', theme); } catch(e) {}
   return theme;
 }
@@ -5964,5 +5993,6 @@ function updateFloatingBar() {
     <div class="fob-price" id="fob-price"></div>
   </div>
 </div>
+<script src="/spiderman-theme.js"></script>
 </body>
 </html>
