@@ -1544,7 +1544,7 @@
     <button class="easter-hdr-btn" onclick="easterHdrClick(event)" title="">⭐</button>
     <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
     <span class="odysea-logo" aria-hidden="true" title="Odysea — už v kinách"><span class="ol-mark">🏺</span><span class="ol-text"><span class="ol-title">ODYSEA</span><span class="ol-sub">Už v kinách</span></span></span>
-    <span class="spiderman-logo" aria-hidden="true"><span class="sm-mask">◉</span><span><b>SPIDER</b><small>VERSE</small></span></span>
+    <span class="spiderman-logo" aria-hidden="true"><span class="sm-mask">◉</span><span><b>SPIDER‑MAN</b><small>NOVÝ DEŇ</small></span></span>
   </h1>
   <div class="header-right">
     <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
@@ -1691,18 +1691,20 @@
 </div>
 
 <!-- Spider-Man — interaktívny filmový box office a dekoratívne pavúky. -->
-<aside id="spiderman-boxoffice" aria-label="Spider-Man box office">
+<aside id="spiderman-boxoffice" aria-label="Spider-Man: Nový deň — filmové informácie">
   <button class="sm-sound" id="sm-sound-toggle" type="button" aria-pressed="false" title="Zapnúť alebo vypnúť zvuky pavučiny">🔊 THWIP</button>
-  <div class="sm-kicker">FANTOZZI PRESENTS</div>
-  <div class="sm-title">SPIDER‑VERSE</div>
-  <div class="sm-tagline">S veľkým hladom prichádza veľká objednávka.</div>
-  <div class="sm-total"><span>Celosvetové tržby filmov</span><strong>$3.93 mld.</strong></div>
+  <div class="sm-kicker">UŽ V KINÁCH • OD 31. JÚLA 2026</div>
+  <div class="sm-title">SPIDER‑MAN</div>
+  <div class="sm-day">NOVÝ DEŇ</div>
+  <div class="sm-tagline">Svet zabudol na Petra Parkera. On nezabudol na nich.</div>
+  <div class="sm-countdown"><span>Do premiéry</span><strong id="sm-premiere-days">—</strong></div>
+  <div class="sm-total"><span>Otvárací víkend</span><strong>PREBIEHA <small>tržby sa sčítavajú</small></strong></div>
   <div class="sm-films">
-    <div><span>No Way Home</span><b>$1.92 mld.</b></div>
-    <div><span>Far From Home</span><b>$1.13 mld.</b></div>
-    <div><span>Homecoming</span><b>$880 mil.</b></div>
+    <div><span>Predchádzajúca MCU trilógia</span><b>$3.93 mld.</b></div>
+    <div><span>Réžia</span><b>Destin D. Cretton</b></div>
+    <div><span>Peter Parker</span><b>Tom Holland</b></div>
   </div>
-  <div class="sm-source">Celosvetové kino tržby • zaokrúhlené</div>
+  <div class="sm-source">Spider‑Man: Brand New Day • akčný / dobrodružný</div>
 </aside>
 <div id="spider-walkers" aria-label="Interaktívne pavúky"></div>
 
@@ -2235,8 +2237,8 @@
           <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
             <span class="t-check">✅</span>
             <div class="t-emoji">🕷️</div>
-            <div class="t-name">Spider‑Verse</div>
-            <div class="t-desc">Komiksový New York — pavučiny, box-office panel, chodiace pavúky a interaktívny THWIP zvuk.</div>
+            <div class="t-name">Spider‑Man: Nový deň</div>
+            <div class="t-desc">Filmová téma Brand New Day — premiéra, box office, chodiace pavúky, interaktívne pavučiny a THWIP zvuk.</div>
             <div class="theme-dots"><span style="background:#b11313"></span><span style="background:#101b3b"></span><span style="background:#f4f7fb"></span></div>
           </div>
         </div>
@@ -4019,7 +4021,7 @@ const THEME_LABELS = {
   fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' },
   chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' },
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
-  spiderman:  { name: '🕷️ Spider‑Verse',      toast: '🕸️ THWIP! Spider‑Verse zapnutý', state: 'Aktívna téma: Spider‑Verse — komiks, box office a interaktívne pavúky.' }
+  spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
