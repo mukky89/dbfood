@@ -3441,8 +3441,18 @@ function _chinCtx() {
     if (!AC) return null;
     try { _chinAudioCtx = new AC(); } catch(e) { return null; }
   }
-  if (_chinAudioCtx.state === 'suspended') _chinAudioCtx.resume().catch(()=>{});
   return _chinAudioCtx;
+}
+// iOS Safari/Chrome Android len „odomknú" AudioContext v priamom handleri dôveryhodného
+// gesta (click/touchend/mousedown/keydown) — 'pointerdown' tam niekedy nestačí.
+function _chinUnlockAudio() {
+  const ctx = _chinCtx();
+  if (ctx && ctx.state === 'suspended') ctx.resume().catch(()=>{});
+}
+function _chinArmUnlock() {
+  ['touchend', 'mousedown', 'click', 'keydown'].forEach(ev =>
+    document.addEventListener(ev, _chinUnlockAudio, { once: true })
+  );
 }
 // Jedno „pip" — krátky vysoký cvrlikavý tón s rýchlym sklzom frekvencie a jemným vibratom.
 function _chinPip(ctx, startTime, baseFreq) {
@@ -3502,7 +3512,11 @@ function _chinPlaySound(idx) {
   const ctx = _chinCtx();
   if (!ctx) return;
   const fn = (idx != null && _CHIN_SOUNDS[idx]) ? _CHIN_SOUNDS[idx] : _CHIN_SOUNDS[Math.floor(Math.random() * _CHIN_SOUNDS.length)];
-  fn(ctx, ctx.currentTime);
+  if (ctx.state === 'suspended') {
+    ctx.resume().then(() => fn(ctx, ctx.currentTime)).catch(()=>{});
+  } else {
+    fn(ctx, ctx.currentTime);
+  }
 }
 // Spätná kompatibilita — privítací zvuk používa veselý trilkot.
 function _chinSqueakSound() { _chinPlaySound(0); }
@@ -3527,7 +3541,7 @@ let _chinThemeActive = false, _chinAudioUnlocked = false;
 function setupChinchillaTheme(active) {
   if (active && !_chinAudioUnlocked) {
     _chinAudioUnlocked = true;
-    document.addEventListener('pointerdown', () => _chinCtx(), { once: true });
+    _chinArmUnlock();
   }
   if (active && !_chinThemeActive) setTimeout(() => _chinPlaySound(0), 180);
   _chinThemeActive = active;
@@ -3657,7 +3671,7 @@ function setupOdyseaTheme(active) {
   if (_odyseaBoTick) { clearInterval(_odyseaBoTick); _odyseaBoTick = null; }
   if (!active || !val) return;
   // Odomkni audio po prvom geste (aby zvuky išli hneď po prepnutí témy)
-  document.addEventListener('pointerdown', () => { if (typeof _chinCtx === 'function') _chinCtx(); }, { once: true });
+  if (typeof _chinArmUnlock === 'function') _chinArmUnlock();
   // Úvodné „vyletenie" od otváracieho víkendu po aktuálnu tržbu
   const start = performance.now(), from = ODYSEA_BO_OPENING, to = _odyseaBoValue(), dur = 2000;
   function step(now) {
@@ -3770,7 +3784,7 @@ function renderSummary(entries) {
   function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
 
   function buildRows(map, color, prefix) {
-    return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
+    return Object.entries(map).sort((a,b)=>(parseInt(numOf(a[0]))||0)-(parseInt(numOf(b[0]))||0)).map(([k,v]) => {
       const isTop = topJedlo && k === topJedlo;
       return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span>${isTop?'🔥 ':''}<strong>${skrat(k)}</strong></span></span></td><td><span class="summary-count" style="background:${color}">${v}×</span></td></tr>`;
     }).join('');
