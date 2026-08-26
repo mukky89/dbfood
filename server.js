@@ -5,7 +5,7 @@ const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
 const { fetchMenu, setManualMenu, clearCache, debugFetch } = require('./scraper');
-const { sendEmail, sendMail, formatEmail } = require('./mailer');
+const { sendEmail, sendMail, formatEmail, sendFeedbackEmail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 const pkg = require('./package.json');
@@ -569,11 +569,15 @@ app.post('/api/feedback', async (req, res) => {
     if (!text) return res.status(400).json({ ok: false, error: 'Prázdna správa' });
     if (text.length > 2000) return res.status(400).json({ ok: false, error: 'Správa je pridlhá (max 2000 znakov)' });
     const TYPY = ['napad', 'chyba', 'pokec'];
-    await Feedback.create({
+    const zaznam = await Feedback.create({
       meno: String(meno || 'Anonym').trim().slice(0, 60) || 'Anonym',
       typ: TYPY.includes(typ) ? typ : 'pokec',
       sprava: text
     });
+    // Notifikacia mailom — feedback sa nesmie stratit, ked padne odosielanie
+    sendFeedbackEmail({ meno: zaznam.meno, typ: zaznam.typ, sprava: zaznam.sprava, cas: zaznam.cas })
+      .then(r => { if (r && r.ok === false) console.error('[Feedback] Email CHYBA:', r.error); })
+      .catch(e => console.error('[Feedback] Email CHYBA:', e.message));
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });

@@ -3,6 +3,7 @@ module.exports = {
   port: process.env.PORT || 3000,
   orderDeadline: process.env.ORDER_DEADLINE || "10:00",
   emailRecipient: process.env.EMAIL_RECIPIENT,
+  feedbackEmail: process.env.FEEDBACK_EMAIL || "mmucka@sylex.sk",
   emailSender: process.env.EMAIL_SENDER,
   emailPassword: process.env.EMAIL_PASSWORD,
   adminPassword: process.env.ADMIN_PASSWORD || "admin123",

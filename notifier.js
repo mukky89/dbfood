@@ -103,15 +103,24 @@ function notesByItem(entries) {
   return map;
 }
 
+// Cislo polozky z kluca ("P2" → 2). Polozky bez cisla idu na koniec.
+function itemNum(key) {
+  const m = String(key || '').match(/^(?:č\.|PZ|[PJD])(\d+)/i);
+  return m ? parseInt(m[1], 10) : Infinity;
+}
+
+// Suhrn je vzdy zoradeny podla cisla polozky (P1, P2, J2, J3, J4 …), nie podla poctu objednavok
+function byItemNum(a, b) {
+  const na = itemNum(a), nb = itemNum(b);
+  if (na !== nb) return na < nb ? -1 : 1;
+  return String(a).localeCompare(String(b), 'sk');
+}
+
 function formatSection(title, map, notesMap) {
   const keys = Object.keys(map);
   if (keys.length === 0) return '';
   const lines = keys
-    .sort((a, b) => {
-      const na = parseInt(a.replace(/\D/g, '')) || 0;
-      const nb = parseInt(b.replace(/\D/g, '')) || 0;
-      return na - nb;
-    })
+    .sort(byItemNum)
     .map(k => {
       let line = `${map[k]}x ${k}`;
       const notes = notesMap && notesMap[k];

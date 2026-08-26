@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.0] — 2026-08-26
+
+### Zmenené
+- **Súhrn objednávok je všade zoradený podľa čísla položky** — v súhrne (v appke, v admin paneli, v ntfy notifikácii aj v e-maile) idú položky v poradí **P1, P2 → J2, J3, J4 → PZ1, PZ2 → D1, D2**, teda podľa čísla z denného menu, nie podľa počtu objednávok. Poradie sekcií (🍲 polievky → 🍽️ hlavné jedlá → 🍕 pizza → 🍮 dezerty) ostáva zachované, položky bez čísla idú na koniec. Označenie najobjednávanejšieho jedla 🔥 funguje ďalej — len už neurčuje poradie riadkov.
+
+### Pridané
+- **Feedback príde aj e-mailom** — každá správa z plávajúceho okna 💬 sa okrem uloženia do databázy pošle aj e-mailom na `mmucka@sylex.sk` (prepísateľné cez `FEEDBACK_EMAIL`). E-mail obsahuje typ správy (💡 nápad / 🐞 chyba / 💬 odkaz), meno odosielateľa, čas a text správy. Odosielanie beží na pozadí — ak zlyhá, správa sa aj tak uloží a používateľ dostane potvrdenie.
+
 ## [1.20.0] — 2026-07-30
 
 ### Pridané

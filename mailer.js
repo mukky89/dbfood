@@ -10,6 +10,19 @@ function relabel(val, prefix) {
   return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
 }
 
+// Cislo polozky z nazvu ("P2 Hrachova", "🍕 PZ3 Gyros" → 2 / 3). Polozky bez cisla idu na koniec.
+function itemNum(key) {
+  const m = String(key || '').replace(/^[^\p{L}]+/u, '').match(/^(?:č\.|PZ|[PJD])(\d+)/i);
+  return m ? parseInt(m[1], 10) : Infinity;
+}
+
+// Suhrn je vzdy zoradeny podla cisla polozky (P1, P2, J2, J3, J4 …), nie podla poctu objednavok
+function byItemNum(a, b) {
+  const na = itemNum(a), nb = itemNum(b);
+  if (na !== nb) return na < nb ? -1 : 1;
+  return String(a).localeCompare(String(b), 'sk');
+}
+
 // Priradi poznamky ku konkretnemu cislu jedla/pizze.
 // Poznamka je ulozena ako "🍽️ <text> | 🍕 <text>" — emoji urcuje, ci ide o jedlo alebo pizzu.
 // Vrati mapu: token polozky (napr. "J3" / "PZ2") → pole { meno, text }.
@@ -88,12 +101,8 @@ function formatEmail(orders, menu) {
       mapDezert[k] = (mapDezert[k] || 0) + 1;
     }
   });
-  // V ramci skupiny zoradene podla cisla polozky (P1, P2, … / J2, J3, J5 …)
-  const sortByNum = map => Object.entries(map).sort((a, b) => {
-    const na = parseInt((a[0].match(/(\d+)/) || [])[1] || 0, 10);
-    const nb = parseInt((b[0].match(/(\d+)/) || [])[1] || 0, 10);
-    return na - nb;
-  });
+  // V ramci skupiny zoradene podla cisla polozky (P1, P2, … / J2, J3, J5 …), nie podla poctu objednavok
+  const sortByNum = map => Object.entries(map).sort((a, b) => byItemNum(a[0], b[0]));
   const pocty = [...sortByNum(mapPol), ...sortByNum(mapJedlo), ...sortByNum(mapPizza), ...sortByNum(mapDezert)];
 
   // Plain text verzia
@@ -350,4 +359,70 @@ async function sendEmail(orders, menu) {
   return sendMail({ to: config.emailRecipient, subject, text, html });
 }
 
-module.exports = { sendEmail, sendMail, createTransporter, formatEmail };
+// ── Feedback (💬 plavajuce okno na stranke) ───────────────────────────────────
+const FEEDBACK_TYPY = {
+  napad: { label: 'Napad',    emoji: '💡', color: '#f39c12' },
+  chyba: { label: 'Chyba',    emoji: '🐞', color: '#c0392b' },
+  pokec: { label: 'Odkaz',    emoji: '💬', color: '#1565c0' }
+};
+
+function escapeHtml(val) {
+  return String(val == null ? '' : val)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatFeedbackEmail({ meno, typ, sprava, cas }) {
+  const t = FEEDBACK_TYPY[typ] || FEEDBACK_TYPY.pokec;
+  const kedy = new Date(cas || Date.now()).toLocaleString('sk-SK', { timeZone: 'Europe/Bratislava' });
+  const autor = meno || 'Anonym';
+
+  const text = `NOVY FEEDBACK - Fantozzi\n`
+    + `${'='.repeat(40)}\n`
+    + `Typ:  ${t.label}\n`
+    + `Od:   ${autor}\n`
+    + `Kedy: ${kedy}\n\n`
+    + `${sprava}\n`;
+
+  const html = `<!DOCTYPE html>
+<html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:24px 12px;background:#f2f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)">
+      <tr><td style="padding:20px 24px;background:${t.color}">
+        <div style="color:#fff;font-size:18px;font-weight:800">${t.emoji} Novy feedback</div>
+        <div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:3px">Fantozzi Objednavkovy Systém</div>
+      </td></tr>
+      <tr><td style="padding:20px 24px 6px">
+        <div style="font-size:13px;color:#8a93a0">Typ</div>
+        <div style="font-size:14px;font-weight:700;color:#2b2f36;margin-bottom:12px">${t.emoji} ${t.label}</div>
+        <div style="font-size:13px;color:#8a93a0">Od</div>
+        <div style="font-size:14px;font-weight:700;color:#2b2f36;margin-bottom:12px">${escapeHtml(autor)}</div>
+        <div style="font-size:13px;color:#8a93a0">Kedy</div>
+        <div style="font-size:14px;color:#2b2f36">${escapeHtml(kedy)}</div>
+      </td></tr>
+      <tr><td style="padding:14px 24px 24px">
+        <div style="background:#f7f9fb;border:1px solid #eef1f4;border-left:4px solid ${t.color};border-radius:10px;padding:14px 16px;font-size:14px;color:#2b2f36;line-height:1.55;white-space:pre-wrap">${escapeHtml(sprava)}</div>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+  return {
+    subject: `${t.emoji} Feedback (${t.label}) od ${autor} - Fantozzi`,
+    text,
+    html
+  };
+}
+
+async function sendFeedbackEmail(feedback) {
+  const to = config.feedbackEmail;
+  if (!to) {
+    console.log('[Mailer] feedbackEmail nie je nastaveny — preskakujem feedback email');
+    return { ok: false, error: 'feedbackEmail not configured' };
+  }
+  const { subject, text, html } = formatFeedbackEmail(feedback);
+  return sendMail({ to, subject, text, html });
+}
+
+module.exports = { sendEmail, sendMail, createTransporter, formatEmail, formatFeedbackEmail, sendFeedbackEmail };

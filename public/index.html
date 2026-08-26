@@ -3720,6 +3720,18 @@ function relabel(val, prefix) {
   return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
 }
 
+// Cislo polozky z nazvu ("P2 Hrachova" → 2). Polozky bez cisla idu na koniec.
+function itemNum(text) {
+  const m = String(text || '').match(/^(?:č\.|PZ|[PJD])(\d+)/);
+  return m ? parseInt(m[1], 10) : Infinity;
+}
+// Zoradenie suhrnu vzdy podla cisla polozky (P1, P2, J2, J3, J4 …), nie podla poctu
+function byItemNum(a, b) {
+  const na = itemNum(a[0]), nb = itemNum(b[0]);
+  if (na !== nb) return na < nb ? -1 : 1;
+  return String(a[0]).localeCompare(String(b[0]), 'sk');
+}
+
 function renderOrders(orders, count) {
   const list = document.getElementById('orders-list');
   const countEl = document.getElementById('order-count');
@@ -3770,7 +3782,7 @@ function renderSummary(entries) {
   function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
 
   function buildRows(map, color, prefix) {
-    return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
+    return Object.entries(map).sort(byItemNum).map(([k,v]) => {
       const isTop = topJedlo && k === topJedlo;
       return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span>${isTop?'🔥 ':''}<strong>${skrat(k)}</strong></span></span></td><td><span class="summary-count" style="background:${color}">${v}×</span></td></tr>`;
     }).join('');
@@ -4100,7 +4112,7 @@ function renderAdminOrders(orders, history = []) {
   const maxP = Math.max(1,...Object.values(polievkyMap));
   const polEl = document.getElementById('admin-polievky-list');
   polEl.innerHTML = !Object.keys(polievkyMap).length ? '<div class="empty-state">Žiadne</div>' :
-    Object.entries(polievkyMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
+    Object.entries(polievkyMap).sort(byItemNum).map(([nazov,pocet]) => {
       const m=nazov.match(/^(?:č\.|PZ|[PJD])(\d+)/); const num=m?m[1]:'?';
       const skrat=nazov.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,'');
       const pct=Math.round(pocet/maxP*100);
@@ -4116,7 +4128,7 @@ function renderAdminOrders(orders, history = []) {
   const maxJ = Math.max(1,...Object.values(jedlaMap));
   const jedEl = document.getElementById('admin-jedla-list');
   jedEl.innerHTML = !Object.keys(jedlaMap).length ? '<div class="empty-state">Žiadne</div>' :
-    Object.entries(jedlaMap).sort((a,b)=>b[1]-a[1]).map(([nazov,pocet]) => {
+    Object.entries(jedlaMap).sort(byItemNum).map(([nazov,pocet]) => {
       const m=nazov.match(/^(?:č\.|PZ|[PJD])(\d+)/); const num=m?m[1]:'?';
       const isPizza=nazov.toLowerCase().includes('pizza');
       const isTop=topJedlo&&nazov===topJedlo;
