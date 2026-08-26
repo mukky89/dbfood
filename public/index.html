@@ -1721,7 +1721,11 @@
   </div>
   <div id="rc-trail" tabindex="0" aria-label="Interaktívna RC trať. Použi šípky alebo WASD.">
     <div class="rc-sun"></div><div class="rc-ridge ridge-back"></div><div class="rc-ridge ridge-front"></div>
-    <div class="rc-road"><i></i><i></i><i></i><i></i></div>
+    <div class="rc-road"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <svg class="rc-switchbacks" viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M-20 132 C80 75 155 145 232 91 S365 42 425 83 S515 96 625 20"/>
+      <path class="rc-track-line" d="M-20 132 C80 75 155 145 232 91 S365 42 425 83 S515 96 625 20"/>
+    </svg>
     <div class="rc-checkpoint cp-one" data-checkpoint="1"><span>01</span> BROD</div>
     <div class="rc-checkpoint cp-two" data-checkpoint="2"><span>02</span> SKALA</div>
     <div class="rc-checkpoint cp-three" data-checkpoint="3"><span>03</span> CIEĽ</div>
@@ -1741,6 +1745,7 @@
   </div>
   <div class="rc-toolbar">
     <button id="rc-toggle" type="button" aria-pressed="true">◉ RC režim zapnutý</button>
+    <button id="rc-sound" type="button" aria-pressed="true">🔊 Zvuk motora</button>
     <button id="rc-reset" type="button">↺ Vrátiť na štart</button>
     <label>Farba auta <input id="rc-color" type="color" value="#526b3f" aria-label="Farba RC auta"></label>
   </div>
