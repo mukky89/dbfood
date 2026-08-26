@@ -161,7 +161,7 @@ async function getPlatba() {
 function clearPlatbaCache() { _platbaCache = null; }
 
 // ── Nastavenia vzhladu ─────────────────────────────────────────────────────
-const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
+const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
 let _vzhladCache = null;
 async function getVzhlad() {
   if (_vzhladCache) return _vzhladCache;
@@ -173,7 +173,7 @@ async function getVzhlad() {
       : (doc?.futuristicky ? 'futuristic' : 'classic');
     _vzhladCache = { tema };
   } catch(e) {
-    _vzhladCache = { tema: 'classic' };
+    _vzhladCache = { tema: 'rc' };
   }
   return _vzhladCache;
 }

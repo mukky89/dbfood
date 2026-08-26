@@ -7,11 +7,11 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
-      try { var cached = localStorage.getItem('fob_theme'); if (cached) apply(cached); } catch(e){}
+      try { var cached = localStorage.getItem('fob_theme'); apply(cached || 'rc'); } catch(e){ apply('rc'); }
       fetch('/api/design').then(r=>r.json()).then(d=>{
         if (!d || !d.ok) return;
         var t = d.theme || (d.futuristic ? 'futuristic' : 'classic');
@@ -1530,6 +1530,7 @@
     @media (max-width: 1380px) { .logout-label { display:none; } html.theme-fifa .fifa-logo, html.theme-odysea .odysea-logo { display:none; } }
     @media (max-width: 1240px) { .contact-card { display:none; } }
   </style>
+  <link rel="stylesheet" href="/rc-theme.css">
 </head>
 <body>
 
@@ -1545,6 +1546,7 @@
     <span class="fifa-logo" aria-hidden="true" title="FIFA 2026"><span class="fifa-logo-ball">⚽</span><span class="fifa-logo-text">FIFA<b>26</b></span></span>
     <span class="odysea-logo" aria-hidden="true" title="Odysea — už v kinách"><span class="ol-mark">🏺</span><span class="ol-text"><span class="ol-title">ODYSEA</span><span class="ol-sub">Už v kinách</span></span></span>
     <span class="spiderman-logo" aria-hidden="true"><span class="sm-mask">◉</span><span><b>SPIDER‑MAN</b><small>NOVÝ DEŇ</small></span></span>
+    <span class="rc-header-mark" aria-hidden="true"><span class="rc-mark-icon">◆</span><span><b>TRAIL</b><small>RC EXPEDITION</small></span></span>
   </h1>
   <div class="header-right">
     <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
@@ -1706,6 +1708,47 @@
   <div class="sm-source">Spider‑Man: Brand New Day • akčný / dobrodružný</div>
 </aside>
 <div id="spider-walkers" aria-label="Interaktívne pavúky"></div>
+
+<!-- RC Trail — ovládateľná off-road minihra, viditeľná iba v RC téme. -->
+<section id="rc-expedition" aria-label="RC trail expedícia">
+  <div class="rc-hero-copy">
+    <span class="rc-eyebrow">FANTOZZI BASE CAMP · RUŽINOV</span>
+    <h2>Vyber obed.<br><em>Vyraz na trail.</em></h2>
+    <p>Malý off-road, veľká výprava. Prejdi checkpointmi šípkami alebo WASD.</p>
+    <div class="rc-key-hints" aria-label="Ovládanie auta">
+      <span><kbd>↑</kbd><kbd>↓</kbd> plyn</span><span><kbd>←</kbd><kbd>→</kbd> riadenie</span><span><kbd>Space</kbd> boost</span>
+    </div>
+  </div>
+  <div id="rc-trail" tabindex="0" aria-label="Interaktívna RC trať. Použi šípky alebo WASD.">
+    <div class="rc-sun"></div><div class="rc-ridge ridge-back"></div><div class="rc-ridge ridge-front"></div>
+    <div class="rc-road"><i></i><i></i><i></i><i></i></div>
+    <div class="rc-checkpoint cp-one" data-checkpoint="1"><span>01</span> BROD</div>
+    <div class="rc-checkpoint cp-two" data-checkpoint="2"><span>02</span> SKALA</div>
+    <div class="rc-checkpoint cp-three" data-checkpoint="3"><span>03</span> CIEĽ</div>
+    <div class="rc-rock rock-one"></div><div class="rc-rock rock-two"></div>
+    <div id="rc-car" aria-hidden="true">
+      <svg viewBox="0 0 180 96" role="img" aria-label="Zelené RC off-road autíčko">
+        <ellipse class="rc-shadow" cx="91" cy="82" rx="73" ry="9"/>
+        <g class="rc-wheels"><circle cx="46" cy="73" r="18"/><circle cx="139" cy="73" r="18"/><circle class="hub" cx="46" cy="73" r="7"/><circle class="hub" cx="139" cy="73" r="7"/></g>
+        <path class="rc-body" d="M18 67 27 47l24-6 15-24h51l20 28 24 7 9 15-10 9H27z"/>
+        <path class="rc-roof" d="M66 20h47l18 25H55z"/><path class="rc-window" d="M71 25h18v18H59zM95 25h16l14 18H95z"/>
+        <path class="rc-bumper" d="M13 65h20v8H13zM154 64h22v8h-22z"/>
+        <rect class="rc-rack" x="67" y="10" width="52" height="5" rx="2"/><circle class="rc-light" cx="153" cy="56" r="5"/>
+      </svg>
+    </div>
+    <div id="rc-particles" aria-hidden="true"></div>
+    <div id="rc-status" role="status" aria-live="polite">BASE CAMP · 0/3</div>
+  </div>
+  <div class="rc-toolbar">
+    <button id="rc-toggle" type="button" aria-pressed="true">◉ RC režim zapnutý</button>
+    <button id="rc-reset" type="button">↺ Vrátiť na štart</button>
+    <label>Farba auta <input id="rc-color" type="color" value="#526b3f" aria-label="Farba RC auta"></label>
+  </div>
+  <div id="rc-touch" aria-label="Dotykové ovládanie RC auta">
+    <div class="rc-pad"><button data-key="left" aria-label="Doľava">←</button><button data-key="up" aria-label="Dopredu">↑</button><button data-key="down" aria-label="Cúvať">↓</button><button data-key="right" aria-label="Doprava">→</button></div>
+    <button class="rc-boost" data-key="boost" aria-label="Boost">BOOST</button>
+  </div>
+</section>
 
 <!-- Feedback 💬 — plávajúce okno na nápady, chyby a pokec -->
 <button id="feedback-fab" onclick="toggleFeedback()" title="Napíš nám — nápad, chyba alebo len tak pokec 💬">💬</button>
@@ -2232,6 +2275,13 @@
             <div class="t-name">Odysea</div>
             <div class="t-desc">Filmové promo v duchu eposu Christophera Nolana — búrlivé more, bronz a zlato, kino plagát s tržbami a odkazom do CineMax IMAX, plus kino-činčila so zvukmi.</div>
             <div class="theme-dots"><span style="background:#0a1622"></span><span style="background:#c9a227"></span><span style="background:#f4ecdd"></span></div>
+          </div>
+          <div class="theme-option" data-theme="rc" onclick="saveDesignConfig('rc')">
+            <span class="t-check">✅</span>
+            <div class="t-emoji">🛻</div>
+            <div class="t-name">RC Expedition</div>
+            <div class="t-desc">Interaktívny off-road trail s ovládateľným RC autíčkom.</div>
+            <div class="theme-dots"><span style="background:#15251c"></span><span style="background:#526b3f"></span><span style="background:#d9b678"></span></div>
           </div>
           <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
             <span class="t-check">✅</span>
@@ -4011,7 +4061,7 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -4020,7 +4070,8 @@ const THEME_LABELS = {
   fifa:       { name: '⚽ FIFA 2026',        toast: '⚽ Goool! FIFA 2026 zapnutá',   state: 'Aktívna téma: FIFA 2026 — futbalová edícia.' },
   chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' },
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
-  spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' }
+  spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
+  rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -4031,6 +4082,7 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-chinchilla', theme === 'chinchilla');
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
   document.documentElement.classList.toggle('theme-spiderman',  theme === 'spiderman');
+  document.documentElement.classList.toggle('theme-rc',         theme === 'rc');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
   if (typeof setupSpiderTheme === 'function') setupSpiderTheme(theme === 'spiderman');
@@ -5995,5 +6047,6 @@ function updateFloatingBar() {
   </div>
 </div>
 <script src="/spiderman-theme.js"></script>
+<script src="/rc-theme.js"></script>
 </body>
 </html>
