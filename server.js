@@ -89,7 +89,8 @@ const NastaveniaPlatby = mongoose.model('NastaveniaPlatby', nastaveniaPlatbySche
 // Nastavenia vzhladu (vyber temy; futuristicky boolean ostava pre spatnu kompatibilitu)
 const nastaveniaVzhladSchema = new mongoose.Schema({
   futuristicky: { type: Boolean, default: false },
-  tema: { type: String, default: '' }
+  tema: { type: String, default: '' },
+  designVersion: { type: Number, default: 0 }
 });
 const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
 
@@ -167,10 +168,19 @@ async function getVzhlad() {
   if (_vzhladCache) return _vzhladCache;
   try {
     const doc = await NastaveniaVzhlad.findOne({});
-    // Novsie pole 'tema' ma prednost; stary boolean 'futuristicky' je fallback
-    const tema = (doc?.tema && PLATNE_TEMY.includes(doc.tema))
-      ? doc.tema
-      : (doc?.futuristicky ? 'futuristic' : 'classic');
+    // Jednorazovo nasad RC Expedition ako novy globalny dizajn. Dalsie volby
+    // administratora sa zachovaju vdaka designVersion.
+    let tema;
+    if (!doc || (doc.designVersion || 0) < 2) {
+      tema = 'rc';
+      await NastaveniaVzhlad.findOneAndUpdate(
+        {}, { $set: { tema, futuristicky: false, designVersion: 2 } }, { upsert: true }
+      );
+    } else {
+      tema = (doc.tema && PLATNE_TEMY.includes(doc.tema))
+        ? doc.tema
+        : (doc.futuristicky ? 'futuristic' : 'rc');
+    }
     _vzhladCache = { tema };
   } catch(e) {
     _vzhladCache = { tema: 'rc' };
@@ -702,7 +712,7 @@ app.post('/api/admin/design', async (req, res) => {
   if (!PLATNE_TEMY.includes(tema)) return res.status(400).json({ ok: false, error: 'Neznáma téma' });
   try {
     await NastaveniaVzhlad.findOneAndUpdate(
-      {}, { $set: { tema, futuristicky: tema === 'futuristic' } }, { upsert: true, new: true }
+      {}, { $set: { tema, futuristicky: tema === 'futuristic', designVersion: 2 } }, { upsert: true, new: true }
     );
     clearVzhladCache();
     const vzhlad = await getVzhlad();
