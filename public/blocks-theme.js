@@ -37,14 +37,15 @@
       && !$('content').hidden && panel.getClientRects().length > 0;
   }
   function tile(x, y, color, ghost = false) {
+    if (window.LunchFood) { window.LunchFood.drawTile(ctx, x, y, color, ghost); return; }
     ctx.fillStyle = ghost ? '#263545' : colors[color];
     ctx.fillRect(x * 30 + 2, y * 30 + 2, 26, 26);
     ctx.fillStyle = ghost ? '#496174' : '#ffffff55';
     ctx.fillRect(x * 30 + 3, y * 30 + 3, 24, 3);
   }
   function paint() {
-    ctx.fillStyle = '#09111b'; ctx.fillRect(0, 0, 300, 600);
-    ctx.strokeStyle = '#1b2b39'; ctx.lineWidth = .6;
+    ctx.fillStyle = '#201c19'; ctx.fillRect(0, 0, 300, 600);
+    ctx.strokeStyle = '#3b3128'; ctx.lineWidth = .6;
     for (let x = 0; x <= 10; x++) { ctx.beginPath(); ctx.moveTo(x * 30, 0); ctx.lineTo(x * 30, 600); ctx.stroke(); }
     for (let y = 0; y <= 20; y++) { ctx.beginPath(); ctx.moveTo(0, y * 30); ctx.lineTo(300, y * 30); ctx.stroke(); }
     game.board.forEach((row, y) => row.forEach((v, x) => { if (v) tile(x, y, v); }));
@@ -54,6 +55,8 @@
       p.shape.forEach((row, r) => row.forEach((v, c) => { if (v) tile(p.x + c, p.y + r, p.color); }));
     }
     $('score').textContent = game.score; $('lines').textContent = game.lines; $('level').textContent = game.level;
+    const food = window.LunchFood && game.piece && window.LunchFood.foods[game.piece.color];
+    if ($('food-name')) $('food-name').textContent = food ? `${food.icon} ${food.name}` : 'Dobrú chuť!';
   }
   function schedule() {
     clearTimeout(timer); timer = null;
@@ -74,7 +77,7 @@
     $('pause').setAttribute('aria-label', next === 'paused' ? 'Pokračovať v hre' : 'Pozastaviť hru');
     controls.forEach(button => { button.disabled = next !== 'playing'; });
     if (next === 'paused') {
-      $('cover-title').textContent = 'Pauza'; $('cover-text').textContent = 'Tvoje kocky počkajú.';
+      $('cover-title').textContent = 'Kuchynská pauza'; $('cover-text').textContent = 'Tvoje dobroty počkajú.';
       $('start').textContent = 'Pokračovať →'; $('status').textContent = 'Hra je pozastavená.';
     } else if (next === 'over') {
       $('cover-title').textContent = 'Koniec hry'; $('cover-text').textContent = `Tvoje skóre: ${game.score}. Dáme ďalšie kolo?`;

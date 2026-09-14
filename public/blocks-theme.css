@@ -82,16 +82,19 @@ html.theme-blocks #blocks-game { display: block; background: #111c28; border: 1p
 #blocks-game button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
 #blocks-game button:disabled { cursor: default; opacity: .45; }
 .blocks-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.blocks-heading h2 { font-size: 20px; font-weight: 650; letter-spacing: -.5px; color: #f0f3f7; }
+.blocks-heading h2 { font-size: 19px; font-weight: 650; letter-spacing: -.5px; color: #f0f3f7; }
 .blocks-eyebrow { font: 10px/1.6 monospace; color: #a0d9ce; letter-spacing: 1.4px; }
 .blocks-tools { display: flex; gap: 5px; }
 .blocks-tools button { border: 1px solid #435362; color: #cad7e3; background: #22313f; width: 32px; height: 32px; border-radius: 6px; font-size: 15px; }
 .blocks-scores { display: flex; justify-content: space-between; gap: 6px; border-top: 1px solid #344252; margin-top: 13px; padding: 12px 0; color: #acbacb; font-size: 10px; }
 .blocks-scores b { color: #f0f3f7; font: 16px monospace; margin-left: 3px; }
-.blocks-playfield { position: relative; width: 100%; max-width: 260px; margin: 0 auto; border: 1px solid #344455; background: #09111b; border-radius: 6px; overflow: hidden; }
+.blocks-playfield { position: relative; width: 100%; max-width: 260px; margin: 0 auto; border: 3px solid #745437; background: #201c19; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #251c14; }
+.blocks-food-label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 10px; padding: 7px 9px; background: #30281f; border: 1px solid #5d4934; border-radius: 6px; color: #d3b992; font-size: 9px; letter-spacing: 1px; }
+.blocks-food-label b { color: #ffe3b0; font-size: 12px; letter-spacing: 0; }
+.blocks-food-samples { font-size: 29px; letter-spacing: 5px; margin-bottom: 14px; }
 #blocks-canvas { display: block; width: 100%; height: auto; cursor: crosshair; }
 #blocks-canvas:focus-visible { outline: 2px solid #f8b374; outline-offset: -3px; }
-#blocks-cover { position: absolute; inset: 0; background: #09111bcc; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+#blocks-cover { position: absolute; inset: 0; background: #171714e8; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
 #blocks-cover[hidden], #blocks-content[hidden] { display: none; }
 #blocks-cover strong { color: #f0f3f7; font-size: 23px; font-weight: 650; line-height: 1.2; letter-spacing: -.6px; }
 #blocks-cover p { font-size: 13px; line-height: 1.6; color: #bac8d5; margin: 9px 0 17px; }

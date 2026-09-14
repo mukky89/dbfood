@@ -1870,9 +1870,9 @@
   <!-- Hlavna stranka -->
   <div id="order-section">
     <div class="grid">
-        <section id="blocks-game" aria-label="Obedové kocky — hra s padajúcimi blokmi">
+        <section id="blocks-game" aria-label="Kuchynské kocky — hra s padajúcimi jedlami">
           <div class="blocks-heading">
-            <div><div class="blocks-eyebrow">CHVÍĽKA NA HRU</div><h2>Obedové kocky</h2></div>
+            <div><div class="blocks-eyebrow">OBJEDNANÉ? IDEME VARIŤ!</div><h2>Kuchynské kocky</h2></div>
             <div class="blocks-tools">
               <button type="button" id="blocks-pause" aria-label="Pozastaviť hru" disabled>Ⅱ</button>
               <button type="button" id="blocks-collapse" aria-label="Zbaliť hru" aria-expanded="true" aria-controls="blocks-content">−</button>
@@ -1880,11 +1880,13 @@
           </div>
           <div id="blocks-content">
             <div class="blocks-scores"><span>SKÓRE <b id="blocks-score">0</b></span><span>RIADKY <b id="blocks-lines">0</b></span><span>LEVEL <b id="blocks-level">1</b></span></div>
+            <div class="blocks-food-label"><span>NA DOSKE</span><b id="blocks-food-name">🍕 Pizza</b></div>
             <div class="blocks-playfield">
               <canvas id="blocks-canvas" tabindex="0" aria-describedby="blocks-instructions" width="300" height="600" role="img" aria-label="Hracia plocha: 10 stĺpcov a 20 riadkov">Hra s padajúcimi kockami. Ovládanie myšou, šípkami alebo tlačidlami pod hrou.</canvas>
               <div id="blocks-cover">
-                <strong id="blocks-cover-title">Malá obedová pauza.</strong>
-                <p id="blocks-cover-text">Skladaj padajúce kocky a zapĺňaj celé riadky.</p>
+                <div class="blocks-food-samples" aria-hidden="true">🍕 🥩 🧇</div>
+                <strong id="blocks-cover-title">Uvar si nový rekord.</strong>
+                <p id="blocks-cover-text">Pizza, steak či sushi. Skladaj dobroty do plných riadkov!</p>
                 <button type="button" id="blocks-start">Spustiť hru →</button>
               </div>
             </div>
@@ -2344,7 +2346,7 @@
             <span class="t-check">✅</span>
             <span class="t-emoji">🧩</span>
             <span class="t-name">Obedové kocky</span>
-            <span class="t-desc">Tmavý dizajn s marhuľovými detailmi a voliteľnou hrou s padajúcimi kockami. Pôvodné objednávanie zostáva.</span>
+            <span class="t-desc">Tmavý dizajn s marhuľovými detailmi a hrou Kuchynské kocky: pizza, steak, sushi a ďalšie dobroty v tetrisových tvaroch.</span>
             <span class="theme-dots"><span style="background:#0e141c"></span><span style="background:#f8b374"></span><span style="background:#64d8dd"></span></span>
           </button>
           <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
@@ -4169,7 +4171,7 @@ const THEME_LABELS = {
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
   spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
   rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' },
-  blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a voliteľná hra s padajúcimi blokmi.' }
+  blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a hra Kuchynské kocky s padajúcim jedlom.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -6150,6 +6152,7 @@ function updateFloatingBar() {
 <script src="/spiderman-theme.js"></script>
 <script src="/rc-theme.js"></script>
 <script src="/blocks-engine.js"></script>
+<script src="/blocks-food.js"></script>
 <script src="/blocks-theme.js"></script>
 <script src="/christmas-countdown.js"></script>
 <div id="chinchilla-runner" aria-hidden="true" hidden>
