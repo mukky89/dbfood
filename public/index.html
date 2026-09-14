@@ -1542,6 +1542,7 @@
   </style>
   <link rel="stylesheet" href="/rc-theme.css">
   <link rel="stylesheet" href="/blocks-theme.css">
+  <link rel="stylesheet" href="/christmas-countdown.css">
 </head>
 <body>
 
@@ -1559,6 +1560,16 @@
     <span class="spiderman-logo" aria-hidden="true"><span class="sm-mask">◉</span><span><b>SPIDER‑MAN</b><small>NOVÝ DEŇ</small></span></span>
     <span class="rc-header-mark" aria-hidden="true"><span class="rc-mark-icon">◆</span><span><b>TRAIL</b><small>RC EXPEDITION</small></span></span>
   </h1>
+  <div id="christmas-countdown" class="christmas-countdown" role="timer" aria-label="Odpočet do Štedrého dňa" hidden>
+    <span class="christmas-tree" aria-hidden="true">✦<br>▲<br>▰</span>
+    <div class="christmas-copy"><span class="christmas-kicker">ČARO VIANOC</span><span id="christmas-label">Do Štedrého dňa</span></div>
+    <div class="christmas-units" aria-hidden="true">
+      <span><b id="christmas-days">—</b><small>dní</small></span><i>:</i>
+      <span><b id="christmas-hours">—</b><small>hod</small></span><i>:</i>
+      <span><b id="christmas-minutes">—</b><small>min</small></span><i>:</i>
+      <span><b id="christmas-seconds">—</b><small>sek</small></span>
+    </div>
+  </div>
   <div class="header-right">
     <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
       <span class="hw-icon" id="hw-icon">⏳</span>
@@ -1858,6 +1869,35 @@
   <!-- Hlavna stranka -->
   <div id="order-section">
     <div class="grid">
+        <section id="blocks-game" aria-label="Obedové kocky — hra s padajúcimi blokmi">
+          <div class="blocks-heading">
+            <div><div class="blocks-eyebrow">CHVÍĽKA NA HRU</div><h2>Obedové kocky</h2></div>
+            <div class="blocks-tools">
+              <button type="button" id="blocks-pause" aria-label="Pozastaviť hru" disabled>Ⅱ</button>
+              <button type="button" id="blocks-collapse" aria-label="Zbaliť hru" aria-expanded="true" aria-controls="blocks-content">−</button>
+            </div>
+          </div>
+          <div id="blocks-content">
+            <div class="blocks-scores"><span>SKÓRE <b id="blocks-score">0</b></span><span>RIADKY <b id="blocks-lines">0</b></span><span>LEVEL <b id="blocks-level">1</b></span></div>
+            <div class="blocks-playfield">
+              <canvas id="blocks-canvas" width="300" height="600" role="img" aria-label="Hracia plocha: 10 stĺpcov a 20 riadkov">Hra s padajúcimi kockami. Ovládanie šípkami alebo tlačidlami pod hrou.</canvas>
+              <div id="blocks-cover">
+                <strong id="blocks-cover-title">Malá obedová pauza.</strong>
+                <p id="blocks-cover-text">Skladaj padajúce kocky a zapĺňaj celé riadky.</p>
+                <button type="button" id="blocks-start">Spustiť hru →</button>
+              </div>
+            </div>
+            <div class="blocks-controls" aria-label="Ovládanie hry">
+              <button type="button" data-blocks-action="left" aria-label="Posunúť vľavo" disabled>←</button>
+              <button type="button" data-blocks-action="rotate" aria-label="Otočiť kocku" disabled>↻</button>
+              <button type="button" data-blocks-action="right" aria-label="Posunúť vpravo" disabled>→</button>
+              <button type="button" data-blocks-action="down" aria-label="Posunúť dole" disabled>↓</button>
+              <button type="button" data-blocks-action="drop" class="blocks-drop" aria-label="Pustiť kocku na dno" disabled>Pustiť ⤓</button>
+            </div>
+            <p class="blocks-hint">← → pohyb · ↑ otočiť · ↓ dole<br>Medzerník: pustiť · P / Esc: pauza</p>
+            <p id="blocks-status" role="status" aria-live="polite">Hra sa spustí až po kliknutí.</p>
+          </div>
+        </section>
       <!-- Lava strana: formular -->
       <div>
         <div class="card" id="menu-card">
@@ -1926,35 +1966,6 @@
           <div id="hist-badge-container"></div>
           <div id="orders-list"><div class="empty-state">Zatiaľ nikto</div></div>
         </div>
-        <section id="blocks-game" aria-label="Obedové kocky — hra s padajúcimi blokmi">
-          <div class="blocks-heading">
-            <div><div class="blocks-eyebrow">CHVÍĽKA NA HRU</div><h2>Obedové kocky</h2></div>
-            <div class="blocks-tools">
-              <button type="button" id="blocks-pause" aria-label="Pozastaviť hru" disabled>Ⅱ</button>
-              <button type="button" id="blocks-collapse" aria-label="Zbaliť hru" aria-expanded="true" aria-controls="blocks-content">−</button>
-            </div>
-          </div>
-          <div id="blocks-content">
-            <div class="blocks-scores"><span>SKÓRE <b id="blocks-score">0</b></span><span>RIADKY <b id="blocks-lines">0</b></span><span>LEVEL <b id="blocks-level">1</b></span></div>
-            <div class="blocks-playfield">
-              <canvas id="blocks-canvas" width="300" height="600" role="img" aria-label="Hracia plocha: 10 stĺpcov a 20 riadkov">Hra s padajúcimi kockami. Ovládanie šípkami alebo tlačidlami pod hrou.</canvas>
-              <div id="blocks-cover">
-                <strong id="blocks-cover-title">Malá obedová pauza.</strong>
-                <p id="blocks-cover-text">Skladaj padajúce kocky a zapĺňaj celé riadky.</p>
-                <button type="button" id="blocks-start">Spustiť hru →</button>
-              </div>
-            </div>
-            <div class="blocks-controls" aria-label="Ovládanie hry">
-              <button type="button" data-blocks-action="left" aria-label="Posunúť vľavo" disabled>←</button>
-              <button type="button" data-blocks-action="rotate" aria-label="Otočiť kocku" disabled>↻</button>
-              <button type="button" data-blocks-action="right" aria-label="Posunúť vpravo" disabled>→</button>
-              <button type="button" data-blocks-action="down" aria-label="Posunúť dole" disabled>↓</button>
-              <button type="button" data-blocks-action="drop" class="blocks-drop" aria-label="Pustiť kocku na dno" disabled>Pustiť ⤓</button>
-            </div>
-            <p class="blocks-hint">← → pohyb · ↑ otočiť · ↓ dole<br>Medzerník: pustiť · P / Esc: pauza</p>
-            <p id="blocks-status" role="status" aria-live="polite">Hra sa spustí až po kliknutí.</p>
-          </div>
-        </section>
       </div>
     </div>
 
@@ -6139,5 +6150,6 @@ function updateFloatingBar() {
 <script src="/rc-theme.js"></script>
 <script src="/blocks-engine.js"></script>
 <script src="/blocks-theme.js"></script>
+<script src="/christmas-countdown.js"></script>
 </body>
 </html>

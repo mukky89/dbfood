@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.1] — 2026-09-14
+
+### Pridané
+- Vianočný odpočet v hlavičke všetkých tém: zeleno-zlatý dizajn, dni/hodiny/minúty/sekundy do Štedrého dňa podľa času v Bratislave. Počas 24.–26. decembra zobrazí prianie; potom odpočítava do ďalších Vianoc.
+
+### Zmenené
+- Obedové kocky sú na širokých obrazovkách vľavo hore v samostatnom stĺpci vedľa menu a súhrnu. Na menších obrazovkách sa hra presunie pod objednávkový obsah.
+- Hlavička a odpočet uzávierky v téme Kocky sa prispôsobujú úzkym obrazovkám.
+
 ## [1.21.0] — 2026-09-14
 
 ### Pridané
