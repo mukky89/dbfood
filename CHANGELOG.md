@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.2] — 2026-09-14
+
+### Pridané
+- Obedové kocky sa ovládajú aj myšou priamo na hracej ploche: pohyb do strán posúva kocku, ľavý klik ju otočí a pravý klik ju pustí na dno. Presun rešpektuje steny aj ostatné kocky. Klávesnica a dotykové tlačidlá zostávajú dostupné.
+
 ## [1.21.1] — 2026-09-14
 
 ### Pridané
