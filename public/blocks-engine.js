@@ -18,6 +18,9 @@
     }
     get level() { return 1 + Math.floor(this.lines / 10); }
     get interval() { return Math.max(110, 700 - (this.level - 1) * 65); }
+    get grounded() {
+      return !!this.piece && !this.over && !this.fits(this.piece.shape, this.piece.x, this.piece.y + 1);
+    }
     spawn() {
       if (!this.bag.length) {
         this.bag = [0, 1, 2, 3, 4, 5, 6];
@@ -66,17 +69,17 @@
       while (remaining.length < 20) remaining.unshift(Array(10).fill(0));
       this.board = remaining; this.spawn(); return cleared;
     }
-    step(softDrop = false) {
+    step(softDrop = false, lockOnContact = true) {
       if (!this.piece || this.over) return 0;
       const p = this.piece;
       if (this.fits(p.shape, p.x, p.y + 1)) { p.y++; if (softDrop) this.score++; return 0; }
-      return this.lock();
+      return lockOnContact ? this.lock() : 0;
     }
-    drop() {
+    drop(lockOnContact = true) {
       if (!this.piece || this.over) return 0;
       const y = this.ghostY();
       this.score += (y - this.piece.y) * 2; this.piece.y = y;
-      return this.lock();
+      return lockOnContact ? this.lock() : 0;
     }
   }
   return { Game };
