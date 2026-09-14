@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.7] — 2026-09-14
+
+### Opravené
+- Jeden ľavý klik dokončí celý rýchly pád aj vtedy, keď sledovanie myši posunie kocku z vyššej prekážky do voľného priestoru. Už netreba opakovane klikať na dokončenie pádu.
+- Pád reaguje už na stlačenie tlačidla. Následné uvoľnenie nespustí druhý pád ani pri dlhšom držaní myši. Otáčanie, kolízie a čas na posunutie po dopade zostávajú zachované.
+
 ## [1.21.6] — 2026-09-14
 
 ### Zmenené
