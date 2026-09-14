@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -1531,6 +1531,7 @@
     @media (max-width: 1240px) { .contact-card { display:none; } }
   </style>
   <link rel="stylesheet" href="/rc-theme.css">
+  <link rel="stylesheet" href="/blocks-theme.css">
 </head>
 <body>
 
@@ -1915,6 +1916,35 @@
           <div id="hist-badge-container"></div>
           <div id="orders-list"><div class="empty-state">Zatiaľ nikto</div></div>
         </div>
+        <section id="blocks-game" aria-label="Obedové kocky — hra s padajúcimi blokmi">
+          <div class="blocks-heading">
+            <div><div class="blocks-eyebrow">CHVÍĽKA NA HRU</div><h2>Obedové kocky</h2></div>
+            <div class="blocks-tools">
+              <button type="button" id="blocks-pause" aria-label="Pozastaviť hru" disabled>Ⅱ</button>
+              <button type="button" id="blocks-collapse" aria-label="Zbaliť hru" aria-expanded="true" aria-controls="blocks-content">−</button>
+            </div>
+          </div>
+          <div id="blocks-content">
+            <div class="blocks-scores"><span>SKÓRE <b id="blocks-score">0</b></span><span>RIADKY <b id="blocks-lines">0</b></span><span>LEVEL <b id="blocks-level">1</b></span></div>
+            <div class="blocks-playfield">
+              <canvas id="blocks-canvas" width="300" height="600" role="img" aria-label="Hracia plocha: 10 stĺpcov a 20 riadkov">Hra s padajúcimi kockami. Ovládanie šípkami alebo tlačidlami pod hrou.</canvas>
+              <div id="blocks-cover">
+                <strong id="blocks-cover-title">Malá obedová pauza.</strong>
+                <p id="blocks-cover-text">Skladaj padajúce kocky a zapĺňaj celé riadky.</p>
+                <button type="button" id="blocks-start">Spustiť hru →</button>
+              </div>
+            </div>
+            <div class="blocks-controls" aria-label="Ovládanie hry">
+              <button type="button" data-blocks-action="left" aria-label="Posunúť vľavo" disabled>←</button>
+              <button type="button" data-blocks-action="rotate" aria-label="Otočiť kocku" disabled>↻</button>
+              <button type="button" data-blocks-action="right" aria-label="Posunúť vpravo" disabled>→</button>
+              <button type="button" data-blocks-action="down" aria-label="Posunúť dole" disabled>↓</button>
+              <button type="button" data-blocks-action="drop" class="blocks-drop" aria-label="Pustiť kocku na dno" disabled>Pustiť ⤓</button>
+            </div>
+            <p class="blocks-hint">← → pohyb · ↑ otočiť · ↓ dole<br>Medzerník: pustiť · P / Esc: pauza</p>
+            <p id="blocks-status" role="status" aria-live="polite">Hra sa spustí až po kliknutí.</p>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -2288,6 +2318,13 @@
             <div class="t-desc">Interaktívny off-road trail s ovládateľným RC autíčkom.</div>
             <div class="theme-dots"><span style="background:#15251c"></span><span style="background:#526b3f"></span><span style="background:#d9b678"></span></div>
           </div>
+          <button type="button" class="theme-option blocks-theme-option" data-theme="blocks" onclick="saveDesignConfig('blocks')" aria-pressed="false">
+            <span class="t-check">✅</span>
+            <span class="t-emoji">🧩</span>
+            <span class="t-name">Obedové kocky</span>
+            <span class="t-desc">Tmavý dizajn s marhuľovými detailmi a voliteľnou hrou s padajúcimi kockami. Pôvodné objednávanie zostáva.</span>
+            <span class="theme-dots"><span style="background:#0e141c"></span><span style="background:#f8b374"></span><span style="background:#64d8dd"></span></span>
+          </button>
           <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
             <span class="t-check">✅</span>
             <div class="t-emoji">🕷️</div>
@@ -4066,7 +4103,7 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -4076,7 +4113,8 @@ const THEME_LABELS = {
   chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' },
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
   spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
-  rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' }
+  rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' },
+  blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a voliteľná hra s padajúcimi blokmi.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -4088,6 +4126,7 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
   document.documentElement.classList.toggle('theme-spiderman',  theme === 'spiderman');
   document.documentElement.classList.toggle('theme-rc',         theme === 'rc');
+  document.documentElement.classList.toggle('theme-blocks',     theme === 'blocks');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
   if (typeof setupSpiderTheme === 'function') setupSpiderTheme(theme === 'spiderman');
@@ -4095,8 +4134,10 @@ function applyTheme(theme) {
   return theme;
 }
 function markThemeSelection(theme) {
-  document.querySelectorAll('#vzhlad-options .theme-option').forEach(el =>
-    el.classList.toggle('selected', el.dataset.theme === theme));
+  document.querySelectorAll('#vzhlad-options .theme-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.theme === theme);
+    if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', String(el.dataset.theme === theme));
+  });
 }
 async function loadDesignConfig() {
   const label = document.getElementById('vzhlad-state-label');
@@ -6053,5 +6094,7 @@ function updateFloatingBar() {
 </div>
 <script src="/spiderman-theme.js"></script>
 <script src="/rc-theme.js"></script>
+<script src="/blocks-engine.js"></script>
+<script src="/blocks-theme.js"></script>
 </body>
 </html>
