@@ -105,11 +105,11 @@
   });
   canvas.addEventListener('click', event => {
     if (event.pointerType && event.pointerType !== 'mouse') return;
-    if (event.button === 0) action('rotate');
+    if (event.button === 0) action('drop');
   });
   canvas.addEventListener('contextmenu', event => {
     if (mode !== 'playing' || !visible()) return;
-    event.preventDefault(); event.stopPropagation(); action('drop');
+    event.preventDefault(); event.stopPropagation(); action('rotate');
   });
   // Listen only inside the game: ordering inputs and page shortcuts keep their behavior.
   panel.addEventListener('keydown', event => {

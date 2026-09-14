@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.3] — 2026-09-14
+
+### Zmenené
+- Ovládanie Obedových kociek myšou: ľavý klik pustí kocku na dno, pravý klik ju otočí. Nápoveda zodpovedá novému rozloženiu tlačidiel.
+
 ## [1.21.2] — 2026-09-14
 
 ### Pridané
