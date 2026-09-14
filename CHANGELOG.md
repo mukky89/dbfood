@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.4] — 2026-09-14
+
+### Pridané
+- Cez hlavnú stránku občas náhodne prebehne animovaná činčila s pohybujúcimi sa labkami a chvostom. Prvý prebeh po 8–16 sekundách, ďalšie po náhodnej pauze 35–80 sekúnd, v oboch smeroch. Funguje vo všetkých témach, neblokuje kliknutia a rešpektuje obmedzenie pohybu v systéme. V administrácii a na skrytej karte sa nespúšťa.
+
 ## [1.21.3] — 2026-09-14
 
 ### Zmenené
