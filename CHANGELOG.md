@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.6] — 2026-09-14
+
+### Zmenené
+- Hra v téme Obedové kocky sa mení na **Kuchynské kocky**: sedem tetrisových tvarov má podobu sushi, wafle, pizze, brokolice, steaku, lososa a syra. Vlastná kreslená grafika zachováva jasné hranice obsadených políčok aj farebný obrys dopadu.
+- Hracia plocha pripomína kuchynskú dosku, ukazuje názov aktuálneho jedla a má novú úvodnú obrazovku. Pravidlá, skóre, ovládanie myšou a zasúvanie pod previsy zostávajú rovnaké.
+
 ## [1.21.5] — 2026-09-14
 
 ### Opravené

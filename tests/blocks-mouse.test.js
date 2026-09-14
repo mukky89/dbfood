@@ -33,7 +33,7 @@ function fixture() {
   const document = { documentElement: node('root'), hidden: false,
     getElementById: node, addEventListener() {} };
   vm.runInNewContext(fs.readFileSync(require.resolve('../public/blocks-theme.js'), 'utf8'), {
-    document, window: { LunchBlocks: { Game: class extends Game {
+    document, window: { LunchFood: require('../public/blocks-food'), LunchBlocks: { Game: class extends Game {
       constructor() { super(() => .5); game = this; }
     } }, addEventListener() {} },
     setTimeout: (fn, ms) => { timers.set(++timerId, { fn, at: now + ms }); return timerId; },
