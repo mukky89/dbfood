@@ -41,7 +41,7 @@ function fixture() {
   });
   const canvas = node('blocks-canvas');
   const fire = (type, overrides = {}) => {
-    const event = { pointerType: 'mouse', button: 0, clientX: 200,
+    const event = { pointerType: 'mouse', button: 0, clientX: 200, detail: 1,
       preventDefault() { this.prevented = true; }, stopPropagation() {}, ...overrides };
     canvas.handlers[type](event); return event;
   };
@@ -60,14 +60,14 @@ test('mouse follows scaled canvas coordinates and stops at walls and obstacles',
 test('right click rotates, left click drops exactly once, and canvas keeps focus', () => {
   const f = fixture(); f.start();
   f.game.piece = { x: 4, y: 3, color: 1, shape: [[1, 1, 1]] };
-  assert.equal(f.fire('pointerdown').prevented, true);
+  assert.equal(f.fire('pointerdown', { button: 2 }).prevented, true);
   assert.equal(f.node('blocks-canvas').focused, true);
   f.fire('pointerdown', { button: 2 });
   assert.equal(f.game.board.flat().filter(Boolean).length, 0);
   assert.equal(f.fire('contextmenu', { button: 2 }).prevented, true);
   assert.deepEqual(f.game.piece.shape, [[1], [1], [1]]);
   assert.equal(f.game.board.flat().filter(Boolean).length, 0);
-  f.fire('click');
+  f.fire('pointerdown');
   assert.equal(f.game.grounded, true);
   assert.equal(f.game.board.flat().filter(Boolean).length, 0);
   f.advance(550);
@@ -93,7 +93,7 @@ test('held mouse target tucks T under the screenshot red overhang after falling'
 });
 test('drop leaves time to slide under the overhang and then locks automatically', () => {
   const f = fixture(); f.start(); redOverhang(f);
-  f.fire('click'); f.advance(400);
+  f.fire('pointerdown'); f.advance(400);
   assert.equal(f.game.piece.y, 18);
   f.fire('pointermove', { clientX: 145 });
   assert.equal(f.game.piece.x, 1);
@@ -104,10 +104,40 @@ test('dropping also retries a mouse target that was blocked above the overhang',
   const f = fixture(); f.start(); redOverhang(f);
   f.fire('pointermove', { clientX: 145 });
   assert.equal(f.game.piece.x, 0);
-  f.fire('click');
+  f.fire('pointerdown');
   assert.equal(f.game.piece.x, 1);
   assert.equal(f.game.piece.y, 18);
   f.advance(550); assert.equal(f.game.board[19][3], 3);
+});
+test('one drop reaches the floor after mouse movement slides off a higher ledge', () => {
+  const f = fixture(); f.start();
+  f.game.piece = { x: 0, y: 0, color: 2, shape: [[1, 1], [1, 1]] };
+  f.game.board[0][2] = 5; // prevents moving to the pointer column at spawn height
+  f.game.board[10][0] = 5; // higher ledge initially stops the vertical drop
+  f.fire('pointermove', { clientX: 205 });
+  assert.equal(f.game.piece.x, 0);
+  f.fire('pointerdown');
+  assert.equal(f.game.piece.x, 4);
+  assert.equal(f.game.piece.y, 18);
+  assert.equal(f.game.grounded, true);
+});
+test('press drops immediately and a late release never drops the next piece', () => {
+  const f = fixture(); f.start();
+  f.game.piece = { x: 4, y: 0, color: 2, shape: [[1, 1], [1, 1]] };
+  f.fire('pointerdown');
+  assert.equal(f.game.piece.y, 18);
+  f.advance(550); // the held press outlasts landing and the next piece spawns
+  const next = f.game.piece;
+  assert.equal(next.y, 0);
+  f.fire('click');
+  assert.equal(f.game.piece, next);
+  assert.equal(next.y, 0);
+  assert.equal(f.game.board.flat().filter(Boolean).length, 4);
+});
+test('keyboard or assistive click activation still drops once', () => {
+  const f = fixture(); f.start();
+  f.fire('click', { pointerType: '', detail: 0 });
+  assert.equal(f.game.grounded, true);
 });
 test('leaving canvas cancels held mouse target and pause cancels pending landing', () => {
   const f = fixture(); f.start(); redOverhang(f);
@@ -121,7 +151,7 @@ test('leaving canvas cancels held mouse target and pause cancels pending landing
 test('repeated movement cannot postpone a landing forever', () => {
   const f = fixture(); f.start();
   f.game.piece = { x: 0, y: 18, color: 2, shape: [[1, 1], [1, 1]] };
-  f.fire('click');
+  f.fire('pointerdown');
   for (let i = 0; i < 16; i++) {
     f.advance(100); f.fire('pointermove', { clientX: i % 2 ? 125 : 145 });
   }
@@ -131,16 +161,16 @@ test('repeated movement cannot postpone a landing forever', () => {
 test('mouse does nothing before start, during pause, or when hidden; touch movement is ignored', () => {
   const f = fixture();
   const original = JSON.stringify(f.game.piece);
-  f.fire('pointermove', { clientX: 100 }); f.fire('click'); f.fire('contextmenu');
+  f.fire('pointermove', { clientX: 100 }); f.fire('pointerdown'); f.fire('contextmenu');
   assert.equal(JSON.stringify(f.game.piece), original);
   f.start();
   const active = JSON.stringify(f.game.piece);
   f.fire('pointermove', { pointerType: 'touch', clientX: 100 });
   assert.equal(JSON.stringify(f.game.piece), active);
   f.document.hidden = true;
-  f.fire('pointermove', { clientX: 100 }); f.fire('click'); f.fire('contextmenu');
+  f.fire('pointermove', { clientX: 100 }); f.fire('pointerdown'); f.fire('contextmenu');
   assert.equal(JSON.stringify(f.game.piece), active);
   f.document.hidden = false; f.node('blocks-pause').handlers.click();
-  f.fire('pointermove', { clientX: 100 }); f.fire('click'); f.fire('contextmenu');
+  f.fire('pointermove', { clientX: 100 }); f.fire('pointerdown'); f.fire('contextmenu');
   assert.equal(JSON.stringify(f.game.piece), active);
 });

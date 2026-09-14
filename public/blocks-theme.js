@@ -101,7 +101,14 @@
     if (name === 'right') moved = game.move(1);
     if (name === 'rotate') moved = game.rotate();
     if (name === 'down') cleared = game.step(true, false);
-    if (name === 'drop') { cleared = game.drop(false); moved = followMouse(); schedule(); }
+    if (name === 'drop') {
+      // Following the mouse can slide off a ledge. Finish falling in the same action.
+      do {
+        cleared += game.drop(false);
+        moved = followMouse() || moved;
+      } while (game.piece && !game.grounded);
+      schedule();
+    }
     update(cleared, moved);
   }
   $('start').addEventListener('click', () => {
@@ -128,10 +135,12 @@
     if (event.pointerType !== 'mouse' || mode !== 'playing' || !visible()) return;
     // Keep focus within the panel; clicking the canvas must not trigger focusout pause.
     event.preventDefault(); canvas.focus({ preventScroll: true });
+    if (event.button === 0) { event.stopPropagation(); action('drop'); }
   });
   canvas.addEventListener('click', event => {
-    if (event.pointerType && event.pointerType !== 'mouse') return;
-    if (event.button === 0) action('drop');
+    // Real pointer clicks were handled on press, even if the pointer leaves before release.
+    // Keep only keyboard/assistive activation here; never drop the next piece on release.
+    if (!event.pointerType && event.detail === 0 && event.button === 0) action('drop');
   });
   canvas.addEventListener('contextmenu', event => {
     if (mode !== 'playing' || !visible()) return;
