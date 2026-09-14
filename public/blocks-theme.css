@@ -20,8 +20,8 @@ html.theme-blocks .phone-btn, html.theme-blocks .hdr-weather, html.theme-blocks 
 html.theme-blocks .phone-dropdown, html.theme-blocks .modal, html.theme-blocks .qr-modal,
 html.theme-blocks .fob-inner { background: var(--card); color: var(--text); border-color: var(--border); }
 html.theme-blocks .phone-item:hover { background: #342b24; color: var(--accent); }
-html.theme-blocks #main-content { max-width: 1180px; }
-html.theme-blocks #order-section > .grid { grid-template-columns: minmax(0, 1fr) minmax(300px, 340px); gap: 22px; }
+html.theme-blocks #main-content { max-width: 1500px; }
+html.theme-blocks #order-section > .grid { grid-template-columns: 280px minmax(0, 1fr) minmax(300px, 320px); gap: 22px; align-items: start; }
 html.theme-blocks #order-section > .grid > * { min-width: 0; }
 html.theme-blocks .card { background: var(--card); border-color: var(--border); box-shadow: none; }
 html.theme-blocks .card-title { color: var(--text); border-bottom: 1px solid var(--border); font-size: 15px; padding-bottom: 14px; }
@@ -66,7 +66,7 @@ html.theme-blocks .admin-num-badge { background: #324357; color: var(--text); }
 html.theme-blocks #login-banner { background: #202e3d !important; border: 1px solid #435366; }
 html.theme-blocks #login-banner button { background: #f8b374 !important; color: #2b1c10 !important; }
 html.theme-blocks #price-calculator { background: #244334 !important; border: 1px solid #4a785e; }
-html.theme-blocks #countdown-bar { max-width: 1148px; margin: 20px auto 0; padding: 0; border: 1px solid #465260; border-radius: 10px; overflow: hidden; }
+html.theme-blocks #countdown-bar { max-width: 1468px; margin: 20px auto 0; padding: 0; border: 1px solid #465260; border-radius: 10px; overflow: hidden; }
 html.theme-blocks #countdown-bar .cd-inner { background: #202b36; color: var(--text); padding: 12px; }
 html.theme-blocks #countdown-bar.green .cd-inner { background: #223b30; color: #c6e9d3; }
 html.theme-blocks #countdown-bar.orange .cd-inner { background: #3b3022; color: #f2d5a7; }
@@ -102,9 +102,16 @@ html.theme-blocks #blocks-game { display: block; background: #111c28; border: 1p
 .blocks-hint { font-size: 11px; line-height: 1.6; color: #acbacb; text-align: center; margin-top: 10px; }
 #blocks-status { font-size: 12px; color: #a0d9ce; text-align: center; margin-top: 8px; line-height: 1.5; min-height: 18px; }
 
+@media (max-width: 1199px) {
+  html.theme-blocks #order-section > .grid { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); }
+  html.theme-blocks #blocks-game { grid-column: 1; grid-row: 2; }
+}
 @media (max-width: 800px) {
+  html.theme-blocks #blocks-game { grid-column: auto; grid-row: auto; order: 3; }
   html.theme-blocks #order-section > .grid { grid-template-columns: minmax(0, 1fr); }
   html.theme-blocks #countdown-bar { margin: 14px 16px 0; }
+  html.theme-blocks #countdown-bar .cd-inner { flex-wrap: wrap; gap: 10px; }
+  html.theme-blocks #countdown-bar .cd-label { white-space: normal; }
   html.theme-blocks header { height: auto; min-height: 64px; padding: 12px; flex-wrap: wrap; gap: 10px; }
   html.theme-blocks .header-right { flex-wrap: wrap; max-width: 100%; gap: 6px; }
   html.theme-blocks .card { padding: 16px; }
