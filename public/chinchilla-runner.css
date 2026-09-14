@@ -1,0 +1,18 @@
+#chinchilla-runner { position: fixed; left: -140px; bottom: 90px; width: 120px; height: 88px; z-index: 90; pointer-events: none; user-select: none; }
+#chinchilla-runner[hidden] { display: none; }
+#chinchilla-runner * { pointer-events: none; }
+.runner-facing { width: 100%; height: 100%; }
+#chinchilla-runner[data-direction="left"] .runner-facing { transform: scaleX(-1); }
+.runner-chin { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 5px 3px #0003); }
+#chinchilla-runner.running { animation: chin-run-across var(--run-duration, 5s) linear both; }
+#chinchilla-runner.running[data-direction="left"] { animation-direction: reverse; }
+.running .runner-chin { animation: chin-run-bounce .22s ease-in-out infinite alternate; }
+.running .runner-foot { transform-box: fill-box; transform-origin: center; animation: chin-run-stride .22s ease-in-out infinite alternate; }
+.running .runner-foot-back { animation-direction: alternate-reverse; }
+.running .runner-tail { transform-box: fill-box; transform-origin: right bottom; animation: chin-run-tail .3s ease-in-out infinite alternate; }
+@keyframes chin-run-across { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 280px)); } }
+@keyframes chin-run-bounce { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-6px) rotate(2deg); } }
+@keyframes chin-run-stride { from { transform: translateX(-5px) rotate(-22deg); } to { transform: translateX(5px) rotate(22deg); } }
+@keyframes chin-run-tail { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+@media (max-width: 600px) { #chinchilla-runner { width: 90px; height: 66px; } }
+@media (prefers-reduced-motion: reduce) { #chinchilla-runner { display: none !important; } }
