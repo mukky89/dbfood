@@ -85,6 +85,32 @@
     else if (mode === 'paused' && visible()) setMode('playing');
   });
   controls.forEach(button => button.addEventListener('click', () => action(button.dataset.blocksAction)));
+  // Mouse coordinates follow the displayed canvas size, including responsive scaling.
+  canvas.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || mode !== 'playing' || !visible() || !game.piece) return;
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width) return;
+    const column = Math.max(0, Math.min(9, Math.floor((event.clientX - bounds.left) * 10 / bounds.width)));
+    const target = column - Math.floor(game.piece.shape[0].length / 2);
+    // Move one cell at a time so the mouse cannot jump through occupied cells.
+    while (game.piece.x !== target) {
+      if (!game.move(Math.sign(target - game.piece.x))) break;
+    }
+    paint();
+  });
+  canvas.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'mouse' || mode !== 'playing' || !visible()) return;
+    // Keep focus within the panel; clicking the canvas must not trigger focusout pause.
+    event.preventDefault(); canvas.focus({ preventScroll: true });
+  });
+  canvas.addEventListener('click', event => {
+    if (event.pointerType && event.pointerType !== 'mouse') return;
+    if (event.button === 0) action('rotate');
+  });
+  canvas.addEventListener('contextmenu', event => {
+    if (mode !== 'playing' || !visible()) return;
+    event.preventDefault(); event.stopPropagation(); action('drop');
+  });
   // Listen only inside the game: ordering inputs and page shortcuts keep their behavior.
   panel.addEventListener('keydown', event => {
     if (mode !== 'playing') return;
