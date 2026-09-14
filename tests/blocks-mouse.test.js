@@ -45,15 +45,17 @@ test('mouse follows scaled canvas coordinates and stops at walls and obstacles',
   f.game.board[3][3] = 0;
   f.fire('pointermove', { clientX: 299 }); assert.equal(f.game.piece.x, 8);
 });
-test('left click rotates, right click drops exactly once, and canvas keeps focus', () => {
+test('right click rotates, left click drops exactly once, and canvas keeps focus', () => {
   const f = fixture(); f.start();
   f.game.piece = { x: 4, y: 3, color: 1, shape: [[1, 1, 1]] };
   assert.equal(f.fire('pointerdown').prevented, true);
   assert.equal(f.node('blocks-canvas').focused, true);
-  f.fire('click'); assert.deepEqual(f.game.piece.shape, [[1], [1], [1]]);
   f.fire('pointerdown', { button: 2 });
   assert.equal(f.game.board.flat().filter(Boolean).length, 0);
   assert.equal(f.fire('contextmenu', { button: 2 }).prevented, true);
+  assert.deepEqual(f.game.piece.shape, [[1], [1], [1]]);
+  assert.equal(f.game.board.flat().filter(Boolean).length, 0);
+  f.fire('click');
   assert.equal(f.game.board.flat().filter(Boolean).length, 3);
   assert.ok(f.game.score > 0);
 });
