@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -220,6 +220,16 @@
     .polievka-badge { color: #1565c0; }
     .jedlo-badge { color: #b71c1c; }
     .hot-row td { background: linear-gradient(90deg, rgba(247,166,0,.14), transparent 75%) !important; }
+    .summary-table .summary-note-row td { padding: 0 8px 12px; border-bottom: 1px solid var(--border); }
+    .summary-note { margin-top: 6px; padding: 10px 12px; background: color-mix(in srgb, var(--orange) 13%, var(--card)); border: 1px solid #c58b28; border-left: 4px solid #d88c18; border-radius: 8px; color: var(--text); text-align: left; overflow-wrap: anywhere; }
+    .summary-note-title { display: block; font-size: 12px; font-weight: 800; margin-bottom: 6px; line-height: 1.4; }
+    .summary-note ul { list-style: none; margin: 0; padding: 0; }
+    .summary-note li { font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+    .summary-note li + li { border-top: 1px solid color-mix(in srgb, var(--orange) 30%, var(--border)); margin-top: 7px; padding-top: 7px; }
+    .summary-note-person { font-weight: 800; }
+    .summary-note-context { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
+    .summary-note-flag { font-size: 14px; margin-left: 5px; }
+    .summary-general-notes { margin-top: 14px; }
 
     /* Toast */
     #toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; font-size: 15px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 320px; }
@@ -1531,6 +1541,7 @@
     @media (max-width: 1240px) { .contact-card { display:none; } }
   </style>
   <link rel="stylesheet" href="/rc-theme.css">
+  <link rel="stylesheet" href="/blocks-theme.css">
 </head>
 <body>
 
@@ -1915,6 +1926,35 @@
           <div id="hist-badge-container"></div>
           <div id="orders-list"><div class="empty-state">Zatiaľ nikto</div></div>
         </div>
+        <section id="blocks-game" aria-label="Obedové kocky — hra s padajúcimi blokmi">
+          <div class="blocks-heading">
+            <div><div class="blocks-eyebrow">CHVÍĽKA NA HRU</div><h2>Obedové kocky</h2></div>
+            <div class="blocks-tools">
+              <button type="button" id="blocks-pause" aria-label="Pozastaviť hru" disabled>Ⅱ</button>
+              <button type="button" id="blocks-collapse" aria-label="Zbaliť hru" aria-expanded="true" aria-controls="blocks-content">−</button>
+            </div>
+          </div>
+          <div id="blocks-content">
+            <div class="blocks-scores"><span>SKÓRE <b id="blocks-score">0</b></span><span>RIADKY <b id="blocks-lines">0</b></span><span>LEVEL <b id="blocks-level">1</b></span></div>
+            <div class="blocks-playfield">
+              <canvas id="blocks-canvas" width="300" height="600" role="img" aria-label="Hracia plocha: 10 stĺpcov a 20 riadkov">Hra s padajúcimi kockami. Ovládanie šípkami alebo tlačidlami pod hrou.</canvas>
+              <div id="blocks-cover">
+                <strong id="blocks-cover-title">Malá obedová pauza.</strong>
+                <p id="blocks-cover-text">Skladaj padajúce kocky a zapĺňaj celé riadky.</p>
+                <button type="button" id="blocks-start">Spustiť hru →</button>
+              </div>
+            </div>
+            <div class="blocks-controls" aria-label="Ovládanie hry">
+              <button type="button" data-blocks-action="left" aria-label="Posunúť vľavo" disabled>←</button>
+              <button type="button" data-blocks-action="rotate" aria-label="Otočiť kocku" disabled>↻</button>
+              <button type="button" data-blocks-action="right" aria-label="Posunúť vpravo" disabled>→</button>
+              <button type="button" data-blocks-action="down" aria-label="Posunúť dole" disabled>↓</button>
+              <button type="button" data-blocks-action="drop" class="blocks-drop" aria-label="Pustiť kocku na dno" disabled>Pustiť ⤓</button>
+            </div>
+            <p class="blocks-hint">← → pohyb · ↑ otočiť · ↓ dole<br>Medzerník: pustiť · P / Esc: pauza</p>
+            <p id="blocks-status" role="status" aria-live="polite">Hra sa spustí až po kliknutí.</p>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -2288,6 +2328,13 @@
             <div class="t-desc">Interaktívny off-road trail s ovládateľným RC autíčkom.</div>
             <div class="theme-dots"><span style="background:#15251c"></span><span style="background:#526b3f"></span><span style="background:#d9b678"></span></div>
           </div>
+          <button type="button" class="theme-option blocks-theme-option" data-theme="blocks" onclick="saveDesignConfig('blocks')" aria-pressed="false">
+            <span class="t-check">✅</span>
+            <span class="t-emoji">🧩</span>
+            <span class="t-name">Obedové kocky</span>
+            <span class="t-desc">Tmavý dizajn s marhuľovými detailmi a voliteľnou hrou s padajúcimi kockami. Pôvodné objednávanie zostáva.</span>
+            <span class="theme-dots"><span style="background:#0e141c"></span><span style="background:#f8b374"></span><span style="background:#64d8dd"></span></span>
+          </button>
           <div class="theme-option" data-theme="spiderman" onclick="saveDesignConfig('spiderman')">
             <span class="t-check">✅</span>
             <div class="t-emoji">🕷️</div>
@@ -3813,21 +3860,54 @@ function renderSummary(entries) {
   if (!el) return;
   if (!entries.length) { el.innerHTML = '<div class="empty-state" style="padding:20px 0">Zatiaľ žiadne</div>'; return; }
 
-  const polievkyMap = {}, jedlaMap = {}, pizzaMap = {}, dezertMap = {};
+  const groups = { polievka: new Map(), jedlo: new Map(), pizza: new Map(), dezert: new Map() };
+  const prefixes = { polievka: 'P', jedlo: 'J', pizza: 'PZ', dezert: 'D' };
+  const generalNotes = [];
+  const codePattern = /^(?:č\.|PZ|[PJD])\s*(\d+)\s*/i;
+  function numOf(text) { const m = String(text).trim().match(codePattern); return m ? Number(m[1]) : Infinity; }
+  function skrat(text) { return String(text).trim().replace(codePattern, ''); }
+  function codeOf(text, prefix) { const n = numOf(text); return prefix + (Number.isFinite(n) ? n : '?'); }
+
   entries.forEach(o => {
-    if (o.polievka) polievkyMap[o.polievka] = (polievkyMap[o.polievka]||0)+1;
-    if (o.jedlo)    jedlaMap[o.jedlo]       = (jedlaMap[o.jedlo]      ||0)+1;
-    if (o.pizza)    pizzaMap[o.pizza]        = (pizzaMap[o.pizza]       ||0)+1;
-    if (o.dezert)   dezertMap[o.dezert]      = (dezertMap[o.dezert]    ||0)+1;
+    Object.entries(groups).forEach(([group, map]) => {
+      if (!o[group]) return;
+      if (!map.has(o[group])) map.set(o[group], { count: 0, notes: [] });
+      map.get(o[group]).count++;
+    });
+    const note = String(o.poznamka || '').trim();
+    if (!note) return;
+    // Existing orders store item notes as "🍽️ text | 🍕 text". Split only
+    // before a recognized item marker; an ordinary pipe remains part of the note.
+    note.split(/\s+\|\s+(?=(?:🍽️?|🍕)\s)/u).forEach(part => {
+      const tagged = part.match(/^(🍽️?|🍕)\s+([\s\S]+)$/u);
+      const group = tagged ? (tagged[1] === '🍕' ? 'pizza' : 'jedlo') : null;
+      const detail = { name: o.meno || 'Neznámy', text: tagged ? tagged[2].trim() : part.trim() };
+      if (!detail.text) return;
+      if (group && o[group]) groups[group].get(o[group]).notes.push(detail);
+      else {
+        // Untagged/legacy admin notes belong to the whole order, not an inferred dish.
+        detail.text = part.trim();
+        detail.context = Object.keys(groups).filter(g => o[g]).map(g => codeOf(o[g], prefixes[g])).join(', ');
+        generalNotes.push(detail);
+      }
+    });
   });
 
-  function skrat(text) { return text.replace(/^(?:č\.|PZ|[PJD])\d+\s*/,''); }
-  function numOf(text) { const m=text.match(/^(?:č\.|PZ|[PJD])(\d+)/); return m?m[1]:'?'; }
+  function noteBox(notes, title) {
+    return `<div class="summary-note"><strong class="summary-note-title">⚠ ${esc(title)}</strong><ul>${notes.map(n =>
+      `<li>${n.context ? `<span class="summary-note-context">Objednávka: ${esc(n.context)}</span>` : ''}<span class="summary-note-person">${esc(n.name)}:</span> ${esc(n.text)}</li>`
+    ).join('')}</ul></div>`;
+  }
 
   function buildRows(map, color, prefix) {
-    return Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => {
+    return [...map.entries()].sort(([a], [b]) =>
+      (numOf(a) - numOf(b)) || skrat(a).localeCompare(skrat(b), 'sk', { numeric: true })
+    ).map(([k, item]) => {
       const isTop = topJedlo && k === topJedlo;
-      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${prefix}${numOf(k)}</span><span>${isTop?'🔥 ':''}<strong>${skrat(k)}</strong></span></span></td><td><span class="summary-count" style="background:${color}">${v}×</span></td></tr>`;
+      const code = codeOf(k, prefix);
+      const warning = item.notes.length ? '<span class="summary-note-flag" aria-label="Jedlo má poznámku">⚠</span>' : '';
+      const notes = item.notes.length ? `<tr class="summary-note-row"><td colspan="2">${noteBox(item.notes, 'Poznámky k ' + code)}</td></tr>` : '';
+      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${code}</span><span>${isTop?'🔥 ':''}<strong>${esc(skrat(k))}</strong>${warning}</span></span></td><td><span class="summary-count" style="background:${color}">${item.count}×</span></td></tr>${notes}`;
     }).join('');
   }
 
@@ -3835,18 +3915,18 @@ function renderSummary(entries) {
     return `<tr class="summary-section-header"><td colspan="2"><span class="summary-section-title" style="color:${color}">${emoji} ${nazov}</span></td></tr>`;
   }
 
-  const hasJedlo  = Object.keys(jedlaMap).length > 0;
-  const hasPizza  = Object.keys(pizzaMap).length > 0;
-  const hasDezert = Object.keys(dezertMap).length > 0;
-  const hasPol    = Object.keys(polievkyMap).length > 0;
+  const hasJedlo  = groups.jedlo.size > 0;
+  const hasPizza  = groups.pizza.size > 0;
+  const hasDezert = groups.dezert.size > 0;
+  const hasPol    = groups.polievka.size > 0;
 
   el.innerHTML = `<table class="summary-table"><tbody>
-    ${hasPol ? sekcia('🍲','Polievky','#1565c0') + buildRows(polievkyMap,'#1565c0','P') : ''}
-    ${hasJedlo ? sekcia('🍽️','Hlavné jedlá','#c0392b') + buildRows(jedlaMap,'#c0392b','J') : ''}
-    ${hasPizza ? sekcia('🍕','Pizza','#e67e22') + buildRows(pizzaMap,'#e67e22','PZ') : ''}
-    ${hasDezert ? sekcia('🍮','Dezert','#8e44ad') + buildRows(dezertMap,'#8e44ad','D') : ''}
+    ${hasPol ? sekcia('🍲','Polievky','#1565c0') + buildRows(groups.polievka,'#1565c0','P') : ''}
+    ${hasJedlo ? sekcia('🍽️','Hlavné jedlá','#c0392b') + buildRows(groups.jedlo,'#c0392b','J') : ''}
+    ${hasPizza ? sekcia('🍕','Pizza','#e67e22') + buildRows(groups.pizza,'#e67e22','PZ') : ''}
+    ${hasDezert ? sekcia('🍮','Dezert','#8e44ad') + buildRows(groups.dezert,'#8e44ad','D') : ''}
     <tr class="summary-total-row"><td>Celkom objednávok</td><td><span class="summary-count" style="background:var(--brand)">${entries.length}</span></td></tr>
-  </tbody></table>`;
+  </tbody></table>${generalNotes.length ? `<div class="summary-general-notes">${noteBox(generalNotes, 'Poznámky k objednávkam')}</div>` : ''}`;
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────
@@ -4066,7 +4146,7 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -4076,7 +4156,8 @@ const THEME_LABELS = {
   chinchilla: { name: '🐭 Činčily',          toast: '🐭 Pip pip! Téma Činčily zapnutá', state: 'Aktívna téma: Činčily — mäkká fluffy téma so zvukmi.' },
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
   spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
-  rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' }
+  rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' },
+  blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a voliteľná hra s padajúcimi blokmi.' }
 };
 function applyTheme(theme) {
   if (!APP_THEMES.includes(theme)) theme = 'classic';
@@ -4088,6 +4169,7 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
   document.documentElement.classList.toggle('theme-spiderman',  theme === 'spiderman');
   document.documentElement.classList.toggle('theme-rc',         theme === 'rc');
+  document.documentElement.classList.toggle('theme-blocks',     theme === 'blocks');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
   if (typeof setupSpiderTheme === 'function') setupSpiderTheme(theme === 'spiderman');
@@ -4095,8 +4177,10 @@ function applyTheme(theme) {
   return theme;
 }
 function markThemeSelection(theme) {
-  document.querySelectorAll('#vzhlad-options .theme-option').forEach(el =>
-    el.classList.toggle('selected', el.dataset.theme === theme));
+  document.querySelectorAll('#vzhlad-options .theme-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.theme === theme);
+    if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', String(el.dataset.theme === theme));
+  });
 }
 async function loadDesignConfig() {
   const label = document.getElementById('vzhlad-state-label');
@@ -6053,5 +6137,7 @@ function updateFloatingBar() {
 </div>
 <script src="/spiderman-theme.js"></script>
 <script src="/rc-theme.js"></script>
+<script src="/blocks-engine.js"></script>
+<script src="/blocks-theme.js"></script>
 </body>
 </html>

@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.0] — 2026-09-14
+
+### Pridané
+- **Súhrn objednávok** zoraďuje položky podľa čísla (P1, P2, P3; J1, J2, J5; rovnako pizza a dezerty), nezávisle od popularity. Poznámky k jedlu alebo pizze sú výrazne označené priamo pod príslušnou položkou spolu s menom objednávateľa. Staršie všeobecné poznámky majú samostatné upozornenie s kódmi objednaných jedál.
+- **Admin → Vzhľad → Obedové kocky** — voliteľný tmavý dizajn s marhuľovými detailmi. Zachováva menu, objednávanie, platby, súhrn aj históriu. Aktuálne zvolená téma sa nasadením nemení.
+- **Hra s padajúcimi blokmi** v pravom stĺpci novej témy: klávesnica aj dotykové tlačidlá, rotácia, rýchly pád, tieň dopadu, mazanie riadkov, skóre a rastúca rýchlosť. Spustenie je manuálne; pri odchode z hry, skrytí stránky alebo zmene témy sa hra pozastaví. Panel sa dá zbaliť.
+
 ## [1.20.0] — 2026-07-30
 
 ### Pridané
