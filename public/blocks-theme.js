@@ -9,6 +9,29 @@
   const controls = panel.querySelectorAll('[data-blocks-action]');
   const colors = ['', '#64d8dd', '#f3ce74', '#b39af7', '#8bd3ac', '#ec8896', '#83aff0', '#f3b47a'];
   let mode = 'idle', timer = null;
+  let lockTimer = null, lockPiece = null, lockResets = 0, mouseColumn = null;
+  function clearLock() { clearTimeout(lockTimer); lockTimer = null; }
+  function syncLock(moved = false) {
+    if (game.piece !== lockPiece) { clearLock(); lockPiece = game.piece; lockResets = 0; }
+    if (mode !== 'playing' || !game.grounded) { clearLock(); return; }
+    if (moved && lockTimer !== null && lockResets < 15) { clearLock(); lockResets++; }
+    if (lockTimer !== null) return;
+    lockTimer = setTimeout(() => {
+      lockTimer = null;
+      if (!visible()) { setMode('paused'); return; }
+      if (mode === 'playing' && game.grounded) { update(game.lock()); schedule(); }
+    }, 550);
+  }
+  function followMouse() {
+    if (mouseColumn === null || !game.piece) return false;
+    const target = mouseColumn - Math.floor(game.piece.shape[0].length / 2);
+    let moved = false;
+    while (game.piece.x !== target) {
+      if (!game.move(Math.sign(target - game.piece.x))) break;
+      moved = true;
+    }
+    return moved;
+  }
   function visible() {
     return root.classList.contains('theme-blocks') && !document.hidden && !panel.hidden
       && !$('content').hidden && panel.getClientRects().length > 0;
@@ -39,11 +62,12 @@
     timer = setTimeout(() => {
       timer = null;
       if (!visible()) { setMode('paused'); return; }
-      update(game.step()); schedule();
+      const cleared = game.step(false, false);
+      update(cleared, followMouse()); schedule();
     }, game.interval);
   }
   function setMode(next) {
-    mode = next; clearTimeout(timer); timer = null;
+    mode = next; clearTimeout(timer); timer = null; clearLock(); mouseColumn = null;
     $('cover').hidden = next === 'playing';
     $('pause').disabled = next !== 'playing' && next !== 'paused';
     $('pause').textContent = next === 'paused' ? '▶' : 'Ⅱ';
@@ -57,23 +81,25 @@
       $('start').textContent = 'Hrať znova →'; $('status').textContent = `Koniec hry. Skóre ${game.score}, riadky ${game.lines}.`;
       $('start').focus({ preventScroll: true });
     } else if (next === 'playing') {
-      $('status').textContent = 'Zapĺňaj riadky. Každý sa počíta.'; schedule();
+      $('status').textContent = 'Zapĺňaj riadky. Každý sa počíta.'; schedule(); syncLock();
     }
   }
-  function update(cleared) {
+  function update(cleared, moved = false) {
     paint();
     if (game.over) setMode('over');
     else if (cleared) $('status').textContent = `Vymazané riadky: ${cleared}. Skóre ${game.score}.`;
+    syncLock(moved);
   }
   function action(name) {
     if (mode !== 'playing' || !visible()) return;
-    let cleared = 0;
-    if (name === 'left') game.move(-1);
-    if (name === 'right') game.move(1);
-    if (name === 'rotate') game.rotate();
-    if (name === 'down') cleared = game.step(true);
-    if (name === 'drop') { cleared = game.drop(); schedule(); }
-    update(cleared);
+    let cleared = 0, moved = false;
+    if (name === 'left' || name === 'right' || name === 'down') mouseColumn = null;
+    if (name === 'left') moved = game.move(-1);
+    if (name === 'right') moved = game.move(1);
+    if (name === 'rotate') moved = game.rotate();
+    if (name === 'down') cleared = game.step(true, false);
+    if (name === 'drop') { cleared = game.drop(false); moved = followMouse(); schedule(); }
+    update(cleared, moved);
   }
   $('start').addEventListener('click', () => {
     if (!visible()) return;
@@ -91,13 +117,10 @@
     const bounds = canvas.getBoundingClientRect();
     if (!bounds.width) return;
     const column = Math.max(0, Math.min(9, Math.floor((event.clientX - bounds.left) * 10 / bounds.width)));
-    const target = column - Math.floor(game.piece.shape[0].length / 2);
-    // Move one cell at a time so the mouse cannot jump through occupied cells.
-    while (game.piece.x !== target) {
-      if (!game.move(Math.sign(target - game.piece.x))) break;
-    }
-    paint();
+    mouseColumn = column;
+    update(0, followMouse());
   });
+  canvas.addEventListener('pointerleave', () => { mouseColumn = null; });
   canvas.addEventListener('pointerdown', event => {
     if (event.pointerType !== 'mouse' || mode !== 'playing' || !visible()) return;
     // Keep focus within the panel; clicking the canvas must not trigger focusout pause.

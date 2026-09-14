@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.5] — 2026-09-14
+
+### Opravené
+- Kocka priebežne sleduje cieľ myši aj po klesnutí alebo rýchlom páde. Ak ju predtým blokoval previs, po uvoľnení cesty sa zasunie do voľného priestoru bez ďalšieho pohybu myši. Steny a obsadené políčka zostávajú nepriechodné.
+- Po dopade je krátka pauza pred uzamknutím (550 ms) na posun alebo otočenie. Predlžovanie pohybom je obmedzené na 15 pokusov; pozastavenie hry zastaví aj uzamknutie. Ľavý klik naďalej spúšťa pád, pravý otáča.
+
 ## [1.21.4] — 2026-09-14
 
 ### Pridané

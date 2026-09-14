@@ -1,6 +1,6 @@
 {
   "name": "fantozzi-objednavky",
-  "version": "1.21.4",
+  "version": "1.21.5",
   "description": "Objednávkový systém obedov z Fantozzi",
   "main": "server.js",
   "scripts": {
