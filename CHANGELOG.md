@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.23.0] — 2026-09-25
+
+### Zmenené
+- Mravenisko funguje ako autonómne živé pozadie: bez klikania pribúda potrava v okolí, robotnice ju odnášajú, kolónia sama plánuje stavby, rozdeľuje prácu, rastie a vylepšuje hniezdo. Zásoby sa spotrebúvajú na život kolónie, takže zber pokračuje aj po rozšírení.
+- Hlavné dianie je vo voľných okrajoch stránky, karty s jedlom sú nepriehľadné. Herné panely nahradilo zbalené ovládanie pozadia a voliteľný pohľad na pozorovanie kolónie.
+- Zachované sú miestne uloženie, pauza, skrytie, obmedzený pohyb a zastavenie v skrytej karte. Simulácia prevezme aj staršiu ručne riadenú kolóniu.
+
 ## [1.22.0] — 2026-09-25
 
 ### Pridané
