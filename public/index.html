@@ -92,7 +92,7 @@
     .phone-drop-addr { font-size: 11px; color: var(--muted); text-align: center; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); }
     .header-right { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
     /* Predpoveď počasia pre Bratislavu Ružinov — vždy v hlavičke, nezávisle od témy */
-    .hdr-weather { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; height:34px; padding:0 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
+    .hdr-weather { font:inherit; cursor:pointer; display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; height:34px; padding:0 13px; font-size:14px; color:#fff; white-space:nowrap; transition:background .2s; }
     .hdr-weather:hover { background:rgba(255,255,255,.2); }
     .hdr-weather .hw-icon { font-size:17px; line-height:1; }
     .hdr-weather .hw-temp { font-weight:800; letter-spacing:.3px; }
@@ -1572,11 +1572,11 @@
     </div>
   </div>
   <div class="header-right">
-    <div class="hdr-weather" id="hdr-weather" title="Predpoveď počasia — Bratislava Ružinov">
+    <button type="button" class="hdr-weather" id="hdr-weather" title="Počasie — Bratislava Ružinov. Kliknutím obnoviť." aria-label="Počasie Bratislava Ružinov — obnoviť">
       <span class="hw-icon" id="hw-icon">⏳</span>
       <span class="hw-temp" id="hw-temp">–°C</span>
       <span class="hw-desc" id="hw-desc"></span>
-    </div>
+    </button>
     <div class="phone-wrap">
       <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
         📞 <span class="phone-btn-label">Fantozzi</span>
@@ -2592,8 +2592,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadHistory();
   await loadOrders();
   setInterval(loadOrders, 30000);
-  loadWeather();
-  setInterval(loadWeather, 15 * 60 * 1000);
 
   // Ak nie je prihlaseny, zobraz banner (nie modal)
   if (!currentUser) {
@@ -3649,65 +3647,6 @@ function setupChinchillaTheme(active) {
   _chinThemeActive = active;
 }
 
-// ── Počasie — Bratislava Ružinov (Open-Meteo, bez API kľúča) ──────────────
-// WMO weather code → { emoji, popis }
-function weatherInfo(code) {
-  const map = {
-    0:  ['☀️','Jasno'],
-    1:  ['🌤️','Prevažne jasno'],
-    2:  ['⛅','Polojasno'],
-    3:  ['☁️','Zamračené'],
-    45: ['🌫️','Hmla'],
-    48: ['🌫️','Mrznúca hmla'],
-    51: ['🌦️','Mrholenie'],
-    53: ['🌦️','Mrholenie'],
-    55: ['🌦️','Silné mrholenie'],
-    56: ['🌧️','Mrznúce mrholenie'],
-    57: ['🌧️','Mrznúce mrholenie'],
-    61: ['🌧️','Slabý dážď'],
-    63: ['🌧️','Dážď'],
-    65: ['🌧️','Silný dážď'],
-    66: ['🌧️','Mrznúci dážď'],
-    67: ['🌧️','Mrznúci dážď'],
-    71: ['🌨️','Slabé sneženie'],
-    73: ['🌨️','Sneženie'],
-    75: ['🌨️','Silné sneženie'],
-    77: ['🌨️','Snehové zrná'],
-    80: ['🌦️','Prehánky'],
-    81: ['🌦️','Prehánky'],
-    82: ['🌧️','Silné prehánky'],
-    85: ['🌨️','Snehové prehánky'],
-    86: ['🌨️','Snehové prehánky'],
-    95: ['⛈️','Búrka'],
-    96: ['⛈️','Búrka s krupobitím'],
-    99: ['⛈️','Búrka s krupobitím'],
-  };
-  return map[code] || ['🌡️','—'];
-}
-async function loadWeather() {
-  const iconEl = document.getElementById('hw-icon');
-  const tempEl = document.getElementById('hw-temp');
-  const descEl = document.getElementById('hw-desc');
-  if (!iconEl || !tempEl) return;
-  try {
-    // Bratislava Ružinov ≈ 48.155 N, 17.155 E
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=48.155&longitude=17.155'
-              + '&current=temperature_2m,weather_code&timezone=Europe/Bratislava';
-    const res = await fetch(url);
-    const data = await res.json();
-    const cur = data && data.current;
-    if (!cur || typeof cur.temperature_2m !== 'number') throw new Error('no data');
-    const [emoji, popis] = weatherInfo(cur.weather_code);
-    iconEl.textContent = emoji;
-    tempEl.textContent = Math.round(cur.temperature_2m) + '°C';
-    if (descEl) descEl.textContent = popis;
-  } catch (e) {
-    // Počasie je nepovinné — pri chybe nechaj decentný fallback
-    iconEl.textContent = '🌡️';
-    tempEl.textContent = '–°C';
-    if (descEl) descEl.textContent = '';
-  }
-}
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -6154,6 +6093,7 @@ function updateFloatingBar() {
 <script src="/blocks-engine.js"></script>
 <script src="/blocks-food.js"></script>
 <script src="/blocks-theme.js"></script>
+<script src="/weather-widget.js"></script>
 <script src="/christmas-countdown.js"></script>
 <div id="chinchilla-runner" aria-hidden="true" hidden>
   <div class="runner-facing">
