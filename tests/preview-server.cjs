@@ -39,4 +39,5 @@ app.get('/api/weather', (_, res) => res.json({ ok: false }));
 app.use('/api', (_, res) => res.status(404).json({ ok: false, error: 'Not available in local fixture' }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('/admin', (_, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
-app.listen(8766, '127.0.0.1', () => console.log('Local fixture at http://127.0.0.1:8766 — admin: preview-only'));
+const previewPort = Number(process.env.PREVIEW_PORT || 8766);
+app.listen(previewPort, '127.0.0.1', () => console.log(`Local fixture at http://127.0.0.1:${previewPort} — admin: preview-only`));
