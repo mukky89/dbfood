@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.21.8] — 2026-09-25
+
+### Opravené
+- Widget počasia sa načítava samostatne aj v administrácii; nečaká na používateľov, menu, históriu ani objednávky. Pomalá alebo zaseknutá požiadavka aplikácie už nezablokuje počasie.
+- Načítanie má limit 8 sekúnd, kontroluje HTTP odpoveď a platnosť údajov. Pri výpadku zachová poslednú teplotu s označením neaktuálnosti; bez údajov zobrazí dostupný popis chyby. Obnovenie funguje kliknutím, pri návrate pripojenia a automaticky po minúte pri chybe.
+
 ## [1.21.7] — 2026-09-14
 
 ### Opravené
