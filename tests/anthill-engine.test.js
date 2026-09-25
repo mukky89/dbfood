@@ -91,3 +91,26 @@ test('long simulation remains finite and bounded, including event obstacles and 
   assert.ok(g.s.ants.every(a => Number.isFinite(a.x) && Number.isFinite(a.y) && a.energy >= 0));
   assert.equal(new Game(g.serialize()).s.time, g.s.time);
 });
+test('autonomous colony finds food, builds its own nursery and grows without any input', () => {
+  const g = colony();
+  for (let i = 0; i < 6000; i++) g.tick(.1, true);
+  assert.ok(g.s.delivered > 0);
+  assert.ok(g.s.rooms.length > 4);
+  assert.ok(g.s.rooms.some(r => r.id >= 4 && r.type === 'nursery' && r.progress === 100));
+  assert.ok(g.s.ants.length > 12);
+  assert.ok(!g.s.tasks.placed, 'natural food must not be counted as a user action');
+});
+test('autonomy takes over an old manual save and keeps working after capacity is reached', () => {
+  const g = colony(); g.s.auto = false;
+  g.s.allocation = { gather: 0, scout: 0, dig: 0, care: 0 };
+  g.build('nursery', 4); g.s.rooms[4].paused = true;
+  const restored = new Game(g.serialize(), g.random);
+  for (let i = 0; i < 18000; i++) restored.tick(.1, true);
+  assert.equal(restored.s.auto, true);
+  assert.equal(restored.s.rooms[4].progress, 100);
+  assert.ok(restored.s.ants.length > 12 && restored.s.ants.length <= 40);
+  assert.ok(restored.s.food >= 0 && restored.s.food <= restored.capacity);
+  assert.ok(restored.s.water >= 0 && restored.s.water <= restored.waterCapacity);
+  assert.ok(restored.s.delivered > 100);
+  assert.equal(new Game(restored.serialize()).s.time, restored.s.time);
+});

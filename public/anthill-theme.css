@@ -90,3 +90,19 @@
   #ant-dock button { padding:7px 9px; }
 }
 @media(prefers-reduced-motion:reduce) { .theme-anthill *, .theme-anthill *::before, .theme-anthill *::after { animation:none!important; scroll-behavior:auto!important; } }
+
+/* The colony is scenery; its controls stay collapsed until requested. */
+#ant-dock { padding:7px 12px; border-radius:18px; font-size:12px; background:#304732e8; }
+#ant-dock summary { cursor:pointer; font-weight:600; list-style:none; }
+#ant-dock summary::-webkit-details-marker { display:none; }
+#ant-dock summary:focus-visible { outline:2px solid #ead69b; outline-offset:3px; }
+#ant-dock p { margin:8px 0 4px; }
+#ant-dock:not([open]) > :not(summary) { display:none; }
+#ant-game.ant-observer > .ant-world { flex:1; min-height:0; }
+#ant-game.ant-observer { width:min(1120px,calc(100vw - 24px)); height:min(880px,calc(100dvh - 24px)); }
+#ant-background { opacity:.65; }
+.theme-anthill .card { background:#fffdf5; }
+@media(max-width:580px) { #ant-game.ant-observer { width:100vw; height:100dvh; } }
+
+#ant-dock { left:auto; right:18px; }
+@media(max-width:580px) { #ant-dock { left:auto; right:9px; } }

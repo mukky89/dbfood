@@ -1,44 +1,30 @@
 # Živé mravenisko
 
-Tému zapne administrátor v **Admin → Vzhľad → Živé mravenisko**. Existujúca téma sa pri nasadení automaticky nemení. Na stránke pribudne panel **Moja kolónia → Preskúmať mravenisko**. Hra nemení objednávky, platby ani prihlásenie.
+Téma sa zapína cez **Admin → Vzhľad → Živé mravenisko**. Jej hlavnou funkciou je autonómne pozadie stránky s jedlom. Nie je potrebné otvárať hru ani čokoľvek obsluhovať.
 
-## Ovládanie
+Kolónia sama:
+- objavuje potravu a vodu, ktoré sa priebežne objavujú v okolí;
+- vytvára cesty a prenáša náklady do zásobárne;
+- rozdeľuje zber, prieskum, kopanie a starostlivosť podľa potreby;
+- buduje komory, vychováva nové robotnice a neskôr vylepšuje hniezdo;
+- spotrebúva zásoby, oddychuje a reaguje na príležitostné udalosti.
 
-- **Potrava:** vyber porciu a klikni/ťukni na voľný povrch. Tlačidlo „Položiť na voľný povrch“ poskytuje alternatívu ku canvasu. Prieskumníci objavia porciu, zberači ju fyzicky odnesú. Pizza potrebuje dvoch nosičov. Voda a ovocie dopĺňajú vodu.
-- **Stavba:** vyber typ a vyznačené miesto; dostupný je aj zoznam miest. Cena sa odpočíta pri plánovaní. Priebeh závisí od kopáčov; stavbu možno pozastaviť alebo zrušiť za polovicu pôvodnej ceny. Hotové komory možno vylepšovať.
-- **Mravce:** automaticky alebo ručne rozdeľ prácu. Náklad sa doručí pred zmenou úlohy. Vybraného mravca možno pomenovať, označiť ako obľúbeného a sledovať kamerou.
-- **Rozvoj:** šesť vylepšení s tromi úrovňami. **Úlohy:** úvodné ciele odomykajú dekorácie.
-- **Feromóny:** zobraz cesty, nakresli krátku stopu alebo vytvor stopu pri vstupe tlačidlom. Stopy sa vytrácajú, nástroj má obnovu.
-- **Prekážky:** potiahni kameň alebo ho presuň tlačidlom vo Voľbách. Ťuknutie na mláčku alebo tlačidlo položí/odoberie listový most. Nové trasy rešpektujú prekážky.
-- **Kamera:** potiahnutie prázdnej plochy, koliesko, tlačidlá priblíženia; po zaostrení canvasu aj šípky a +/−. Escape zruší nástroj alebo zavrie herný pohľad. Zoznamy v paneloch umožňujú výber objektov klávesnicou.
+Zdroje pribúdajú iba fyzickým doručením. Stavby vznikajú prácou kopáčov; nová robotnica spotrebuje jedlo a vodu. Nedostatok spomalí rast, ale nespôsobuje smrť kolónie. Po dosiahnutí limitu 40 robotníc zber a život v hniezde pokračujú.
 
-Na mobile zostáva herný svet nad samostatne posúvateľným ovládacím panelom. Pozadie nepreberá kliknutia stránky. Animáciu možno skryť, pozastaviť alebo nastaviť statické pozadie. Pri systémovom obmedzení pohybu sa pozadie nehýbe; otvorenie herného pohľadu je výslovným spustením hry. Zvuk je predvolene vypnutý.
+## Zobrazenie
 
-## Dáta a simulácia
+Na desktope sa komory a mravce vykresľujú do voľných okrajov okolo hlavného obsahu. Pozadie nezachytáva kliknutia a nepriehľadné karty chránia čitateľnosť menu. Zbalený prvok **Živé pozadie** obsahuje len pauzu, skrytie a **Pozorovať zblízka**. Detailný pohľad umožňuje posun a priblíženie, bez herných úloh a ručného riadenia.
 
-- `public/anthill-engine.js`: samostatný, deterministicky testovateľný model; prehliadač aj CommonJS.
-- `public/anthill-theme.js`: Canvas 2D, prístupné HTML ovládanie, životný cyklus témy a uloženie.
-- `public/anthill-theme.css`: izolovaný vzhľad a responzívny herný dialóg.
-- Stav je v `localStorage` pod `fob_anthill_v1`, automaticky každých päť sekúnd a po interakciách. Pri obnove sa kontroluje schéma; poškodené uloženie vytvorí novú kolóniu. Náklad na ceste sa zachová a dopraví, pozície sa obnovia pri hniezde. Dočasné udalosti, stopy a pohybové trasy sa začnú nanovo.
-- Zatvorená/skrytá karta nepridáva ani neodoberá zdroje. Zmena témy zastaví animačnú slučku a zatvorí dialóg. Žiadny offline trest ani neobmedzený offline zisk.
-- Limit 40 robotníc, 10 porcií, 10 miest pre komory. Rozšírenia sa prichytávajú na pripravenú sieť tunelov. Ide o pokojnú simuláciu, bez boja a smrti kolónie.
+## Uloženie a výkon
+
+Stav zostáva v localStorage pod fob_anthill_v1, ukladá sa každých päť sekúnd a pri odchode. Staré kolónie sa zachovajú; automatické riadenie prevezme rozdelenie práce a pokračuje v rozostavaných komorách. Voľby pauzy a skrytia sa rešpektujú. Počas neprítomnosti sa zdroje nemenia.
+
+Pri systémovom obmedzení pohybu je pozadie statické, detailný pohľad sa spustí až na požiadanie. Skrytá karta aj zmena témy zastavia slučku. Vykresľovanie je obmedzené na 30 snímok za sekundu, populácia na 40 jedincov.
 
 ## Overenie
 
-```sh
-npm ci
-npm test
-node tests/preview-server.cjs
-```
+Jednotkové testy: node --test tests/*.test.js
 
-Lokálny server na `http://127.0.0.1:8766` používa testovacie dáta, bez MongoDB, e-mailov a platieb. Heslo administrácie je `preview-only`.
+Lokálny server bez produkčných dát: node tests/preview-server.cjs
 
-V druhom termináli s dostupným Playwrightom:
-
-```sh
-node tests/anthill-browser.cjs
-```
-
-`PLAYWRIGHT_MODULE` môže odkazovať na existujúci modul Playwright. `BROWSER_CHANNEL` má predvolenú hodnotu `msedge`; hodnota `chromium` použije prehliadač nainštalovaný Playwrightom. `PREVIEW_URL` prepíše adresu lokálneho testovacieho servera. Tento test prepína tému cez testovacie admin API, preto má bežať výhradne proti fixture serveru.
-
-Prehliadačový test pokrýva zásoby, stavbu, pomenovanie, role, most, obnovu postupu, pauzu, skrytú kartu, prepínanie tém, zachovanie rozpracovanej objednávky a dotykové ovládanie. Snímky desktopu a mobilu sú v ignorovanom priečinku `test-results/anthill/`.
+Prehliadačové testy: node tests/anthill-browser.cjs (Playwright, predvolený kanál msedge; PLAYWRIGHT_MODULE môže ukazovať na existujúci modul). Test používa len lokálny fixture server a prepne jeho tému. Overuje samostatný chod na pozadí, objednávkový formulár, pauzu, mobil, obnovu stavu a zastavenie pri zmene témy. Snímky sú v test-results/anthill/.

@@ -51,6 +51,7 @@
         upgrades: Object.fromEntries(Object.keys(UPGRADES).map(k => [k, 0])),
         allocation: { gather: 6, scout: 2, dig: 2, care: 2 }, auto: true,
         cooldown: 0, guideCooldown: 0, guide: null, brood: 0, eventClock: 0, event: null,
+        ecology: { forage: 18, plan: 20, upkeep: 0 },
         rock: 390, bridge: false, tasks: {}, composition: {}, settings: { sound: false, hidden: false, paused: false, paths: false, static: false }, savedAt: Date.now() };
     }
     ant(id) {
@@ -175,9 +176,51 @@
       if (length > 240) return 'Stopa môže mať najviac 240 bodov dĺžky.';
       this.s.guide = { points: points.map(p => ({ ...p })), life: 25 }; this.s.guideCooldown = 15; return null;
     }
-    tick(dt) {
+    live(dt) {
+      const s = this.s, e = s.ecology;
+      s.auto = true;
+      for (const room of s.rooms) if (room.progress < 100) room.paused = false;
+      e.forage += dt; e.plan += dt; e.upkeep += dt;
+      // The environment supplies sources, never credits the stockpile directly.
+      if (e.forage >= 18) {
+        e.forage = 0;
+        if (s.foods.length < 4) {
+          const types = ['bread', 'fruit', 'seed', 'cheese', 'pizza'];
+          const type = s.water < 8 && !s.foods.some(f => FOODS[f.type].water) ? 'water' : types[Math.floor(this.random() * types.length)];
+          const positions = [110, 230, 310, 480, 550, 650, 870, 1020, 1110];
+          const start = Math.floor(this.random() * positions.length);
+          const placed = s.tasks.placed, cooldown = s.cooldown;
+          s.cooldown = 0;
+          for (let i = 0; i < positions.length; i++) if (!this.addFood(type, positions[(start + i) % positions.length])) break;
+          s.tasks.placed = placed; s.cooldown = cooldown;
+        }
+      }
+      // Feeding the colony keeps foraging meaningful after the nest is full.
+      // A shortage slows growth; it never kills the colony or subtracts offline.
+      if (e.upkeep >= 10) {
+        e.upkeep = 0;
+        s.food = Math.max(0, s.food - s.ants.length * .05);
+        s.water = Math.max(0, s.water - s.ants.length * .015);
+      }
+      if (e.plan < 25) return;
+      e.plan = 0;
+      if (s.rooms.some(r => r.progress < 100)) return;
+      const slot = SLOTS.findIndex((_, i) => i >= 4 && !s.rooms.some(r => r.slot === i));
+      const plan = ['nursery', 'store', 'water', 'rest', 'nursery', 'tunnel'];
+      if (slot >= 4) {
+        const type = plan[slot - 4];
+        if (s.food >= ROOMS[type].cost + 8) this.build(type, slot);
+        return;
+      }
+      const grow = s.rooms.find(r => r.type === 'nursery' && r.level < 3 && s.ants.length >= this.populationCapacity && this.populationCapacity < 40);
+      if (grow && s.food >= ROOMS.nursery.cost * grow.level + 12) { this.upgradeRoom(grow.id); return; }
+      const upgrade = Object.keys(UPGRADES).sort((a, b) => s.upgrades[a] - s.upgrades[b]).find(k => s.upgrades[k] < 3 && s.food >= UPGRADES[k].cost * (s.upgrades[k] + 1) + 12);
+      if (upgrade) this.upgrade(upgrade);
+    }
+    tick(dt, autonomous = false) {
       if (!number(dt, 0, 1)) return;
       const s = this.s; s.time += dt;
+      if (autonomous) this.live(dt);
       s.cooldown = Math.max(0, s.cooldown - dt); s.guideCooldown = Math.max(0, s.guideCooldown - dt);
       if (s.guide && (s.guide.life -= dt) <= 0) s.guide = null;
       for (const f of s.foods) f.trail = Math.max(0, f.trail - dt * .012);
@@ -308,6 +351,7 @@
           tasks: Object.fromEntries(['placed', 'discovered', 'delivered', 'paths', 'built', 'named', 'pizza'].map(k => [k, s.tasks?.[k] === true])),
           settings: Object.fromEntries(Object.keys(fresh.settings).map(k => [k, s.settings?.[k] === true])),
           composition: Object.fromEntries(Object.keys(FOODS).map(k => [k, number(s.composition?.[k], 0, 1e10) ? s.composition[k] : 0])) };
+        this.s.ecology = Object.fromEntries(['forage', 'plan', 'upkeep'].map(k => [k, number(s.ecology?.[k], 0, 25) ? s.ecology[k] : fresh.ecology[k]]));
         this.s.food = Math.min(this.capacity, this.s.food); this.s.water = Math.min(this.waterCapacity, this.s.water);
         for (const a of this.s.ants) if (a.cargo) this.go(a, SLOTS[0], 'deliver');
         return true;
