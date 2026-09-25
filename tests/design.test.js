@@ -33,11 +33,22 @@ function appearance(saved = 'rc') {
 }
 
 test('adding blocks does not migrate or replace the current theme', async () => {
-  for (const theme of ['rc', 'classic', 'futuristic', 'spiderman', 'blocks']) {
+  for (const theme of ['rc', 'classic', 'futuristic', 'spiderman', 'blocks', 'anthill']) {
     const api = appearance(theme);
     assert.equal((await api.request('GET')).data.theme, theme);
     assert.equal(api.writes(), 0);
   }
+});
+test('anthill can be saved by an admin and restored without changing other settings', async () => {
+  const api = appearance('blocks');
+  assert.equal((await api.request('POST', { adminPass: 'wrong', theme: 'anthill' })).status, 401);
+  assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'anthill' })).data.theme, 'anthill');
+  vm.runInContext('clearVzhladCache()', api.sandbox);
+  assert.equal((await api.request('GET')).data.theme, 'anthill');
+  assert.equal(api.doc().designVersion, 2);
+  assert.match(html, /data-theme="anthill" onclick="saveDesignConfig\('anthill'\)"/);
+  assert.match(html, /classList.toggle\('theme-anthill',\s+theme === 'anthill'\)/);
+  assert.ok(html.indexOf('/anthill-engine.js') < html.indexOf('/anthill-theme.js'));
 });
 test('admin can persist blocks, reload settings and return to another theme', async () => {
   const api = appearance();

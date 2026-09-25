@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.22.0] — 2026-09-25
+
+### Pridané
+- Nová voliteľná téma **Živé mravenisko** v administrácii: zemité farby, živé pozadie a samostatný herný pohľad na kolóniu. Rozpracovaná objednávka zostáva pri hraní zachovaná.
+- Robotnice objavujú a prenášajú šesť druhov zásob, pizza vyžaduje dvoch nosičov. Feromónové stopy, rozdelenie práce, energia, liaheň, výstavba piatich typov komôr a tunelov, vylepšenia a úlohy majú skutočný účinok na simuláciu.
+- Výber, pomenovanie a sledovanie mravcov; presúvanie kameňa, listový most, pokojné udalosti, zvuk na požiadanie, pauza, rýchlosť a ovládanie kamery. Postup sa ukladá lokálne s kontrolou poškodených dát.
+- Dotykové aj klávesnicové ovládanie, statické pozadie pri obmedzenom pohybe, pozastavenie v skrytej karte a ukončenie animácie pri zmene témy.
+- Testy ekonomiky, stavby, pracovných úloh, obnovy uloženia a prepojenia s administráciou; prehliadačové kontroly desktopu a mobilu cez izolovaný lokálny server.
+
 ## [1.21.8] — 2026-09-25
 
 ### Opravené
