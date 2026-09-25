@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -1542,6 +1542,7 @@
   </style>
   <link rel="stylesheet" href="/rc-theme.css">
   <link rel="stylesheet" href="/blocks-theme.css">
+  <link rel="stylesheet" href="/anthill-theme.css">
   <link rel="stylesheet" href="/christmas-countdown.css">
   <link rel="stylesheet" href="/chinchilla-runner.css">
 </head>
@@ -2342,6 +2343,12 @@
             <div class="t-desc">Interaktívny off-road trail s ovládateľným RC autíčkom.</div>
             <div class="theme-dots"><span style="background:#15251c"></span><span style="background:#526b3f"></span><span style="background:#d9b678"></span></div>
           </div>
+          <button type="button" class="theme-option anthill-theme-option" data-theme="anthill" onclick="saveDesignConfig('anthill')" aria-pressed="false">
+            <span class="t-check">✅</span><span class="t-emoji">🐜</span>
+            <span class="t-name">Živé mravenisko</span>
+            <span class="t-desc">Malý svet pod tvojím obedom. Nakŕm mravce, rozšír hniezdo a sleduj vlastnú živú kolóniu.</span>
+            <span class="theme-dots"><span style="background:#3b573b"></span><span style="background:#d4b782"></span><span style="background:#f6f1e4"></span></span>
+          </button>
           <button type="button" class="theme-option blocks-theme-option" data-theme="blocks" onclick="saveDesignConfig('blocks')" aria-pressed="false">
             <span class="t-check">✅</span>
             <span class="t-emoji">🧩</span>
@@ -4160,7 +4167,7 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill'];
 const THEME_LABELS = {
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -4171,6 +4178,7 @@ const THEME_LABELS = {
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
   spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
   rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' },
+  anthill: { name: '🐜 Živé mravenisko', toast: '🐜 Kolónia ožíva', state: 'Aktívna téma: Živé mravenisko — interaktívna kolónia, potrava a stavba komôr.' },
   blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a hra Kuchynské kocky s padajúcim jedlom.' }
 };
 function applyTheme(theme) {
@@ -4183,6 +4191,7 @@ function applyTheme(theme) {
   document.documentElement.classList.toggle('theme-odysea',     theme === 'odysea');
   document.documentElement.classList.toggle('theme-spiderman',  theme === 'spiderman');
   document.documentElement.classList.toggle('theme-rc',         theme === 'rc');
+  document.documentElement.classList.toggle('theme-anthill', theme === 'anthill');
   document.documentElement.classList.toggle('theme-blocks',     theme === 'blocks');
   if (typeof setupChinchillaTheme === 'function') setupChinchillaTheme(theme === 'chinchilla');
   if (typeof setupOdyseaTheme === 'function') setupOdyseaTheme(theme === 'odysea');
@@ -6154,6 +6163,8 @@ function updateFloatingBar() {
 <script src="/blocks-engine.js"></script>
 <script src="/blocks-food.js"></script>
 <script src="/blocks-theme.js"></script>
+<script src="/anthill-engine.js"></script>
+<script src="/anthill-theme.js"></script>
 <script src="/christmas-countdown.js"></script>
 <div id="chinchilla-runner" aria-hidden="true" hidden>
   <div class="runner-facing">

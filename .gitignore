@@ -3,3 +3,4 @@ config.json
 orders.json
 package-lock.json
 .env
+test-results/

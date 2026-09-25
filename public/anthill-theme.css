@@ -1,0 +1,92 @@
+.theme-anthill { --brand:#344f36; --accent:#a54f27; --green:#4e713e; --bg:#ece4d3; --card:#fffdf5; --border:#ded6c3; --text:#303d2d; --muted:#6c745e; }
+.theme-anthill body { background:#d3c3a3; }
+.theme-anthill header { background:linear-gradient(110deg,#263c2b,#4b6038); box-shadow:0 4px 24px #172a2330; }
+.theme-anthill main { position:relative; z-index:1; }
+.theme-anthill .card { background:#fffdf5f7; box-shadow:0 6px 30px #3226141a; border-color:#e5dbc5; }
+.theme-anthill #countdown-bar { position:relative; z-index:1; }
+.theme-anthill body::before { content:''; position:fixed; inset:0; background:linear-gradient(90deg,transparent,#ece4d388 25%,#ece4d388 75%,transparent); pointer-events:none; z-index:0; }
+.anthill-theme-option { font:inherit; color:inherit; text-align:left; }
+.anthill-theme-option .t-name,.anthill-theme-option .t-desc { display:block; }
+#ant-background { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; opacity:.72; z-index:0; }
+#ant-dock { display:none; position:fixed; left:18px; bottom:82px; z-index:120; color:#f7efdc; background:#253d2bf5; border:1px solid #718568; border-radius:18px; padding:12px 16px; box-shadow:0 8px 28px #1b291f33; font:13px 'Segoe UI',sans-serif; max-width:calc(100vw - 36px); }
+.theme-anthill #ant-dock { display:block; }
+#ant-dock[hidden] { display:none; }
+#ant-dock strong { display:block; letter-spacing:.02em; font-size:15px; margin-bottom:3px; }
+#ant-dock .ant-dock-actions { display:flex; gap:6px; margin-top:8px; }
+#ant-dock button { border:1px solid #849271; background:#f3e7c9; color:#273e2b; padding:8px 12px; border-radius:9px; cursor:pointer; font:600 12px 'Segoe UI',sans-serif; }
+#ant-dock button:not(:first-child) { background:transparent; color:#f3e7c9; }
+#ant-game { --ant-ink:#2e402d; padding:0; border:1px solid #687853; border-radius:22px; width:min(1420px,calc(100vw - 32px)); max-width:none; height:min(940px,calc(100dvh - 32px)); max-height:none; margin:auto; color:var(--ant-ink); background:#f6f1e4; box-shadow:0 30px 100px #15241966; font:14px/1.5 'Segoe UI',Arial,sans-serif; overflow:hidden; }
+#ant-game::backdrop { background:#14251be0; backdrop-filter:blur(5px); }
+#ant-game[open] { display:flex; flex-direction:column; }
+#ant-game * { box-sizing:border-box; }
+#ant-game button,#ant-game select,#ant-game input { font:inherit; }
+#ant-game button { background:#fffaf0; color:#35462f; border:1px solid #d7d9c5; border-radius:9px; padding:8px 12px; cursor:pointer; min-height:38px; }
+#ant-game button:hover { background:#e7ecd9; border-color:#91a16e; }
+#ant-game button:disabled { opacity:.5; cursor:not-allowed; }
+#ant-game button[aria-pressed=true],#ant-game .ant-primary { background:#3b573b; color:#fff9e8; border-color:#3b573b; }
+#ant-game button:focus-visible,#ant-game select:focus-visible,#ant-game input:focus-visible,#ant-game canvas:focus-visible,#ant-dock button:focus-visible { outline:3px solid #bf742e; outline-offset:3px; }
+.ant-top { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px 24px; border-bottom:1px solid #dce0cb; background:#fcf9ef; }
+.ant-eyebrow { font-size:10px; text-transform:uppercase; letter-spacing:.2em; font-weight:800; color:#738052; }
+#ant-game h2 { font:600 28px Georgia,serif; margin:0; line-height:1.25; }
+.ant-title-line { display:flex; gap:10px; align-items:center; }
+.ant-badge { font-size:11px; background:#e7ebd9; border:1px solid #d8dec4; border-radius:20px; padding:3px 9px; }
+.ant-metrics { display:flex; gap:22px; flex-wrap:wrap; padding:10px 24px; border-bottom:1px solid #dce0cb; background:#f1eedf; font-size:12px; }
+.ant-metrics b { margin-left:5px; font-size:14px; }
+.ant-layout { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 310px; }
+.ant-world { position:relative; min-width:0; min-height:0; overflow:hidden; background:#9dae78; }
+#ant-canvas { width:100%; height:100%; display:block; touch-action:none; cursor:crosshair; }
+.ant-scene-label { position:absolute; left:20px; top:16px; pointer-events:none; color:#324627; text-shadow:0 1px #e9edcc; font-size:11px; letter-spacing:.16em; font-weight:700; }
+.ant-camera { display:flex; flex-wrap:wrap; gap:5px; position:absolute; bottom:15px; left:15px; right:15px; align-items:center; }
+#ant-game .ant-camera button { background:#faf5e8e8; font-size:12px; padding:6px 10px; min-height:34px; box-shadow:0 2px 5px #20311818; }
+.ant-sidebar { background:#fbf8ee; border-left:1px solid #d8dcc7; overflow:auto; padding:17px; }
+.ant-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-bottom:16px; }
+#ant-game .ant-tabs button { padding:8px 3px; font-size:12px; }
+#ant-game h3 { font:600 21px Georgia,serif; margin:6px 0 8px; }
+#ant-game h4 { font-size:13px; margin:12px 0 6px; }
+#ant-game p { margin:7px 0 12px; }
+.ant-note { color:#737b62; font-size:12px; }
+.ant-food-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+#ant-game .ant-food { text-align:left; padding:11px 9px; }
+.ant-food span { font-size:23px; display:block; margin-bottom:2px; }
+.ant-food small { display:block; font-size:10px; opacity:.8; }
+.ant-box { background:#efeedf; border:1px solid #dde0cb; border-radius:12px; padding:12px; margin-top:14px; }
+.ant-box p:last-child { margin-bottom:0!important; }
+.ant-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 0; border-bottom:1px solid #e4e4d4; }
+.ant-row small { display:block; color:#737b62; font-size:11px; }
+.ant-row-controls { display:flex; align-items:center; gap:6px; }
+#ant-game .ant-row-controls button { padding:4px 9px; min-width:32px; }
+.ant-wide { width:100%; margin-top:7px; text-align:left; }
+#ant-game input,#ant-game select { max-width:100%; width:100%; background:#fffdf7; border:1px solid #bdc8a7; padding:9px; border-radius:8px; color:#30472d; }
+#ant-game label { display:block; font-size:12px; margin:8px 0; }
+#ant-game progress { width:100%; height:9px; accent-color:#6e863c; }
+.ant-task { padding:8px 0; border-bottom:1px solid #e0e2d0; display:flex; gap:9px; font-size:12px; }
+.ant-task.done { color:#4b702f; }
+.ant-bottom { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:9px 20px; border-top:1px solid #d8dcc7; background:#f8f4e8; font-size:12px; }
+#ant-status { margin:0!important; }
+#ant-detail { margin-top:15px; }
+#ant-game .ant-danger { color:#9a4125; }
+.ant-key { border:1px solid #c7cfb3; border-radius:4px; padding:1px 4px; font-size:10px; }
+@media(max-width:800px) {
+  #ant-game { width:100vw; height:100dvh; border-radius:0; border:0; }
+  .ant-layout { grid-template-columns:minmax(0,1fr) 260px; }
+  .ant-top { padding:12px 15px; }
+  #ant-game h2 { font-size:23px; }
+  .ant-metrics { padding:8px 15px; gap:8px 16px; }
+  .ant-sidebar { padding:12px; }
+}
+@media(max-width:580px) {
+  .ant-layout { display:grid; grid-template-columns:1fr; grid-template-rows:42% minmax(0,1fr); overflow:hidden; }
+  .ant-world { min-height:0; }
+  .ant-sidebar { min-height:0; overflow:auto; border-left:0; border-top:1px solid #d8dcc7; }
+  .ant-tabs { grid-template-columns:repeat(6,1fr); position:sticky; top:-12px; padding:7px 0; background:#fbf8ee; z-index:1; }
+  #ant-game .ant-tabs button { font-size:10px; padding:6px 2px; }
+  .ant-food-grid { grid-template-columns:repeat(3,1fr); }
+  .ant-top { gap:6px; }
+  .ant-badge { display:none; }
+  .ant-bottom { padding:8px 12px; }
+  #ant-dock { left:9px; bottom:70px; padding:8px 11px; }
+  #ant-dock strong { font-size:12px; }
+  #ant-dock .ant-dock-actions { margin-top:5px; }
+  #ant-dock button { padding:7px 9px; }
+}
+@media(prefers-reduced-motion:reduce) { .theme-anthill *, .theme-anthill *::before, .theme-anthill *::after { animation:none!important; scroll-behavior:auto!important; } }
