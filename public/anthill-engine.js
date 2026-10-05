@@ -37,22 +37,46 @@
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const integer = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
   const number = (v, lo, hi) => Number.isFinite(v) && v >= lo && v <= hi;
+  // Rendering and navigation share these sampled curves. Keeping one geometry
+  // prevents workers from cutting through the soil beside a decorative tunnel.
+  function curve(a, c1, c2, b, steps = 16) {
+    return Array.from({ length: steps + 1 }, (_, i) => {
+      const t = i / steps, u = 1 - t;
+      return point(u * u * u * a.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * b.x,
+        u * u * u * a.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * b.y);
+    });
+  }
+  const trunkStops = [point(600, 170), point(593, 275), point(600, 350), point(588, 430), point(603, 510), point(600, 530), point(595, 610), point(607, 650), point(603, 690), point(600, 725)];
+  const trunk = trunkStops.flatMap((p, i) => i ? curve(trunkStops[i - 1], point(trunkStops[i - 1].x + 12, trunkStops[i - 1].y + (p.y - trunkStops[i - 1].y) / 3), point(p.x - 12, p.y - (p.y - trunkStops[i - 1].y) / 3), p, 6).slice(1) : [p]);
+  const branchAnchors = [2, 2, 5, 5, 3, 4, 6, 8, 7, 8];
+  const branches = SLOTS.map((p, slot) => {
+    const a = trunkStops[branchAnchors[slot]], dx = p.x - a.x;
+    const bend = slot % 2 ? 28 : -30;
+    return curve(a, point(a.x + dx * .3, a.y + bend), point(p.x - dx * .28, p.y - bend), p);
+  });
+  const NEST = { trunk, branches };
+  function project(p, a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const t = clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1), 0, 1);
+    return point(a.x + dx * t, a.y + dy * t);
+  }
   class Game {
-    constructor(saved, random = Math.random) {
+    constructor(saved, random = Math.random, now = Date.now) {
       this.random = random;
+      this.now = now;
       this.s = this.fresh();
       if (saved) this.restore(saved);
       this.events = [];
     }
     fresh() {
-      return { version: 1, time: 0, food: 25, water: 12, delivered: 0, nextId: 30,
+      return { version: 1, time: 0, food: 25, water: 12, delivered: 0, deliveredWater: 0, nextId: 30,
         foods: [], ants: Array.from({ length: 12 }, (_, i) => this.ant(i)),
         rooms: ['store', 'nursery', 'rest', 'queen'].map((type, slot) => ({ id: slot, slot, type, progress: 100, level: 1, paused: false })),
         upgrades: Object.fromEntries(Object.keys(UPGRADES).map(k => [k, 0])),
         allocation: { gather: 6, scout: 2, dig: 2, care: 2 }, auto: true,
         cooldown: 0, guideCooldown: 0, guide: null, brood: 0, eventClock: 0, event: null,
         ecology: { forage: 18, plan: 20, upkeep: 0 },
-        rock: 390, bridge: false, tasks: {}, composition: {}, settings: { sound: false, hidden: false, paused: false, paths: false, static: false }, savedAt: Date.now() };
+        rock: 390, bridge: false, tasks: {}, composition: {}, settings: { sound: false, hidden: false, paused: false, paths: false, static: false }, savedAt: this.now() };
     }
     ant(id) {
       return { id, name: 'Mravec ' + (id + 1), favorite: false, x: 600, y: 350, angle: 0,
@@ -64,6 +88,72 @@
     get level() { return 1 + this.s.rooms.filter(r => r.progress === 100 && r.id >= 4).length + Math.floor(this.s.delivered / 100); }
     say(message, sound = false) { this.events.push({ message, sound }); }
     roomPoint(r) { return SLOTS[r.slot]; }
+    excavationPoint(room) {
+      const points = NEST.branches[room.slot];
+      const fraction = clamp(room.progress / 70, .035, 1);
+      let length = 0;
+      for (let i = 1; i < points.length; i++) length += dist(points[i - 1], points[i]);
+      let remaining = length * fraction;
+      for (let i = 1; i < points.length; i++) {
+        const a = points[i - 1], b = points[i], segment = dist(a, b);
+        if (remaining <= segment) {
+          const t = segment ? remaining / segment : 0;
+          return point(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+        }
+        remaining -= segment;
+      }
+      return { ...points[points.length - 1] };
+    }
+    tunnels() {
+      const paths = [{ id: 'trunk', points: NEST.trunk, progress: 100 }];
+      for (const r of this.s.rooms) {
+        paths.push({ id: 'room:' + r.slot, slot: r.slot, points: NEST.branches[r.slot], progress: r.progress });
+        if (r.type !== 'tunnel' || r.progress !== 100) continue;
+        const a = SLOTS[r.slot];
+        const other = this.s.rooms.filter(n => n.slot !== r.slot && n.progress === 100 && Math.abs(SLOTS[n.slot].y - a.y) < 5).sort((u, v) => dist(a, SLOTS[u.slot]) - dist(a, SLOTS[v.slot]))[0];
+        if (other) {
+          const b = SLOTS[other.slot], dx = b.x - a.x;
+          paths.push({ id: 'cross:' + r.slot, slot: r.slot, points: curve(a, point(a.x + dx * .3, a.y + 22), point(a.x + dx * .7, b.y + 22), b), progress: 100 });
+        }
+      }
+      return paths;
+    }
+    nestRoute(a, b) {
+      const nodes = [], edges = [], indices = new Map();
+      const node = p => {
+        const key = p.x.toFixed(5) + ',' + p.y.toFixed(5);
+        if (!indices.has(key)) { indices.set(key, nodes.length); nodes.push(p); edges.push([]); }
+        return indices.get(key);
+      };
+      const connect = (u, v) => { const cost = dist(nodes[u], nodes[v]); edges[u].push([v, cost]); edges[v].push([u, cost]); };
+      const segments = [];
+      for (const path of this.tunnels()) for (let i = 1; i < path.points.length; i++) {
+        const u = node(path.points[i - 1]), v = node(path.points[i]);
+        connect(u, v); segments.push([u, v]);
+      }
+      const attach = p => {
+        let best;
+        for (const [u, v] of segments) {
+          const q = project(p, nodes[u], nodes[v]), distance = dist(p, q);
+          if (!best || distance < best.distance) best = { u, v, q, distance };
+        }
+        const n = node(best.q); connect(n, best.u); connect(n, best.v);
+        return n;
+      };
+      const start = attach(a), end = attach(b), costs = Array(nodes.length).fill(Infinity), previous = [], open = [start], visited = new Set();
+      costs[start] = 0;
+      while (open.length) {
+        open.sort((u, v) => costs[v] - costs[u]);
+        const u = open.pop();
+        if (u === end) break;
+        if (visited.has(u)) continue;
+        visited.add(u);
+        for (const [v, cost] of edges[u]) if (costs[u] + cost < costs[v]) { costs[v] = costs[u] + cost; previous[v] = u; open.push(v); }
+      }
+      const path = [];
+      for (let n = end; n !== undefined; n = previous[n]) { path.push({ ...nodes[n] }); if (n === start) break; }
+      return path.reverse().concat([{ ...b }]);
+    }
     // Routes always travel through the entrance and tunnel junctions. Surface
     // obstacles insert a real detour; the leaf bridge removes the pond detour.
     surfaceRoute(a, b) {
@@ -81,16 +171,11 @@
       return nodes;
     }
     route(a, b) {
-      const nodes = [];
-      if (a.y < 220) nodes.push(...this.surfaceRoute(a, point(600, 170)));
-      else nodes.push(point(600, a.y), point(600, 350));
-      if (b.y < 220) nodes.push(point(600, 170), ...this.surfaceRoute(point(600, 170), b));
-      else {
-        // Completed cross tunnels connect the same row directly.
-        const direct = this.s.rooms.some(r => r.type === 'tunnel' && r.progress === 100 && Math.abs(SLOTS[r.slot].y - b.y) < 5);
-        if (direct && Math.abs(a.y - b.y) < 5) return [{ ...b }];
-        nodes.push(point(600, b.y), { ...b });
-      }
+      const entrance = point(600, 170), aboveA = a.y <= 190, aboveB = b.y <= 190;
+      const nodes = aboveA && aboveB ? this.surfaceRoute(a, b)
+        : aboveA ? [...this.surfaceRoute(a, entrance), ...this.nestRoute(entrance, b)]
+        : aboveB ? [...this.nestRoute(a, entrance), ...this.surfaceRoute(entrance, b)]
+        : this.nestRoute(a, b);
       return nodes.filter((p, i) => i === 0 || dist(p, nodes[i - 1]) > 1);
     }
     go(a, destination, state) { a.route = this.route(a, destination); a.state = state; }
@@ -249,7 +334,8 @@
           if (a.cargo) {
             const c = a.cargo, spec = FOODS[c.type];
             const received = Math.min(this.capacity - s.food, c.amount * spec.value);
-            s.food += received; s.water = Math.min(this.waterCapacity, s.water + c.amount * spec.water);
+            const receivedWater = Math.min(this.waterCapacity - s.water, c.amount * spec.water);
+            s.food += received; s.water += receivedWater; s.deliveredWater += receivedWater;
             s.delivered += received; s.composition[c.type] = (s.composition[c.type] || 0) + received;
             if (c.type === 'pizza') s.tasks.pizza = true;
             a.cargo = null; this.say('Náklad doručený do zásobárne.', true);
@@ -290,7 +376,7 @@
         if (a.energy < 25 || a.role === 'rest') { const room = s.rooms.find(r => r.type === 'rest' && r.progress === 100); this.go(a, room ? SLOTS[room.slot] : point(600, 350), 'rest'); return; }
         if (a.role === 'dig') {
           const room = s.rooms.find(r => r.progress < 100 && !r.paused);
-          if (room) { a.target = 'room:' + room.id; this.go(a, SLOTS[room.slot], 'dig'); return; }
+          if (room) { a.target = 'room:' + room.id; this.go(a, this.excavationPoint(room), 'dig'); return; }
           if (s.event?.type === 'branch') { this.go(a, point(900, 170), 'clear'); return; }
         }
         if (a.role === 'care') { const r = s.rooms.find(r => r.type === 'nursery' && r.progress === 100); if (r) { this.go(a, SLOTS[r.slot], 'care'); return; } }
@@ -322,13 +408,13 @@
       const r = this.s.rooms.find(r => r.type === (f.type === 'water' ? 'water' : 'store') && r.progress === 100) || this.s.rooms[0];
       this.go(a, SLOTS[r.slot], 'deliver');
     }
-    triggerEvent() {
-      const types = ['picnic', 'rain', 'branch', 'harvest'], type = types[Math.floor(this.random() * types.length)];
+    triggerEvent(random = this.random) {
+      const types = ['picnic', 'rain', 'branch', 'harvest'], type = types[Math.floor(random() * types.length)];
       const names = { picnic: 'Piknik: na lúke zostala pizza.', rain: 'Jemný dážď: zbieraj čerstvú vodu.', branch: 'Spadnutá vetvička: kopáči môžu uvoľniť cestu.', harvest: 'Bohatá úroda: nové semienka na lúke.' };
       this.s.event = { type, life: 45, work: 0 }; this.say(names[type]);
-      if (type !== 'branch') { const placed = this.s.tasks.placed; this.s.cooldown = 0; this.addFood({ picnic: 'pizza', rain: 'water', harvest: 'seed' }[type], 100 + this.random() * 180); this.s.tasks.placed = placed; }
+      if (type !== 'branch') { const placed = this.s.tasks.placed; this.s.cooldown = 0; this.addFood({ picnic: 'pizza', rain: 'water', harvest: 'seed' }[type], 100 + random() * 180); this.s.tasks.placed = placed; }
     }
-    serialize() { this.s.savedAt = Date.now(); return JSON.stringify(this.s); }
+    serialize() { this.s.savedAt = this.now(); return JSON.stringify(this.s); }
     restore(raw) {
       // Saves are untrusted input. Validate the complete graph before adopting it;
       // corrupt/old saves fall back to a new colony, never poison the animation loop.
@@ -344,7 +430,7 @@
         if (!s.upgrades || !Object.keys(UPGRADES).every(k => integer(s.upgrades[k], 0, 3))) return false;
         if (!s.allocation || !Object.keys(ROLES).every(k => integer(s.allocation[k], 0, 40)) || Object.values(s.allocation).reduce((a, b) => a + b, 0) > s.ants.length) return false;
         const fresh = this.fresh();
-        this.s = { ...fresh, time: s.time, food: s.food, water: s.water, delivered: s.delivered, nextId: Math.max(s.nextId, ...s.ants.map(a => a.id + 1), ...s.foods.map(f => f.id + 1)), rooms: s.rooms,
+        this.s = { ...fresh, time: s.time, food: s.food, water: s.water, delivered: s.delivered, deliveredWater: number(s.deliveredWater, 0, 1e10) ? s.deliveredWater : 0, nextId: Math.max(s.nextId, ...s.ants.map(a => a.id + 1), ...s.foods.map(f => f.id + 1)), rooms: s.rooms,
           foods: s.foods, upgrades: Object.fromEntries(Object.keys(UPGRADES).map(k => [k, s.upgrades[k]])), allocation: Object.fromEntries(Object.keys(ROLES).map(k => [k, s.allocation[k]])), auto: s.auto !== false,
           ants: s.ants.map(a => ({ ...this.ant(a.id), name: a.name, favorite: !!a.favorite, energy: a.energy, cargo: a.cargo || null })),
           rock: number(s.rock, 320, 450) ? s.rock : 390, bridge: !!s.bridge,
@@ -358,5 +444,5 @@
       } catch (_) { return false; }
     }
   }
-  return { Game, FOODS, ROOMS, ROLES, UPGRADES, SLOTS, dist, clamp };
+  return { Game, FOODS, ROOMS, ROLES, UPGRADES, SLOTS, NEST, dist, clamp };
 });

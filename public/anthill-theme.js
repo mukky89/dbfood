@@ -1,173 +1,1030 @@
 (function () {
-  'use strict';
-  if (!window.Anthill) return;
-  const { Game, FOODS, ROOMS, SLOTS } = window.Anthill;
-  const KEY = 'fob_anthill_v1', root = document.documentElement;
-  let saved; try { saved = localStorage.getItem(KEY); } catch (_) {}
-  const game = new Game(saved);
-  if (game.s.settings.static) { game.s.settings.paused = true; game.s.settings.static = false; }
-  if (!saved) game.s.ants.forEach((a, i) => Object.assign(a, SLOTS[i % 4]));
-  let active = false, raf = 0, last = 0, lastDraw = 0, saveTime = 0, uiTime = 0;
-  let zoom = 1, pan = { x: 0, y: 0 }, transform = { x: 0, y: 0, scale: 1 }, drag = null;
-  const selected = null, tool = null, hover = null, guidePoints = [], follow = null;
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const bg = document.createElement('canvas'); bg.id = 'ant-background'; bg.setAttribute('aria-hidden', 'true'); bg.hidden = true;
-  const dock = document.createElement('details'); dock.id = 'ant-dock';
-  dock.innerHTML = '<summary>🐜 Živé pozadie</summary><p>Kolónia sa stará sama o seba.</p><span id="ant-dock-stats"></span><div class="ant-dock-actions"><button type="button" data-action="open">Pozorovať zblízka</button><button type="button" data-action="pause">Pauza</button><button type="button" data-action="hide">Skryť</button></div>';
-  const dialog = document.createElement('dialog'); dialog.id = 'ant-game'; dialog.className = 'ant-observer'; dialog.setAttribute('aria-labelledby', 'ant-title');
-  dialog.innerHTML = '<div class="ant-top"><div><div class="ant-eyebrow">Kolónia žije vlastným životom</div><h2 id="ant-title">Život pod povrchom</h2></div><button type="button" data-action="close" autofocus>Späť na stránku ✕</button></div><div id="ant-metrics" class="ant-metrics"></div><div class="ant-world"><div class="ant-scene-label">STAČÍ SA POZERAŤ</div><canvas id="ant-canvas" tabindex="0" aria-label="Autonómne mravenisko" aria-describedby="ant-help"></canvas><div class="ant-camera"><button type="button" data-action="zoom-out" aria-label="Oddialiť">−</button><button type="button" data-action="zoom-in" aria-label="Priblížiť">+</button><button type="button" data-action="center">Vycentrovať</button><button type="button" data-action="pause">Pauza</button></div></div><div class="ant-bottom"><p id="ant-help">Mravce samy hľadajú jedlo, rozširujú hniezdo a starajú sa o potomstvo. Pohľad posunieš potiahnutím alebo šípkami.</p></div>';
+  "use strict";
+  if (!window.Anthill || !window.ColonyRenderer || !window.ColonyChallenge)
+    return;
+  const { Game, FOODS, ROOMS, ROLES, SLOTS, dist, clamp } = Anthill;
+  const { Challenge, STEP, DURATION, TOTAL_STEPS, TARGET_DELIVERED } =
+    ColonyChallenge;
+  const KEY = "fob_anthill_v1",
+    RUN_KEY = "fob_colony_run_v1";
+  const read = (key) => {
+    try {
+      return localStorage.getItem(key);
+    } catch (_) {
+      return null;
+    }
+  };
+  const saved = read(KEY),
+    sandbox = new Game(saved),
+    reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  if (!saved) {
+    sandbox.s.ants.forEach((a, i) =>
+      Object.assign(a, {
+        x: SLOTS[i % 4].x + (Math.floor(i / 4) - 1) * 18,
+        y: SLOTS[i % 4].y + ((i % 3) - 1) * 8,
+      }),
+    );
+    for (const [type, x] of [
+      ["fruit", 550],
+      ["seed", 240],
+      ["water", 880],
+    ]) {
+      sandbox.s.cooldown = 0;
+      sandbox.addFood(type, x);
+    }
+    sandbox.s.cooldown = 0;
+  }
+  if (sandbox.s.settings.static) {
+    sandbox.s.settings.paused = true;
+    sandbox.s.settings.static = false;
+  }
+  let mode = "sandbox",
+    challenge = null,
+    run = null,
+    runClaimed = false,
+    submitted = false,
+    dailyPaused = false,
+    finishing = false;
+  let active = false,
+    ambient = false,
+    raf = 0,
+    last = 0,
+    lastDraw = 0,
+    accumulator = 0,
+    uiTime = 0,
+    saveTime = 0;
+  let zoom = 1,
+    pan = { x: 0, y: 0 },
+    transform = { x: 0, y: 0, scale: 1 },
+    pointer = null,
+    hover = null,
+    guide = [];
+  let tool = "observe",
+    selected = { kind: "room", id: 3 },
+    speed = 1,
+    originFocus = null,
+    period = "day",
+    requestId = 0,
+    starting = false,
+    submitting = false;
+  let lastMessage = "",
+    oldTheme = document.documentElement.classList.contains("theme-anthill");
+  const bg = document.createElement("canvas");
+  bg.id = "ant-background";
+  bg.setAttribute("aria-hidden", "true");
+  bg.hidden = true;
+  const dock = document.createElement("details");
+  dock.id = "ant-dock";
+  dock.innerHTML =
+    '<summary>🐜 Mravenisko</summary><p>Malý svet pod povrchom.</p><span id="ant-dock-stats"></span><div class="ant-dock-actions"><button type="button" data-action="open">Otvoriť kolóniu</button><button type="button" data-action="pause">Pauza</button><button type="button" data-action="hide">Skryť</button></div>';
+  const dialog = document.createElement("dialog");
+  dialog.id = "ant-game";
+  dialog.className = "ant-terrarium";
+  dialog.setAttribute("aria-labelledby", "ant-title");
+  dialog.innerHTML = `
+  <div class="ant-top"><div class="ant-brand"><span aria-hidden="true">❧</span> dbfood <span class="ant-divider">/</span> mravenisko</div><div class="ant-mode" aria-label="Herný režim"><button type="button" data-mode="sandbox" aria-pressed="true">Moja kolónia</button><button type="button" data-mode="daily" aria-pressed="false">Denná výzva</button></div><button type="button" data-action="close" autofocus>Späť k obedom ↗</button></div>
+  <div class="ant-heading"><div><h2 id="ant-title">Tvoja kolónia</h2><p id="ant-subtitle">Malý svet pod povrchom.</p></div><div id="ant-metrics" class="ant-metrics"><span>Mravce <b id="ant-population"></b></span><span>Potrava <b id="ant-food-count"></b></span><span>Voda <b id="ant-water-count"></b></span><span id="ant-time-label">Deň <b id="ant-day"></b></span></div><button type="button" data-action="scoreboard" class="ant-mobile-board" aria-expanded="false">Rebríček ↓</button></div>
+  <div class="ant-layout"><div class="ant-playarea"><div class="ant-world"><canvas id="ant-canvas" tabindex="0" aria-label="Živé pieskové mravenisko s kráľovnou, potravou a robotnicami" aria-describedby="ant-help"></canvas><div class="ant-scene-label">ŽIVÉ TERÁRIUM <span id="ant-world-state">SANDBOX</span></div><div class="ant-camera"><button type="button" data-action="zoom-out" aria-label="Oddialiť">−</button><span id="ant-zoom">100 %</span><button type="button" data-action="zoom-in" aria-label="Priblížiť">+</button><button type="button" data-action="center">Celý svet</button></div><div id="ant-daily-intro" class="ant-overlay" hidden><div><span class="ant-eyebrow">ROVNAKÝ SVET PRE VŠETKÝCH</span><h3>Tri minúty pre kolóniu</h3><p>Doruč 40 zásob. Máš šesť porcií potravy či vody navyše a rovnakú štartovaciu kolóniu ako ostatní.</p><p class="ant-note">Jedlo: 10 bodov · voda: 5 bodov · misia: +250. Body pribudnú až po doručení.</p><button type="button" data-action="start-daily" class="ant-primary">Spustiť dennú výzvu</button><p id="ant-start-status" role="status"></p></div></div></div>
+  <div class="ant-toolbar" aria-label="Nástroje kolónie"><button type="button" data-tool="food" aria-pressed="false">◒ Pridať jedlo</button><button type="button" data-tool="water" aria-pressed="false">♧ Kvapka vody</button><button type="button" data-tool="build" aria-pressed="false">⌁ Kopať komoru</button><button type="button" data-tool="observe" aria-pressed="true">⌕ Pozorovať</button><button type="button" data-tool="guide" aria-pressed="false">∿ Stopa</button><button type="button" data-action="pause" aria-pressed="false">Pauza</button><label class="ant-speed"><span class="ant-sr-only">Rýchlosť</span><select id="ant-speed"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option></select></label></div>
+  <div id="ant-tool-options" class="ant-tool-options" hidden><label id="ant-food-option">Druh potravy <select id="ant-food-type"><option value="fruit">Kúsok ovocia</option><option value="bread">Omrvinky</option><option value="seed">Semienka</option></select></label><label id="ant-room-option" hidden>Nová komora <select id="ant-room-type"></select></label><span id="ant-tool-instruction"></span><button type="button" data-action="place" id="ant-place">Položiť na označené miesto</button></div>
+  <div class="ant-play-footer"><p id="ant-status" role="status" aria-live="polite">Polož na povrch jedlo a sleduj zberačky.</p><label><input type="checkbox" id="ant-paths"> Zobraziť stopy</label></div><details class="ant-help"><summary>Ovládanie a pravidlá</summary><p id="ant-help">Jedlo a vodu polož na povrch. Kopanie začni na označenom voľnom mieste. V režime Pozorovať klikni na mravca alebo komoru; potiahnutím posunieš pohľad. Koliesko alebo + a − približuje. Šípky na mape posúvajú pohľad alebo miesto nástroja, Enter nástroj použije a Escape ho zruší. Pri odchode z karty sa hra pozastaví.</p><p>Denná výzva trvá 3 minúty. Do rebríčka patrí najlepší výsledok za deň, týždeň sčíta denné maximá. Sandbox sa do rebríčka nezapisuje.</p></details></div>
+  <aside class="ant-sidebar" aria-label="Rebríček a stav kolónie"><section class="ant-scoreboard"><div class="ant-section-title"><h3>Scoreboard</h3><span aria-hidden="true">♜</span></div><p class="ant-note">Najlepšie výpravy kolónie</p><div class="ant-period" aria-label="Obdobie rebríčka"><button type="button" data-period="day" aria-pressed="true">Dnes</button><button type="button" data-period="week" aria-pressed="false">Týždeň</button></div><ol id="ant-ranks"></ol><p id="ant-board-status" role="status">Načítavam výsledky…</p><p id="ant-best" class="ant-note"></p><button type="button" data-action="refresh-board" class="ant-text-button">Obnoviť výsledky</button></section>
+  <section class="ant-queen-card"><div class="ant-section-title"><h3>Kráľovná</h3><button type="button" data-action="queen" aria-label="Priblížiť kráľovnú">⌕</button></div><canvas id="ant-queen-portrait" width="500" height="200" role="img" aria-label="Detail kráľovnej"></canvas><p id="ant-queen-state"></p></section>
+  <section class="ant-objective"><h3>Nakŕm kolóniu</h3><div class="ant-objective-total"><strong id="ant-delivered">0</strong><span>/ 40 zásob</span></div><progress id="ant-progress" max="40" value="0" aria-label="Doručené zásoby"></progress><p id="ant-objective-note" class="ant-note"></p><div id="ant-run-result" hidden><p id="ant-result-message" role="status"></p><button type="button" data-action="submit" class="ant-primary">Uložiť výsledok</button><button type="button" data-action="new-run">Nový pokus</button></div></section>
+  <section class="ant-detail"><h3 id="ant-detail-title">Pod lupou</h3><p id="ant-detail-body"></p><label for="ant-inspect">Vybrať komoru</label><select id="ant-inspect"></select><button type="button" data-action="inspect">Priblížiť výber</button></section></aside></div><div class="ant-bottom"><span>Malé bytosti, veľké príbehy.</span><span id="ant-save-note">Kolónia sa ukladá na tomto zariadení.</span></div>`;
   document.body.append(bg, dock, dialog);
-  const $ = id => document.getElementById('ant-' + id), canvas = $('canvas'), ctx = canvas.getContext('2d'), bgctx = bg.getContext('2d');
-  if (!ctx || !bgctx) { dock.remove(); dialog.remove(); bg.remove(); return; }
-  let originFocus = null;
-  function persist() { try { localStorage.setItem(KEY, game.serialize()); } catch (_) {} }
-  function updateStats() {
-    const s = game.s, building = s.rooms.find(r => r.progress < 100);
-    $('dock-stats').textContent = s.ants.length + ' mravcov · ' + s.rooms.filter(r => r.progress === 100).length + ' komôr' + (building ? ' · stavia sa ' + ROOMS[building.type].name.toLowerCase() : ' · kolónia si žije');
-    $('metrics').textContent = s.ants.length + ' mravcov  ·  ' + Math.floor(s.food) + ' zásob jedla  ·  ' + Math.floor(s.water) + ' zásob vody' + (building ? '  ·  nová komora ' + Math.floor(building.progress) + ' %' : '');
-    for (const b of document.querySelectorAll('#ant-game [data-action=pause], #ant-dock [data-action=pause]')) { b.textContent = s.settings.paused ? 'Pokračovať' : 'Pauza'; b.setAttribute('aria-pressed', String(s.settings.paused)); }
-    dock.querySelector('[data-action=hide]').textContent = s.settings.hidden ? 'Zobraziť' : 'Skryť';
+  const $ = (id) => document.getElementById("ant-" + id),
+    canvas = $("canvas"),
+    ctx = canvas.getContext("2d"),
+    bgctx = bg.getContext("2d");
+  if (!ctx || !bgctx) {
+    bg.remove();
+    dock.remove();
+    dialog.remove();
+    return;
   }
-  function action(name) {
-    if (name === 'open' && !dialog.open) { originFocus = document.activeElement; dialog.showModal(); dock.open = false; dock.hidden = true; resize(); start(); }
-    if (name === 'close') dialog.close();
-    if (name === 'pause') { game.s.settings.paused = !game.s.settings.paused; start(); }
-    if (name === 'hide') { game.s.settings.hidden = !game.s.settings.hidden; sync(); }
-    if (name === 'zoom-in') zoom = Math.min(3, zoom * 1.25);
-    if (name === 'zoom-out') zoom = Math.max(.7, zoom / 1.25);
-    if (name === 'center') { zoom = 1; pan = { x: 0, y: 0 }; }
-    updateStats(); persist(); draw();
+  for (const [key, r] of Object.entries(ROOMS)) {
+    const o = new Option(r.name + " · " + r.cost + " jedla", key);
+    $("room-type").append(o);
   }
-  for (const container of [dock, dialog]) container.addEventListener('click', e => { const b = e.target.closest('[data-action]'); if (b) action(b.dataset.action); });
-  dialog.addEventListener('close', () => { persist(); sync(); if (originFocus?.isConnected) originFocus.focus(); });
-  canvas.addEventListener('pointerdown', e => { if (e.button !== 0) return; canvas.focus(); canvas.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY, pan: { ...pan } }; });
-  canvas.addEventListener('pointermove', e => { if (!drag) return; pan = { x: drag.pan.x + e.clientX - drag.x, y: drag.pan.y + e.clientY - drag.y }; draw(); });
-  for (const event of ['pointerup', 'pointercancel']) canvas.addEventListener(event, () => { drag = null; });
-  canvas.addEventListener('wheel', e => { e.preventDefault(); action(e.deltaY < 0 ? 'zoom-in' : 'zoom-out'); }, { passive: false });
-  canvas.addEventListener('keydown', e => {
-    const move = { ArrowLeft: [35, 0], ArrowRight: [-35, 0], ArrowUp: [0, 35], ArrowDown: [0, -35] }[e.key];
-    if (move) { e.preventDefault(); pan.x += move[0]; pan.y += move[1]; draw(); }
-    if (['+', '=', '-'].includes(e.key)) { e.preventDefault(); action(e.key === '-' ? 'zoom-out' : 'zoom-in'); }
+  const current = () =>
+    mode === "daily" && challenge ? challenge.game : sandbox;
+  const fmt = (n) => Math.floor(n).toLocaleString("sk-SK");
+  const clock = (n) =>
+    String(Math.floor(n / 60)).padStart(2, "0") +
+    ":" +
+    String(Math.floor(n % 60)).padStart(2, "0");
+  function message(text) {
+    if (text !== lastMessage) {
+      $("status").textContent = text;
+      lastMessage = text;
+    }
+  }
+  function storedRun(storage) {
+    try {
+      return JSON.parse(window[storage].getItem(RUN_KEY));
+    } catch (_) {
+      return null;
+    }
+  }
+  function clearRunCheckpoint(id) {
+    if (!id) return;
+    for (const storage of ["sessionStorage", "localStorage"]) {
+      try {
+        if (storedRun(storage)?.run?.id === id)
+          window[storage].removeItem(RUN_KEY);
+      } catch (_) {}
+    }
+  }
+  function persist({ replaceGlobal = false } = {}) {
+    try {
+      localStorage.setItem(KEY, sandbox.serialize());
+    } catch (_) {
+      $("save-note").textContent =
+        "Úložisko nie je dostupné. Kolónia žije do zatvorenia stránky.";
+    }
+    // A lunch/admin tab may read the latest run, but owns no checkpoint until
+    // its user actually enters the challenge. Each playing tab keeps its run.
+    if (!run || !challenge || !runClaimed) return;
+    const checkpoint = {
+      version: 1,
+      run,
+      frame: challenge.frame,
+      actions: challenge.actions,
+      submitted,
+    };
+    const encoded = JSON.stringify(checkpoint);
+    try {
+      sessionStorage.setItem(RUN_KEY, encoded);
+    } catch (_) {
+      $("save-note").textContent = "Obnovu pokusu v tejto karte sa nepodarilo uložiť.";
+    }
+    try {
+      const previous = storedRun("localStorage");
+      const advances =
+        previous?.run?.id === run.id &&
+        previous.frame <= checkpoint.frame &&
+        (!previous.submitted || checkpoint.submitted) &&
+        Array.isArray(previous.actions) &&
+        previous.actions.length <= checkpoint.actions.length &&
+        previous.actions.every(
+          (entry, i) => JSON.stringify(entry) === JSON.stringify(checkpoint.actions[i]),
+        );
+      // Only a successful explicit start may replace another run (or a cleared
+      // checkpoint). Older tabs cannot resurrect a discarded global run.
+      if (replaceGlobal || advances) localStorage.setItem(RUN_KEY, encoded);
+    } catch (_) {
+      $("save-note").textContent = "Pokus sa ukladá iba v tejto karte.";
+    }
+  }
+  function restoreRun() {
+    for (const storage of ["sessionStorage", "localStorage"]) {
+      try {
+        const data = storedRun(storage);
+        if (data?.run?.expiresAt < Date.now()) {
+          clearRunCheckpoint(data.run.id);
+          continue;
+        }
+        if (
+          !data ||
+          data.version !== 1 ||
+          !Number.isInteger(data.frame) ||
+          data.frame < 0 ||
+          data.frame > TOTAL_STEPS ||
+          !Array.isArray(data.actions) ||
+          data.actions.length > 120 ||
+          !Number.isInteger(data.run?.seed) ||
+          typeof data.run.id !== "string" ||
+          !/^[a-zA-Z0-9-]{16,100}$/.test(data.run.id) ||
+          !Number.isFinite(data.run.expiresAt) ||
+          data.run.expiresAt < Date.now()
+        )
+          continue;
+        const restored = new Challenge(data.run.seed);
+        for (const entry of data.actions) {
+          if (
+            !Number.isInteger(entry.frame) ||
+            entry.frame < restored.frame ||
+            entry.frame > data.frame
+          )
+            throw new Error("Invalid saved action frame");
+          restored.step(entry.frame - restored.frame);
+          const { frame, ...command } = entry;
+          if (restored.dispatch(command)) throw new Error("Invalid saved action");
+        }
+        restored.step(data.frame - restored.frame);
+        challenge = restored;
+        run = data.run;
+        runClaimed = storage === "sessionStorage";
+        submitted = data.submitted === true;
+        return;
+      } catch (_) {
+        /* Try the shared fallback when this tab's checkpoint is invalid. */
+      }
+    }
+  }
+  restoreRun();
+  async function request(url, options = {}) {
+    const controller = new AbortController(),
+      timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options,
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json", ...options.headers },
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        const error = new Error(data.error || "Server nie je dostupný.");
+        error.data = data;
+        throw error;
+      }
+      return data;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  async function leaderboard() {
+    const id = ++requestId;
+    $("board-status").textContent = "Načítavam výsledky…";
+    try {
+      const data = await request("/api/colony?period=" + period);
+      if (id !== requestId) return;
+      $("ranks").replaceChildren();
+      for (const row of data.entries || []) {
+        const li = document.createElement("li");
+        if (row.isMe) li.className = "ant-me";
+        for (const [cls, text] of [
+          ["ant-rank", row.rank],
+          ["ant-player", row.name + (row.isMe ? " · ty" : "")],
+          ["ant-score", fmt(row.score)],
+        ]) {
+          const span = document.createElement("span");
+          span.className = cls;
+          span.textContent = text;
+          li.append(span);
+        }
+        $("ranks").append(li);
+      }
+      $("board-status").textContent = data.entries?.length
+        ? ""
+        : "Zatiaľ žiadny výsledok. Zahraj si prvú dennú výzvu.";
+      $("best").textContent = data.me
+        ? "Tvoje poradie: " +
+          data.me.rank +
+          ". · " +
+          fmt(data.me.score) +
+          " bodov"
+        : "Do poradia sa počíta najlepší denný výsledok.";
+    } catch (_) {
+      if (id === requestId) {
+        $("ranks").replaceChildren();
+        $("best").textContent = "";
+        $("board-status").textContent =
+          "Rebríček sa nepodarilo načítať. Sandbox môžeš hrať ďalej.";
+      }
+    }
+  }
+  async function startDaily() {
+    if (starting) return;
+    starting = true;
+    $("start-status").textContent = "Pripravujem spoločnú mapu…";
+    update();
+    try {
+      const name =
+        (read("fantozzi_user") || "Pozorovateľ").trim().slice(0, 30) ||
+        "Pozorovateľ";
+      const data = await request("/api/colony/runs", {
+        method: "POST",
+        body: JSON.stringify({ name }),
+      });
+      run = data;
+      runClaimed = true;
+      challenge = new Challenge(data.seed);
+      submitted = false;
+      finishing = false;
+      dailyPaused = false;
+      accumulator = 0;
+      $("start-status").textContent = "";
+      if (mode === "daily" && dialog.open) {
+        setTool("observe");
+        resetCamera();
+        message("Výzva začala. Zásoby sa počítajú až po doručení.");
+      }
+      persist({ replaceGlobal: true });
+    } catch (error) {
+      $("start-status").textContent =
+        error.data?.error || "Výzvu sa nepodarilo spustiť. Skús to znova.";
+    } finally {
+      starting = false;
+      update();
+      start();
+    }
+  }
+  async function submit() {
+    if (!challenge?.finished || !run || submitting || submitted) return;
+    submitting = true;
+    $("result-message").textContent = "Overujem výpravu a ukladám výsledok…";
+    update();
+    try {
+      const data = await request(
+        "/api/colony/runs/" + encodeURIComponent(run.id) + "/finish",
+        {
+          method: "POST",
+          body: JSON.stringify({ actions: challenge.actions }),
+        },
+      );
+      submitted = true;
+      $("result-message").textContent =
+        "Uložené: " +
+        fmt(data.score) +
+        " bodov." +
+        (data.improved
+          ? " Nový denný rekord!"
+          : " Tvoj lepší výsledok zostáva.");
+      persist();
+      leaderboard();
+    } catch (error) {
+      if (error.data?.code === "RUN_FINISHED") {
+        submitted = true;
+        $("result-message").textContent = "Výsledok je už uložený v rebríčku.";
+        persist();
+        leaderboard();
+      } else
+        $("result-message").textContent =
+          error.data?.code === "RUN_TOO_EARLY"
+            ? "Uloženie skús o " +
+              Math.max(1, Math.ceil((error.data.remainingMs || 1000) / 1000)) +
+              " s. Čas výzvy sa ešte overuje."
+            : "Výsledok zatiaľ nie je uložený. " +
+              (error.data?.error || "Skontroluj pripojenie a skús znova.");
+    } finally {
+      submitting = false;
+      update();
+    }
+  }
+  function detail() {
+    const s = current().s;
+    if (selected?.kind === "ant") {
+      const a = s.ants.find((a) => a.id === selected.id);
+      $("detail-title").textContent = a?.name || "Mravec";
+      $("detail-body").textContent = a
+        ? (ROLES[a.role] || "Odpočinok") +
+          " · energia " +
+          Math.round(a.energy) +
+          " %" +
+          (a.cargo
+            ? " · nesie " + FOODS[a.cargo.type].name.toLowerCase()
+            : " · bez nákladu")
+        : "";
+    } else if (selected?.kind === "food") {
+      const f = s.foods.find((f) => f.id === selected.id);
+      $("detail-title").textContent = f
+        ? FOODS[f.type].name
+        : "Potrava pozbieraná";
+      $("detail-body").textContent = f
+        ? f.amount +
+          " porcií · " +
+          (f.discovered ? "zberačky poznajú cestu" : "čaká na objavenie")
+        : "Zberačky odniesli celý zdroj.";
+    } else {
+      const r = s.rooms.find((r) => r.id === selected?.id);
+      $("detail-title").textContent = r
+        ? r.type === "queen"
+          ? "Komora kráľovnej"
+          : ROOMS[r.type].name
+        : "Pod lupou";
+      $("detail-body").textContent = r
+        ? r.type === "queen"
+          ? "Rast kolónie potrebuje potravu, vodu a miesto v liahni."
+          : r.progress < 100
+            ? "Kopáči vynášajú piesok. Dokončené " +
+              Math.floor(r.progress) +
+              " %."
+            : "Úroveň " + r.level + " · " + ROOMS[r.type].benefit
+        : "Klikni na mravca alebo komoru.";
+    }
+    const key = s.rooms.map((r) => r.id + ":" + r.type).join(",");
+    if ($("inspect").dataset.rooms !== key) {
+      const old = $("inspect").value;
+      $("inspect").replaceChildren(
+        ...s.rooms.map(
+          (r) =>
+            new Option(
+              r.type === "queen" ? "Kráľovná" : ROOMS[r.type].name,
+              r.id,
+            ),
+        ),
+      );
+      $("inspect").value = s.rooms.some((r) => String(r.id) === old)
+        ? old
+        : "3";
+      $("inspect").dataset.rooms = key;
+    }
+  }
+  function update() {
+    if (run && !submitted && !submitting && run.expiresAt < Date.now()) {
+      clearRunCheckpoint(run.id);
+      run = null;
+      runClaimed = false;
+      challenge = null;
+      finishing = false;
+      $("start-status").textContent =
+        "Predchádzajúci pokus vypršal. Spusti novú výzvu.";
+    }
+    const g = current(),
+      s = g.s,
+      daily = mode === "daily";
+    $("population").textContent = s.ants.length;
+    $("food-count").textContent = fmt(s.food);
+    $("water-count").textContent = fmt(s.water);
+    $("time-label").firstChild.textContent = daily ? "Zostáva " : "Deň ";
+    $("day").textContent = daily
+      ? clock(
+          challenge ? Math.max(0, DURATION - challenge.frame * STEP) : DURATION,
+        )
+      : 1 + Math.floor(s.time / 180);
+    $("title").textContent = daily ? "Denná výzva" : "Tvoja kolónia";
+    $("subtitle").textContent = daily
+      ? challenge
+        ? fmt(challenge.score) +
+          " bodov · " +
+          challenge.budget +
+          " porcií navyše"
+        : "Rovnaký štart. Tvoja stratégia."
+      : "Malý svet pod povrchom.";
+    $("world-state").textContent = daily ? "DENNÁ VÝZVA" : "SANDBOX";
+    for (const b of dialog.querySelectorAll("[data-mode]"))
+      b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
+    for (const b of dialog.querySelectorAll("[data-tool]")) {
+      b.setAttribute("aria-pressed", String(b.dataset.tool === tool));
+      b.disabled = daily && (!challenge || challenge.finished);
+    }
+    for (const b of dialog.querySelectorAll("[data-period]"))
+      b.setAttribute("aria-pressed", String(b.dataset.period === period));
+    for (const b of document.querySelectorAll(
+      "#ant-game [data-action=pause], #ant-dock [data-action=pause]",
+    )) {
+      const paused = b.closest("#ant-dock")
+        ? sandbox.s.settings.paused
+        : daily
+          ? dailyPaused
+          : s.settings.paused;
+      b.textContent = paused ? "Pokračovať" : "Pauza";
+      b.setAttribute("aria-pressed", String(paused));
+      b.disabled = !!(
+        b.closest("#ant-game") &&
+        daily &&
+        (!challenge || challenge.finished)
+      );
+    }
+    dock.querySelector("[data-action=hide]").textContent = sandbox.s.settings
+      .hidden
+      ? "Zobraziť"
+      : "Skryť";
+    $("dock-stats").textContent =
+      sandbox.s.ants.length +
+      " mravcov · " +
+      sandbox.s.rooms.filter((r) => r.progress === 100).length +
+      " komôr";
+    $("daily-intro").hidden = !daily || !!challenge;
+    dialog.querySelector("[data-action=start-daily]").disabled = starting;
+    $("speed").disabled = daily;
+    $("speed").value = daily ? "1" : String(speed);
+    $("paths").checked = !!s.settings.paths;
+    $("queen-state").textContent =
+      s.food < 8
+        ? "◉ Kolónia potrebuje potravu"
+        : s.water < 2
+          ? "◉ Kolónia potrebuje vodu"
+          : "● V bezpečí · starostlivosť o liaheň";
+    $("delivered").textContent = fmt(s.delivered);
+    $("progress").value = Math.min(TARGET_DELIVERED, s.delivered);
+    $("objective-note").textContent =
+      s.delivered >= TARGET_DELIVERED
+        ? "Misia splnená. Pokračuj v zbieraní zásob."
+        : "Robotnice musia zásoby priniesť do hniezda.";
+    $("run-result").hidden = !daily || !challenge?.finished;
+    const submitButton = dialog.querySelector("[data-action=submit]");
+    submitButton.disabled = submitting || submitted;
+    submitButton.textContent = submitted
+      ? "Výsledok uložený"
+      : submitting
+        ? "Ukladám…"
+        : "Uložiť výsledok";
+    $("tool-options").hidden =
+      tool === "observe" || (daily && (!challenge || challenge.finished));
+    $("food-option").hidden = tool !== "food";
+    $("room-option").hidden = tool !== "build";
+    $("place").hidden = tool === "guide";
+    $("place").textContent =
+      tool === "build"
+        ? "Začať kopať označenú komoru"
+        : "Položiť na označené miesto";
+    $("tool-instruction").textContent =
+      {
+        food: "Klikni na voľný povrch.",
+        water: "Klikni na voľný povrch.",
+        build: "Vyber označené miesto pod zemou.",
+        guide: "Potiahni krátku stopu po povrchu. Šípky + Enter fungujú tiež.",
+      }[tool] || "";
+    detail();
+    if (daily && challenge?.finished && !finishing) {
+      finishing = true;
+      message("Výprava dokončená: " + fmt(challenge.score) + " bodov.");
+      $("result-message").textContent = submitted
+        ? "Tento výsledok je už uložený."
+        : "Výprava dokončená.";
+      persist();
+      if (!submitted) submit();
+    }
+  }
+  function command(data) {
+    if (mode === "daily" && (!challenge || challenge.finished))
+      return "Najprv spusti dennú výzvu.";
+    const g = current();
+    const error =
+      mode === "daily"
+        ? challenge.dispatch(data)
+        : data.type === "food"
+          ? g.addFood(data.food, data.x)
+          : data.type === "build"
+            ? g.build(data.room, data.slot)
+            : g.setGuide(data.points);
+    if (!error) {
+      persist();
+      update();
+      draw();
+    }
+    return error;
+  }
+  function useTool(p) {
+    const g = current();
+    if (tool === "food" || tool === "water") {
+      const error =
+        p.y < 90 || p.y > 210
+          ? "Jedlo a vodu polož na povrch."
+          : command({
+              type: "food",
+              food: tool === "water" ? "water" : $("food-type").value,
+              x: Math.round(p.x),
+            });
+      message(
+        error ||
+          "Zdroj je na povrchu. Prieskumníci ho objavia a zberačky odnesú zásoby.",
+      );
+    } else if (tool === "build") {
+      const slot = SLOTS.findIndex((s, i) => i >= 4 && dist(s, p) < 85);
+      message(
+        command({ type: "build", room: $("room-type").value, slot }) ||
+          "Kopáči začali pracovať. Sleduj, ako vynášajú piesok.",
+      );
+    } else if (tool === "observe") {
+      const radius = Math.max(16, 14 / transform.scale),
+        a = g.s.ants.find((a) => dist(a, p) < radius),
+        f = g.s.foods.find((f) => dist(f, p) < radius + 10),
+        r = g.s.rooms.find((r) => dist(SLOTS[r.slot], p) < 80);
+      selected = a
+        ? { kind: "ant", id: a.id }
+        : f
+          ? { kind: "food", id: f.id }
+          : r
+            ? { kind: "room", id: r.id }
+            : null;
+      detail();
+      draw();
+    }
+  }
+  function setTool(value) {
+    tool = value;
+    guide = [];
+    hover =
+      value === "build"
+        ? SLOTS.find(
+            (p, i) => i >= 4 && !current().s.rooms.some((r) => r.slot === i),
+          )
+        : { x: 480, y: 170 };
+    hover = hover ? { ...hover } : null;
+    update();
+    draw();
+  }
+  function resetCamera() {
+    const size = fit(canvas);
+    zoom =
+      innerWidth <= 760 && size.w
+        ? Math.min(2.6, Math.max(1, size.h / 780 / (size.w / 1200)))
+        : 1;
+    pan = { x: 0, y: 0 };
+  }
+  function setMode(value) {
+    if (value === mode) return;
+    mode = value;
+    if (mode === "daily" && run && challenge) {
+      runClaimed = true;
+      persist();
+    }
+    accumulator = 0;
+    last = 0;
+    selected = { kind: "room", id: 3 };
+    resetCamera();
+    setTool("observe");
+    start();
+    message(
+      mode === "daily"
+        ? challenge
+          ? "Pokračuješ v dennej výzve."
+          : "Výzva čaká na spustenie."
+        : "Tvoja uložená kolónia pokračuje.",
+    );
+  }
+  function inspectRoom(id) {
+    const r = current().s.rooms.find((r) => r.id === id);
+    if (!r) return;
+    selected = { kind: "room", id };
+    zoom = 2;
+    const size = fit(canvas),
+      scale = Math.min(size.w / 1200, size.h / 780) * zoom;
+    pan = {
+      x: (600 - SLOTS[r.slot].x) * scale,
+      y: (390 - SLOTS[r.slot].y) * scale,
+    };
+    setTool("observe");
+  }
+  function action(name, fromDock = false) {
+    if (name === "open" && !dialog.open) {
+      originFocus = document.activeElement;
+      dialog.showModal();
+      document.body.classList.add("colony-open");
+      dock.open = false;
+      resetCamera();
+      sync();
+      leaderboard();
+      ColonyRenderer.portrait($("queen-portrait"));
+    }
+    if (name === "close") dialog.close();
+    if (name === "pause") {
+      if (mode === "daily" && !fromDock) dailyPaused = !dailyPaused;
+      else sandbox.s.settings.paused = !sandbox.s.settings.paused;
+      start();
+    }
+    if (name === "hide") {
+      sandbox.s.settings.hidden = !sandbox.s.settings.hidden;
+      sync();
+    }
+    if (name === "zoom-in") zoom = Math.min(3, zoom * 1.2);
+    if (name === "zoom-out") zoom = Math.max(0.75, zoom / 1.2);
+    if (name === "center") {
+      zoom = 1;
+      pan = { x: 0, y: 0 };
+    }
+    if (name === "place" && hover) useTool(hover);
+    if (name === "queen") inspectRoom(3);
+    if (name === "inspect") inspectRoom(Number($("inspect").value));
+    if (name === "start-daily") startDaily();
+    if (name === "submit") submit();
+    if (name === "refresh-board") leaderboard();
+    if (name === "new-run" && challenge?.finished && !submitting) {
+      clearRunCheckpoint(run?.id);
+      challenge = null;
+      run = null;
+      runClaimed = false;
+      submitted = false;
+      finishing = false;
+      update();
+    }
+    if (name === "scoreboard") {
+      const visible = dialog.classList.toggle("ant-show-sidebar");
+      dialog
+        .querySelector("[data-action=scoreboard]")
+        .setAttribute("aria-expanded", String(visible));
+      if (visible)
+        dialog
+          .querySelector(".ant-sidebar")
+          .scrollIntoView({
+            behavior: reduced.matches ? "instant" : "smooth",
+            block: "start",
+          });
+    }
+    update();
+    persist();
+    draw();
+  }
+  for (const container of [dock, dialog])
+    container.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b || b.disabled) return;
+      if (b.dataset.action) action(b.dataset.action, container === dock);
+      if (b.dataset.mode) setMode(b.dataset.mode);
+      if (b.dataset.tool) setTool(b.dataset.tool);
+      if (b.dataset.period) {
+        period = b.dataset.period;
+        update();
+        leaderboard();
+      }
+    });
+  document
+    .getElementById("colony-open")
+    ?.addEventListener("click", () => action("open"));
+  $("speed").addEventListener("change", () => {
+    speed = [1, 2, 3].includes(Number($("speed").value))
+      ? Number($("speed").value)
+      : 1;
   });
-  function fit(c) {const r=c.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);if(c.width!==Math.round(r.width*dpr)||c.height!==Math.round(r.height*dpr)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);}return {w:r.width,h:r.height,dpr};}
-  function resize(){fit(bg);if(dialog.open)fit(canvas);draw();}
-  const observer=new ResizeObserver(resize);observer.observe(dialog.querySelector('.ant-world'));window.addEventListener('resize',resize);
-  function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();}
-  function line(c,points,color,width,dash=[]){c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.setLineDash(dash);c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();c.setLineDash([]);}
-  function label(c,text,x,y,color='#e8d4ad',size=12){c.fillStyle=color;c.font=`${size}px "Segoe UI",sans-serif`;c.textAlign='center';c.fillText(text,x,y);}
-  function antShape(c,a,time,queen=false){
-    c.save();c.translate(a.x,a.y);c.rotate(a.angle||0);if(!queen)c.translate(0,(a.id%3-1)*3);const sc=queen?2.1:1;c.scale(sc,sc);
-    const step=Math.sin(time*17+a.id)*2.5,body=a.favorite?'#845c25':'#382b20';
-    for(let side of [-1,1])for(let i=0;i<3;i++)line(c,[{x:i*4-5,y:side*2},{x:i*4-8+step*(i%2?1:-1),y:side*6},{x:i*5-7+step,y:side*10}],'#3a2b1c',1.2);
-    ellipse(c,-7,0,6,4.2,body);ellipse(c,0,0,3.7,2.8,body);ellipse(c,6,0,3.8,3.4,body);
-    line(c,[{x:8,y:-2},{x:12,y:-6},{x:15,y:-5}],'#382b20',1);line(c,[{x:8,y:2},{x:12,y:6},{x:15,y:5}],'#382b20',1);
-    ellipse(c,7,-1,1,.8,'#f4d49a');
-    if(a.cargo){c.rotate(-(a.angle||0));label(c,FOODS[a.cargo.type].icon,0,-10,'#fff',15);}
-    if(a.state==='dirt')ellipse(c,12,0,4,3,'#a78355');c.restore();
-  }
-  function drawScene(c,w,h,isBackground){
-    const s=game.s,base=Math.min(w/1200,h/800),scale=base*(isBackground?Math.max(1,w/1200/base):zoom);
-    let tx=(w-1200*scale)/2+(isBackground?0:pan.x),ty=(h-800*scale)/2+(isBackground?0:pan.y);
-    if(!isBackground&&follow!==null){const a=s.ants.find(a=>a.id===follow);if(a){tx=w/2-a.x*scale;ty=h/2-a.y*scale;}}
-    if(!isBackground)transform={x:tx,y:ty,scale};
-    c.clearRect(0,0,w,h);c.fillStyle='#6e5138';c.fillRect(0,0,w,h);c.save();c.translate(tx,ty);c.scale(scale,scale);
-    const sky=c.createLinearGradient(0,0,0,210);sky.addColorStop(0,'#e4e5b8');sky.addColorStop(1,'#9dac6d');c.fillStyle=sky;c.fillRect(-2000,-2000,5200,2200);
-    const soil=c.createLinearGradient(0,195,0,850);soil.addColorStop(0,'#8a6848');soil.addColorStop(.3,'#785639');soil.addColorStop(1,'#493c2e');c.fillStyle=soil;c.fillRect(-2000,195,5200,2600);
-    line(c,[point(0,197),point(250,195),point(490,200),point(700,193),point(1200,198)],'#627749',11);
-    // Deterministic texture avoids visual noise and random work per animation frame.
-    for(let i=0;i<190;i++){const x=(i*137.3)%1200,y=218+(i*91.7)%590;ellipse(c,x,y,1+(i%4),1+(i%2),i%2?'#c29d6728':'#2c251c27');}
-    for(let i=0;i<47;i++){const x=i*27+4;line(c,[point(x,193),point(x-5,181-i%9),point(x+1,186)],'#4e683d',2);}
-    for(let i=0;i<9;i++){const x=i*143+22;line(c,[point(x,203),point(x+13,232),point(x+8,265),point(x+30,300)],'#4d402e',2);line(c,[point(x+12,238),point(x-9,250)],'#4d402e',1.5);}
-    const paths=[[point(600,179),point(600,690)]];
-    for(const r of s.rooms){const p=SLOTS[r.slot];if(r.progress===100)paths.push([point(600,p.y),p]);else{line(c,[point(600,p.y),p],'#c6a87866',17,[5,10]);paths.push([point(600,p.y),point(600+(p.x-600)*r.progress/100,p.y)]);}}
-    for(const path of paths){line(c,path,'#4c3d2c',31);line(c,path,'#c6a878',23);line(c,path,'#ddbd8844',13);}
-    for(const r of s.rooms){
-      const p=SLOTS[r.slot],built=r.progress===100;
-      if(r.type==='tunnel'){line(c,[point(200,p.y),point(1040,p.y)],built?'#c6a878':'#ba9e7377',built?24:12,built?[]:[8,10]);}
-      ellipse(c,p.x,p.y,87,57,'#493c2d');ellipse(c,p.x,p.y,82,52,built?'#d4b782':'#90704b');
-      ellipse(c,p.x,p.y+15,74,32,built?'#c2a16c':'#806242');
-      if(selected?.kind==='room'&&selected.id===r.id&&!isBackground){c.strokeStyle='#f8dc82';c.lineWidth=3;c.beginPath();c.ellipse(p.x,p.y,90,60,0,0,Math.PI*2);c.stroke();}
-      if(!built){label(c,Math.floor(r.progress)+' %',p.x,p.y+5,'#fff3d5',18);label(c,r.paused?'Pozastavené':'Kopeme…',p.x,p.y+24,'#f2d9a9',11);}
-      else if(r.type==='store'){for(let i=0;i<Math.min(22,Math.ceil(s.food/4));i++)ellipse(c,p.x-40+(i%7)*12,p.y+18-Math.floor(i/7)*9,5,4,['#b57538','#e1b34f','#8b7141'][i%3]);}
-      else if(r.type==='nursery'){for(let i=0;i<8;i++)ellipse(c,p.x-24+(i%4)*15,p.y+7-Math.floor(i/4)*10,5,8,'#f5e9c4');}
-      else if(r.type==='queen')antShape(c,{x:p.x,y:p.y,id:0,angle:-.3},s.time,true);
-      else if(r.type==='rest'){for(let i=0;i<5;i++)ellipse(c,p.x-40+i*20,p.y+13,12,5,'#829256');}
-      else if(r.type==='water'){ellipse(c,p.x,p.y+10,50,16,'#679ba3');ellipse(c,p.x-10,p.y+6,26,5,'#b2d0c0');}
-      label(c,(ROOMS[r.type]?.name||'Kráľovná').toUpperCase(),p.x,p.y+77,'#e8d9b8',10);
-      if(r.level>1)label(c,'✦'.repeat(r.level),p.x,p.y-35,'#fff0a2',12);
-      if(s.tasks.pizza){ellipse(c,p.x-70,p.y-12,4,7,'#ffda7d');ellipse(c,p.x+70,p.y-12,4,7,'#ffda7d');}
+  $("paths").addEventListener("change", () => {
+    current().s.settings.paths = $("paths").checked;
+    persist();
+    draw();
+  });
+  $("food-type").addEventListener("change", draw);
+  $("room-type").addEventListener("change", draw);
+  dialog.addEventListener("close", () => {
+    document.body.classList.remove("colony-open");
+    pointer = null;
+    guide = [];
+    accumulator = 0;
+    persist();
+    sync();
+    if (originFocus?.isConnected) originFocus.focus();
+  });
+  dialog.addEventListener("cancel", (e) => {
+    if (tool !== "observe") {
+      e.preventDefault();
+      setTool("observe");
     }
-    ellipse(c,600,181,38,12,'#7e6742');ellipse(c,600,181,20,8,'#302e23');
-    ellipse(c,s.rock,166,26,14,'#768071');ellipse(c,s.rock-5,160,18,9,'#a4ac91');
-    ellipse(c,770,176,49,10,'#8eb5b0');line(c,[point(743,174),point(776,174)],'#c9dacc',2);
-    if(s.bridge){ellipse(c,770,163,56,9,'#6a8443');line(c,[point(720,163),point(820,163)],'#c1c982',2);}
-    if(s.event?.type==='branch')line(c,[point(900,165),point(960,181)],'#665036',9);
-    if(s.event?.type==='rain')for(let i=0;i<30;i++){const x=(i*43)%1200,y=(s.time*120+i*29)%180;line(c,[point(x,y),point(x-4,y+12)],'#e0efe088',1.5);}
-    if(s.tasks.delivered){line(c,[point(115,178),point(115,157)],'#ecd3a0',5);ellipse(c,115,155,17,8,'#b75f37');ellipse(c,110,152,3,2,'#fae6b7');ellipse(c,121,153,3,2,'#fae6b7');}
-    if(s.tasks.built)for(let i=0;i<6;i++){const x=1010+i*15;line(c,[point(x,190),point(x,175)],'#506e3e',2);ellipse(c,x,173,4,4,i%2?'#e2ad69':'#e5d1a6');}
-    if(s.upgrades.storage)for(let i=0;i<s.upgrades.storage;i++)label(c,'▣',SLOTS[0].x-50+i*15,SLOTS[0].y+30,'#80522c',17);
-    if(s.upgrades.speed)line(c,[point(90,189),point(1120,189)],'#b9bb86',s.upgrades.speed+1,[3,9]);
-    if(!isBackground&&s.settings.paths){for(const f of s.foods)if(f.trail>.03)line(c,[point(600,350),point(600,170),...game.surfaceRoute(point(600,170),f)],`rgba(243,213,107,${f.trail*.75})`,2+s.upgrades.traffic,[4,7]);}
-    if(!isBackground&&s.guide)line(c,s.guide.points,`rgba(186,238,153,${s.guide.life/25})`,4,[4,6]);
-    for(const f of s.foods){label(c,FOODS[f.type].icon,f.x,158,'#fff',25);if(!isBackground){label(c,String(f.amount),f.x,119,'#344b30',10);if(selected?.kind==='food'&&selected.id===f.id)ellipse(c,f.x,185,17,3,'#f6da78');}}
-    for(const a of s.ants){if(selected?.kind==='ant'&&selected.id===a.id&&!isBackground){c.strokeStyle='#f8dd79';c.lineWidth=2;c.beginPath();c.arc(a.x,a.y,15,0,Math.PI*2);c.stroke();}antShape(c,a,a.route.length?s.time:0);}
-    if(!isBackground&&tool?.startsWith('build:'))for(let i=4;i<SLOTS.length;i++)if(!s.rooms.some(r=>r.slot===i)){const p=SLOTS[i];c.strokeStyle=hover&&dist(hover,p)<80?'#fff0a4':'#dbd1a388';c.lineWidth=2;c.setLineDash([6,7]);c.beginPath();c.ellipse(p.x,p.y,80,50,0,0,Math.PI*2);c.stroke();c.setLineDash([]);label(c,'+ MIESTO '+(i-3),p.x,p.y+5,'#fff1c8',12);}
-    if(!isBackground&&hover&&tool?.startsWith('food:')){const type=tool.split(':')[1],error=hover.y<100||hover.y>205?'Polož na povrch':game.foodError(type,hover.x);c.globalAlpha=.75;ellipse(c,hover.x,hover.y+6,22,7,error?'#a84936':'#547a36');label(c,FOODS[type].icon,hover.x,hover.y,'#fff',30);label(c,error?'Sem nie — vyber voľné miesto':'✓ Položiť porciu',hover.x,hover.y+28,error?'#ffd9ba':'#f3f8d4',12);c.globalAlpha=1;}
-    if(guidePoints.length)line(c,guidePoints,'#d2f3a4',4,[3,4]);
-    c.restore();
+  });
+  function world(e) {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left - transform.x) / transform.scale,
+      y: (e.clientY - r.top - transform.y) / transform.scale,
+    };
   }
-  function point(x,y){return {x,y};}
-  function drawAmbient(c,w,h) {
-    const s=game.s, gutter=Math.max(34,(w-Math.min(1100,w-32))/2), sy=Math.max(.7,h/800);
-    const left=gutter*.5, right=w-left;
-    const mapX=x=>x<560?left+(x-350)*gutter/650:x>640?right+(x-850)*gutter/650:left+(560-350)*gutter/650+(x-560)/80*(right+(640-850)*gutter/650-left-(560-350)*gutter/650);
-    const map=p=>({x:mapX(p.x),y:p.y*sy});
-    const soil=c.createLinearGradient(0,0,0,h);soil.addColorStop(0,'#bbc398');soil.addColorStop(.23,'#ae9974');soil.addColorStop(1,'#6f5c43');c.fillStyle=soil;c.fillRect(0,0,w,h);
-    for(let i=0;i<100;i++)ellipse(c,(i*173)%w,200*sy+(i*97)%(Math.max(1,h-200*sy)),1+i%3,1,'#4c3c2520');
-    line(c,[{x:0,y:196*sy},{x:w,y:196*sy}],'#7d8d56',8);
-    for(let i=0;i<w/22;i++){const x=i*22;line(c,[{x,y:193*sy},{x:x-4,y:181*sy},{x:x+2,y:188*sy}],'#697b4b',1.5);}
-    const tunnels=[[{x:600,y:179},{x:600,y:690}]];
-    for(const r of s.rooms)tunnels.push([{x:600,y:SLOTS[r.slot].y},SLOTS[r.slot]]);
-    for(const path of tunnels){line(c,path.map(map),'#6b573d',22);line(c,path.map(map),'#ccb68b',15);}
-    const radius=Math.min(65,Math.max(22,gutter*.36));
-    for(const r of s.rooms){const p=map(SLOTS[r.slot]);
-      ellipse(c,p.x,p.y,radius+3,37,'#766044');ellipse(c,p.x,p.y,radius,33,r.progress===100?'#d5bd8c':'#a78d64');
-      if(r.progress<100){for(let i=0;i<8;i++)ellipse(c,p.x-radius+8+i*radius/5,p.y+15,3,2,'#70573a');}
-      else if(r.type==='store')for(let i=0;i<Math.min(14,Math.ceil(s.food/6));i++)ellipse(c,p.x-20+i%5*9,p.y+12-Math.floor(i/5)*7,3,3,['#b08645','#c99e52','#978250'][i%3]);
-      else if(r.type==='nursery')for(let i=0;i<5;i++)ellipse(c,p.x-14+i*7,p.y+5,3,6,'#f2e5bc');
-      else if(r.type==='water')ellipse(c,p.x,p.y+9,radius*.65,9,'#8fb6af');
-      else if(r.type==='rest')for(let i=0;i<4;i++)ellipse(c,p.x-18+i*12,p.y+10,8,4,'#96a16d');
-      else if(r.type==='queen'){c.save();c.translate(p.x,p.y);c.scale(.7,.7);antShape(c,{x:0,y:0,angle:0,id:0},s.time,true);c.restore();}
+  canvas.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    canvas.focus({ preventScroll: true });
+    canvas.setPointerCapture(e.pointerId);
+    pointer = { x: e.clientX, y: e.clientY, pan: { ...pan }, moved: false };
+    hover = world(e);
+    if (tool === "guide") guide = [hover];
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    hover = world(e);
+    if (pointer) {
+      if (Math.hypot(e.clientX - pointer.x, e.clientY - pointer.y) > 5)
+        pointer.moved = true;
+      if (tool === "observe")
+        pan = {
+          x: pointer.pan.x + e.clientX - pointer.x,
+          y: pointer.pan.y + e.clientY - pointer.y,
+        };
+      if (
+        tool === "guide" &&
+        guide.length < 32 &&
+        dist(guide[guide.length - 1], hover) > 8
+      )
+        guide.push({ x: Math.round(hover.x), y: Math.round(hover.y) });
     }
-    for(const f of s.foods){const p=map(f);label(c,FOODS[f.type].icon,p.x,p.y-9,'#fff',17);}
-    for(const a of s.ants){const p=map(a);const dx=mapX(a.x+Math.cos(a.angle))-mapX(a.x),dy=Math.sin(a.angle)*sy;
-      c.save();c.translate(p.x,p.y);c.scale(.68,.68);antShape(c,{...a,x:0,y:0,angle:Math.atan2(dy,dx)},a.route.length?s.time:0);c.restore();}
-    if(s.event?.type==='rain')for(let i=0;i<22;i++){const x=i*w/22,y=(s.time*75+i*37)%(196*sy);line(c,[{x,y},{x:x-2,y:y+7}],'#dce6d177',1);}
+    draw();
+  });
+  canvas.addEventListener("pointerup", (e) => {
+    if (!pointer) return;
+    if (tool === "guide")
+      message(
+        command({
+          type: "guide",
+          points: guide.map((p) => ({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+          })),
+        }) || "Stopa je položená.",
+      );
+    else if (!pointer.moved) useTool(world(e));
+    pointer = null;
+    guide = [];
+    draw();
+  });
+  canvas.addEventListener("pointercancel", () => {
+    pointer = null;
+    guide = [];
+    draw();
+  });
+  canvas.addEventListener("pointerleave", () => {
+    if (!pointer && tool === "observe") {
+      hover = null;
+      draw();
+    }
+  });
+  canvas.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      action(e.deltaY < 0 ? "zoom-in" : "zoom-out");
+    },
+    { passive: false },
+  );
+  canvas.addEventListener("keydown", (e) => {
+    const delta = {
+      ArrowLeft: [-18, 0],
+      ArrowRight: [18, 0],
+      ArrowUp: [0, -18],
+      ArrowDown: [0, 18],
+    }[e.key];
+    if (delta) {
+      e.preventDefault();
+      if (tool === "observe") {
+        pan.x -= delta[0] * 2;
+        pan.y -= delta[1] * 2;
+      } else if (tool === "build") {
+        const slots = SLOTS.filter(
+            (p, i) => i >= 4 && !current().s.rooms.some((r) => r.slot === i),
+          ),
+          i = Math.max(
+            0,
+            slots.findIndex((p) => hover && dist(p, hover) < 1),
+          );
+        hover = slots.length
+          ? {
+              ...slots[
+                (i + (delta[0] + delta[1] > 0 ? 1 : slots.length - 1)) %
+                  slots.length
+              ],
+            }
+          : null;
+      } else {
+        hover = { x: clamp((hover?.x || 480) + delta[0], 55, 1145), y: 170 };
+      }
+      draw();
+    }
+    if (["+", "=", "-"].includes(e.key)) {
+      e.preventDefault();
+      action(e.key === "-" ? "zoom-out" : "zoom-in");
+    }
+    if (e.key === "Enter" && hover) {
+      e.preventDefault();
+      if (tool === "guide")
+        message(
+          command({
+            type: "guide",
+            points: [
+              { x: 480, y: 170 },
+              { x: Math.round(hover.x), y: 170 },
+            ],
+          }) || "Stopa je položená.",
+        );
+      else useTool(hover);
+    }
+  });
+  function fit(c) {
+    const r = c.getBoundingClientRect(),
+      dpr = Math.min(devicePixelRatio || 1, 2);
+    if (
+      c.width !== Math.round(r.width * dpr) ||
+      c.height !== Math.round(r.height * dpr)
+    ) {
+      c.width = Math.round(r.width * dpr);
+      c.height = Math.round(r.height * dpr);
+    }
+    return { w: r.width, h: r.height, dpr };
   }
-  function draw(){if(!active)return;if(dialog.open){const {w,h,dpr}=fit(canvas);ctx.setTransform(dpr,0,0,dpr,0,0);if(w&&h)drawScene(ctx,w,h,false);}else if(!game.s.settings.hidden){const {w,h,dpr}=fit(bg);bgctx.setTransform(dpr,0,0,dpr,0,0);if(w&&h)drawAmbient(bgctx,w,h);}}
-
-  function shouldRun() { return active && !document.hidden && !game.s.settings.paused && (dialog.open || (!game.s.settings.hidden && !game.s.settings.static && !reduced.matches)); }
+  function draw() {
+    if (!active) return;
+    const target = dialog.open ? canvas : bg,
+      context = dialog.open ? ctx : bgctx;
+    if (!dialog.open && (!ambient || sandbox.s.settings.hidden)) return;
+    const { w, h, dpr } = fit(target);
+    if (!w || !h) return;
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.clearRect(0, 0, w, h);
+    context.fillStyle = "#d6b785";
+    context.fillRect(0, 0, w, h);
+    const scale = dialog.open
+      ? Math.min(w / 1200, h / 780) * zoom
+      : Math.max(w / 1200, h / 780);
+    if (dialog.open) {
+      pan.x = clamp(pan.x, -w, w);
+      pan.y = clamp(pan.y, -h, h);
+    }
+    const x = (w - 1200 * scale) / 2 + (dialog.open ? pan.x : 0),
+      y = (h - 780 * scale) / 2 + (dialog.open ? pan.y : 0);
+    if (dialog.open) transform = { x, y, scale };
+    context.save();
+    context.translate(x, y);
+    context.scale(scale, scale);
+    ColonyRenderer.draw(context, dialog.open ? current() : sandbox, {
+      selected: dialog.open ? selected : null,
+      tool: dialog.open
+        ? tool === "food"
+          ? "food:" + $("food-type").value
+          : tool === "water"
+            ? "food:water"
+            : tool === "build"
+              ? "build:" + $("room-type").value
+              : tool
+        : null,
+      hover: dialog.open ? hover : null,
+      paths: dialog.open && current().s.settings.paths,
+    });
+    if (dialog.open && guide.length) {
+      context.beginPath();
+      guide.forEach((p, i) =>
+        i ? context.lineTo(p.x, p.y) : context.moveTo(p.x, p.y),
+      );
+      context.strokeStyle = "#89984c";
+      context.lineWidth = 3;
+      context.stroke();
+    }
+    context.restore();
+    if (dialog.open) $("zoom").textContent = Math.round(zoom * 100) + " %";
+  }
+  function shouldRun() {
+    if (!active || document.hidden) return false;
+    if (dialog.open)
+      return mode === "daily"
+        ? !!challenge && !challenge.finished && !dailyPaused
+        : !sandbox.s.settings.paused;
+    return (
+      ambient &&
+      !sandbox.s.settings.paused &&
+      !sandbox.s.settings.hidden &&
+      !reduced.matches
+    );
+  }
   function frame(now) {
-    raf = 0; if (!active || document.hidden) return;
-    const dt = last ? Math.min((now - last) / 1000, .1) : 0; last = now;
+    raf = 0;
+    if (!active || document.hidden) return;
+    const dt = last ? Math.min((now - last) / 1000, 0.25) : 0;
+    last = now;
     if (shouldRun()) {
-      game.tick(dt, true); saveTime += dt; uiTime += dt;
-      if (saveTime >= 5) { persist(); saveTime = 0; }
-      if (uiTime >= 1) { updateStats(); uiTime = 0; }
-      game.events.length = 0;
+      accumulator += dt * (dialog.open && mode === "sandbox" ? speed : 1);
+      while (accumulator >= STEP) {
+        if (dialog.open && mode === "daily") challenge.step();
+        else sandbox.tick(STEP, !dialog.open);
+        accumulator -= STEP;
+      }
+      saveTime += dt;
+      uiTime += dt;
+      if (saveTime >= 5) {
+        persist();
+        saveTime = 0;
+      }
+      if (
+        uiTime >= 0.5 ||
+        (mode === "daily" && challenge?.finished && !finishing)
+      ) {
+        const g = dialog.open ? current() : sandbox,
+          notice = g.events
+            .filter((e) => !e.message.startsWith("Náklad doručený"))
+            .pop();
+        if (notice && dialog.open) message(notice.message);
+        g.events.length = 0;
+        update();
+        uiTime = 0;
+      }
     }
-    if (now - lastDraw >= 1000 / 30) { draw(); lastDraw = now; }
+    if (now - lastDraw >= 1000 / 30) {
+      draw();
+      lastDraw = now;
+    }
     if (shouldRun()) raf = requestAnimationFrame(frame);
   }
-  function start() { if (raf) cancelAnimationFrame(raf); raf = 0; last = 0; if (shouldRun()) raf = requestAnimationFrame(frame); else draw(); }
-  function sync() {
-    const was = active; active = root.classList.contains('theme-anthill');
-    bg.hidden = !active || game.s.settings.hidden; dock.hidden = !active || dialog.open;
-    if (!active) { if (dialog.open) dialog.close(); if (raf) cancelAnimationFrame(raf); raf = 0; if (was) persist(); }
-    else { updateStats(); resize(); start(); }
+  function start() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    last = 0;
+    if (shouldRun()) raf = requestAnimationFrame(frame);
+    else draw();
   }
-  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['class'] });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) persist(); start(); });
-  window.addEventListener('pagehide', persist); reduced.addEventListener('change', sync);
+  function sync() {
+    const theme = document.documentElement.classList.contains("theme-anthill");
+    if (oldTheme && !theme && dialog.open) dialog.close();
+    oldTheme = theme;
+    ambient = theme;
+    active = ambient || dialog.open;
+    bg.hidden = !ambient || sandbox.s.settings.hidden || dialog.open;
+    dock.hidden = !ambient || dialog.open;
+    update();
+    persist();
+    start();
+  }
+  new ResizeObserver(draw).observe(dialog.querySelector(".ant-world"));
+  new MutationObserver(sync).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  window.addEventListener("resize", draw);
+  window.addEventListener("colony-renderer-ready", () => {
+    draw();
+    ColonyRenderer.portrait($("queen-portrait"));
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) persist();
+    accumulator = 0;
+    start();
+  });
+  window.addEventListener("pagehide", persist);
+  reduced.addEventListener("change", sync);
   sync();
+  if (new URLSearchParams(location.search).get("colony") === "1")
+    action("open");
 })();

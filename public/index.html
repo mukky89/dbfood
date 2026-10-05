@@ -1543,6 +1543,7 @@
   <link rel="stylesheet" href="/rc-theme.css">
   <link rel="stylesheet" href="/blocks-theme.css">
   <link rel="stylesheet" href="/anthill-theme.css">
+  <link rel="stylesheet" href="/colony-ui.css">
   <link rel="stylesheet" href="/christmas-countdown.css">
   <link rel="stylesheet" href="/chinchilla-runner.css">
 </head>
@@ -1597,6 +1598,7 @@
         <div class="contact-card-sub">Discord · mimosvk</div>
       </div>
     </a>
+    <button type="button" id="colony-open" class="nav-link" aria-haspopup="dialog">🐜 <span>Mravenisko</span></button>
     <button class="secrets-btn" onclick="openSecrets()" title="Tajné Easter Eggy 🥚">🥚</button>
     <span id="user-badge" onclick="userBadgeClick()" title="Klikni pre zmenu · 2× rýchlo = Kríza Identity 👤">👤 <span id="username-display">...</span></span>
     <button id="logout-btn" class="nav-link" onclick="changeUser()" title="Odhlásiť sa" style="display:none;background:none;border:none;cursor:pointer;font-family:inherit">🚪<span class="logout-label"> Odhlásiť sa</span></button>
@@ -2346,7 +2348,7 @@
           <button type="button" class="theme-option anthill-theme-option" data-theme="anthill" onclick="saveDesignConfig('anthill')" aria-pressed="false">
             <span class="t-check">✅</span><span class="t-emoji">🐜</span>
             <span class="t-name">Živé mravenisko</span>
-            <span class="t-desc">Autonómna kolónia v pozadí stránky. Mravce samy zbierajú potravu, budujú hniezdo a starajú sa o potomstvo. Stačí sa pozerať.</span>
+            <span class="t-desc">Živé pieskové terárium s kráľovnou, potravou a podzemnými komorami. Pozoruj kolóniu, staraj sa o ňu alebo si zahraj dennú výzvu.</span>
             <span class="theme-dots"><span style="background:#3b573b"></span><span style="background:#d4b782"></span><span style="background:#f6f1e4"></span></span>
           </button>
           <button type="button" class="theme-option blocks-theme-option" data-theme="blocks" onclick="saveDesignConfig('blocks')" aria-pressed="false">
@@ -4117,7 +4119,7 @@ const THEME_LABELS = {
   odysea:     { name: '🏛️ Odysea',           toast: '⚓ Vitaj na palube! Téma Odysea zapnutá', state: 'Aktívna téma: Odysea — filmové promo v duchu eposu Christophera Nolana.' },
   spiderman:  { name: '🕷️ Spider‑Man: Nový deň', toast: '🕸️ THWIP! Nový deň sa začína', state: 'Aktívna téma: Spider‑Man: Nový deň — filmové promo, box office a interaktívne pavúky.' },
   rc:          { name: '🛻 RC Expedition', toast: '🛻 RC Expedition pripravená — vyraz na trail!', state: 'Aktívna téma: RC Expedition — interaktívny off-road trail.' },
-  anthill: { name: '🐜 Živé mravenisko', toast: '🐜 Kolónia ožíva', state: 'Aktívna téma: Živé mravenisko — autonómna kolónia žije a rozrastá sa na pozadí.' },
+  anthill: { name: '🐜 Živé mravenisko', toast: '🐜 Kolónia ožíva', state: 'Aktívna téma: Živé mravenisko — pieskové terárium, kráľovná a denná výzva. Hru otvoríš tlačidlom Mravenisko.' },
   blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a hra Kuchynské kocky s padajúcim jedlom.' }
 };
 function applyTheme(theme) {
@@ -6103,6 +6105,8 @@ function updateFloatingBar() {
 <script src="/blocks-food.js"></script>
 <script src="/blocks-theme.js"></script>
 <script src="/anthill-engine.js"></script>
+<script src="/colony-challenge.js"></script>
+<script src="/colony-renderer.js"></script>
 <script src="/anthill-theme.js"></script>
 <script src="/weather-widget.js"></script>
 <script src="/christmas-countdown.js"></script>
