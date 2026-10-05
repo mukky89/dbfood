@@ -1,0 +1,207 @@
+/* The playable terrarium is independent of the page's selected lunch theme. */
+body.colony-open { overflow:hidden; }
+/* The lunch grid can be wider than a 320px phone; keep it from enlarging the
+   layout viewport behind the modal while the colony is open. */
+body.colony-open > main { overflow:clip; }
+#colony-open { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:7px 12px; border:1px solid currentColor; border-radius:8px; background:transparent; color:inherit; font-family:inherit; font-size:12px; font-weight:600; line-height:1.3; cursor:pointer; }
+#colony-open:hover { background:#ffffff1a; }
+#colony-open:focus-visible { outline:3px solid #f1d48f; outline-offset:3px; }
+
+#ant-game.ant-terrarium {
+  --ant-ink:#373c2c;
+  --ant-muted:#797b69;
+  --ant-olive:#65743e;
+  --ant-border:#dedecb;
+  --ant-paper:#fbfaf1;
+  width:min(1480px,calc(100vw - 24px));
+  max-width:none;
+  height:auto;
+  max-height:calc(100dvh - 24px);
+  margin:auto;
+  padding:0;
+  border:1px solid #e4e1cd;
+  border-radius:22px;
+  color:var(--ant-ink);
+  background:radial-gradient(ellipse at 0 0,#fffdf3 0,transparent 65%),#f5f3e8;
+  box-shadow:0 32px 120px #1a25165e,0 1px 0 #fff inset;
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-color:#c3c5ac #f5f3e8;
+  font:14px/1.5 'Segoe UI',Arial,sans-serif;
+  color-scheme:light;
+}
+#ant-game.ant-terrarium[open] { display:block; }
+#ant-game.ant-terrarium::backdrop { background:#172117c9; backdrop-filter:blur(7px); }
+#ant-game * { box-sizing:border-box; }
+#ant-game [hidden] { display:none!important; }
+#ant-game h2 { margin:0; color:#343e27; font:400 clamp(27px,2.4vw,39px)/1.12 Georgia,'Times New Roman',serif; letter-spacing:-.025em; }
+#ant-game h3 { margin:0 0 12px; color:#414b31; font:400 21px/1.2 Georgia,'Times New Roman',serif; }
+#ant-game h4 { margin:0 0 6px; font-size:13px; }
+#ant-game p { margin:5px 0 10px; }
+#ant-game small { font-size:11px; }
+#ant-game button { min-height:44px; padding:9px 13px; border:1px solid var(--ant-border); border-radius:10px; background:#fffdf5; color:#4c5738; font:600 12px/1.35 'Segoe UI',Arial,sans-serif; cursor:pointer; transition:background .14s,border-color .14s,box-shadow .14s; }
+#ant-game button:hover { border-color:#a2ab81; background:#eef0e0; }
+#ant-game button[aria-pressed=true],#ant-game button.active,#ant-game .ant-primary { border-color:#65743e; background:#65743e; color:#fffef4; box-shadow:0 2px 4px #65743e17; }
+#ant-game button:disabled { opacity:.46; cursor:not-allowed; box-shadow:none; }
+#ant-game :is(button,select,input,summary,a,canvas):focus-visible { outline:3px solid #ab7437; outline-offset:3px; }
+#ant-game input,#ant-game select { width:auto; max-width:100%; min-width:0; min-height:44px; padding:8px 10px; border:1px solid #ced1bb; border-radius:9px; color:#424d33; background:#fffdf5; font:inherit; }
+#ant-game input[type=checkbox] { width:17px; min-height:17px; margin:0; accent-color:#65743e; }
+#ant-game label { display:flex; align-items:center; gap:8px; margin:0; color:#646d52; font-size:12px; }
+#ant-game .ant-note,#ant-game .ant-subtitle { color:var(--ant-muted); font-size:12px; }
+#ant-game .ant-eyebrow { color:#7d8764; font-size:10px; font-weight:700; letter-spacing:.17em; text-transform:uppercase; }
+
+#ant-game .ant-top { display:flex; align-items:center; justify-content:space-between; gap:18px; min-height:68px; padding:12px 25px; border-bottom:1px solid #e3e3d4; background:#fbfaf2cc; }
+#ant-game .ant-brand { display:flex; align-items:center; gap:10px; color:#4a5737; font-weight:700; letter-spacing:.03em; }
+#ant-game .ant-brand small { display:block; color:#8c907b; font-size:10px; font-weight:400; letter-spacing:.08em; }
+#ant-game .ant-mode { display:flex; flex-wrap:wrap; align-items:center; gap:3px; padding:4px; border:1px solid #e0e2cf; border-radius:12px; background:#eceee1; }
+#ant-game .ant-mode button { min-width:110px; padding:9px 15px; border-color:transparent; background:transparent; color:#75805e; font-size:11px; }
+#ant-game .ant-mode button[aria-pressed=true],#ant-game .ant-mode button.active { border-color:#e0e3cc; background:#fffef6; color:#4d5d35; box-shadow:0 2px 5px #3d4b2810; }
+#ant-game .ant-top > button:last-child,#ant-game #ant-close { flex:0 0 auto; min-width:44px; padding:8px; border-color:transparent; background:transparent; color:#697358; font-size:11px; white-space:nowrap; }
+#ant-game .ant-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px; padding:22px 25px 20px; }
+#ant-game .ant-heading p { margin:7px 0 0; color:var(--ant-muted); font-size:12px; }
+#ant-game .ant-heading > h2 { flex:1 1 240px; }
+#ant-game .ant-heading > p { flex:1 1 180px; }
+#ant-game .ant-metrics { display:flex; flex-wrap:wrap; align-items:center; gap:10px 22px; padding:0; border:0; background:none; color:#7a806b; font-size:11px; }
+#ant-game .ant-metrics > span,#ant-game .ant-metrics > div { min-width:55px; }
+#ant-game .ant-metrics b,#ant-game .ant-metrics strong { display:block; margin:2px 0 0; color:#485337; font-size:20px; line-height:1.2; font-weight:600; font-variant-numeric:tabular-nums; }
+#ant-game .ant-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; grid-template-rows:auto; gap:19px; padding:0 25px 22px; min-height:0; overflow:visible; }
+#ant-game .ant-playarea { min-width:0; }
+#ant-game .ant-world { position:relative; width:100%; height:clamp(360px,calc(100dvh - 320px),660px); min-height:0; overflow:hidden; isolation:isolate; border:1px solid #c8b794; border-radius:15px; background:#c7ac7d; box-shadow:0 3px 12px #4b3f2611,0 1px 0 #fff7 inset; }
+#ant-game #ant-canvas { display:block; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+#ant-game .ant-scene-label { position:absolute; z-index:2; top:16px; left:18px; padding:7px 9px; border:1px solid #e0d9b899; border-radius:6px; background:#fff9e4df; color:#5b663e; pointer-events:none; font-size:9px; font-weight:700; letter-spacing:.17em; box-shadow:0 1px 5px #4b452515; }
+#ant-game .ant-camera { position:absolute; z-index:3; left:13px; right:auto; bottom:12px; display:flex; flex-wrap:wrap; align-items:center; gap:5px; max-width:calc(100% - 26px); }
+#ant-game .ant-camera button { min-height:44px; padding:8px 11px; border:1px solid #bfb899b3; border-radius:8px; background:#fbf6e6ed; color:#5e6643; font-size:11px; box-shadow:0 2px 8px #3a36241a; backdrop-filter:blur(5px); }
+#ant-game .ant-camera button[aria-pressed=true] { border-color:#7b8456; background:#e9edda; color:#465535; }
+#ant-game #ant-zoom { display:inline-flex; align-items:center; justify-content:center; min-width:45px; min-height:32px; padding:5px 7px; border:1px solid #d5cfb1; border-radius:7px; background:#fff9e7e8; color:#5c6544; font-size:10px; font-variant-numeric:tabular-nums; }
+#ant-game .ant-overlay { position:absolute; z-index:4; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:26px; background:#37401f52; backdrop-filter:blur(3px); text-align:center; }
+#ant-game .ant-overlay > div,#ant-game .ant-overlay > article { width:min(440px,100%); padding:27px; border:1px solid #e6e0c9; border-radius:18px; background:#fcf9ee; box-shadow:0 12px 50px #352d2d33; }
+#ant-game .ant-overlay h3 { margin-bottom:9px; font-size:28px; }
+#ant-game .ant-overlay p { max-width:38ch; margin:9px auto 17px; color:#737b60; font-size:13px; }
+#ant-game .ant-overlay > h3,#ant-game .ant-overlay > p { color:#fffaf0; text-shadow:0 1px 3px #25301c66; }
+#ant-game .ant-overlay .ant-primary { min-width:155px; }
+
+#ant-game .ant-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:12px; padding:0; }
+#ant-game .ant-toolbar [data-tool] { display:inline-flex; align-items:center; justify-content:center; gap:7px; flex:1 1 auto; min-width:75px; padding:10px 12px; background:#faf9ef; }
+#ant-game .ant-toolbar [data-tool][aria-pressed=true] { background:#65743e; color:#fffef3; }
+#ant-game .ant-toolbar select { min-width:63px; padding:8px; background:#faf9ef; font-size:12px; }
+#ant-game .ant-toolbar > label { gap:5px; }
+#ant-game .ant-tool-options { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 0 9px; min-width:0; }
+#ant-game .ant-tool-options label { flex-wrap:wrap; }
+#ant-game .ant-tool-options > p { flex:1 1 100%; margin:0; color:#7b806c; font-size:11px; }
+#ant-game .ant-tool-options select { max-width:100%; font-size:12px; }
+#ant-game .ant-tool-options button { padding:9px 12px; }
+#ant-game .ant-play-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:7px 14px; min-height:38px; padding:6px 0; color:#7a806b; font-size:11px; }
+#ant-game .ant-play-footer p,#ant-game #ant-status { flex:1 1 210px; margin:0!important; }
+#ant-game .ant-play-footer label { flex:0 0 auto; min-height:32px; font-size:11px; }
+#ant-game .ant-help { margin-top:5px; padding:10px 0 0; border-top:1px solid #e1e3d2; color:#737c5d; font-size:12px; }
+#ant-game .ant-help summary { width:max-content; max-width:100%; min-height:32px; padding:5px 0; cursor:pointer; font-weight:600; }
+#ant-game .ant-help p { max-width:82ch; margin:6px 0; line-height:1.65; }
+#ant-game .ant-help ul { margin:6px 0; padding-left:20px; }
+#ant-game .ant-mobile-board { display:none; }
+
+#ant-game .ant-sidebar { display:flex; flex-direction:column; align-items:stretch; gap:13px; min-width:0; min-height:0; padding:0; border:0; background:none; overflow:visible; }
+#ant-game .ant-sidebar > section { padding:16px; border:1px solid #dddfcd; border-radius:13px; background:#fcfbf3; box-shadow:0 2px 6px #5d653505; }
+#ant-game .ant-sidebar p { color:#7c826b; font-size:11px; }
+#ant-game .ant-sidebar h3 { font-size:21px; }
+#ant-game .ant-section-title { display:flex; align-items:center; justify-content:space-between; gap:9px; margin-bottom:9px; }
+#ant-game .ant-section-title h3 { margin:0; }
+#ant-game .ant-section-title > span { color:#8f9a73; }
+#ant-game .ant-section-title button { width:44px; padding:6px; border-color:transparent; background:transparent; }
+#ant-game .ant-text-button { min-height:44px; width:100%; margin-top:8px; padding:7px; border-color:#e3e5d3; background:transparent; font-size:10px; }
+#ant-game .ant-objective-total { display:flex; align-items:baseline; gap:7px; color:#92987c; font-size:11px; }
+#ant-game .ant-objective-total strong { color:#65743e; font:400 31px/1.2 Georgia,serif; font-variant-numeric:tabular-nums; }
+#ant-game .ant-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+#ant-game .ant-period { display:flex; align-items:center; gap:3px; padding:3px; margin:0 0 10px; border-radius:8px; background:#eff0e4; }
+#ant-game .ant-period button { flex:1 1 0; min-width:0; min-height:44px; padding:7px 5px; border-color:transparent; border-radius:6px; background:transparent; color:#848a72; font-size:10px; }
+#ant-game .ant-period button[aria-pressed=true] { border-color:#e3e5d3; background:#fffef7; color:#56633d; box-shadow:0 1px 4px #5159330b; }
+#ant-game #ant-ranks { display:flex; flex-direction:column; gap:3px; margin:0; padding:0; list-style:none; }
+#ant-game #ant-ranks li { display:flex; align-items:center; gap:9px; min-width:0; min-height:38px; padding:7px 8px; border:1px solid transparent; border-radius:7px; color:#73785f; font-size:11px; }
+#ant-game #ant-ranks .ant-me { border-color:#d9dfc1; background:#eef2df; color:#5a6a3d; font-weight:600; }
+#ant-game .ant-rank { flex:0 0 20px; color:#a1a58d; font-size:10px; font-variant-numeric:tabular-nums; }
+#ant-game #ant-ranks li:first-child .ant-rank { color:#a48639; }
+#ant-game .ant-player { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#ant-game .ant-score { flex:0 0 auto; color:#5d6a40; font-weight:600; font-variant-numeric:tabular-nums; }
+#ant-game #ant-board-status { margin:11px 0 0; line-height:1.5; }
+#ant-game .ant-queen-card { overflow:hidden; }
+#ant-game #ant-queen-portrait { display:block; width:100%; height:auto; aspect-ratio:2.4; margin:0 0 13px; border:1px solid #dfd1ad; border-radius:9px; background:#d8c18c; }
+#ant-game .ant-queen-card h3 { margin-bottom:5px; }
+#ant-game .ant-queen-card p:last-child { margin-bottom:0; }
+#ant-game .ant-objective progress { display:block; width:100%; height:7px; margin:12px 0 8px; overflow:hidden; border:0; border-radius:6px; background:#e9ebda; accent-color:#85985a; }
+#ant-game .ant-objective progress::-webkit-progress-bar { border-radius:6px; background:#e9ebda; }
+#ant-game .ant-objective progress::-webkit-progress-value { border-radius:6px; background:#85985a; }
+#ant-game .ant-objective progress::-moz-progress-bar { border-radius:6px; background:#85985a; }
+#ant-game .ant-objective p { margin-bottom:0; }
+#ant-game .ant-detail select { display:block; width:100%; margin:9px 0; font-size:12px; }
+#ant-game .ant-detail button { margin:4px 3px 0 0; padding:8px 10px; font-size:11px; }
+#ant-game .ant-detail label { display:block; }
+#ant-game .ant-detail input:not([type=checkbox]) { width:100%; margin:6px 0; font-size:12px; }
+#ant-game .ant-bottom { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; min-height:45px; padding:12px 25px; border-top:1px solid #e2e4d4; background:#eeefdf99; color:#8b907b; font-size:10px; letter-spacing:.02em; }
+
+@media (min-width:1300px) {
+  #ant-game .ant-top { padding-right:30px; padding-left:30px; }
+  #ant-game .ant-heading { padding-right:30px; padding-left:30px; }
+  #ant-game .ant-layout { padding-right:30px; padding-left:30px; gap:22px; }
+}
+@media (max-width:1050px) {
+  #ant-game .ant-layout { grid-template-columns:minmax(0,1fr) 250px; gap:14px; padding-right:18px; padding-left:18px; }
+  #ant-game .ant-heading,#ant-game .ant-top { padding-right:18px; padding-left:18px; }
+  #ant-game .ant-world { height:clamp(360px,calc(100dvh - 310px),570px); }
+  #ant-game .ant-metrics { gap:9px 16px; }
+  #ant-game .ant-toolbar { gap:5px; }
+  #ant-game .ant-toolbar [data-tool] { min-width:68px; padding:9px; font-size:11px; }
+}
+@media (max-width:760px) {
+  #ant-game.ant-terrarium { width:calc(100vw - 16px); max-height:calc(100dvh - 16px); border-radius:17px; }
+  #ant-game .ant-top { gap:9px; min-height:63px; padding:10px 14px; }
+  #ant-game .ant-brand { gap:7px; font-size:12px; }
+  #ant-game .ant-brand small { display:none; }
+  #ant-game .ant-mode { gap:2px; padding:3px; }
+  #ant-game .ant-mode button { min-width:0; padding:8px 11px; font-size:10px; }
+  #ant-game .ant-top > button:last-child,#ant-game #ant-close { padding:7px; font-size:10px; }
+  #ant-game .ant-heading { align-items:flex-start; gap:15px; padding:18px 15px; }
+  #ant-game .ant-heading h2 { font-size:30px; }
+  #ant-game .ant-heading > p { flex-basis:100%; margin-top:-9px; }
+  #ant-game .ant-metrics { flex:1 1 100%; justify-content:space-between; gap:8px; padding-top:11px; border-top:1px solid #e5e5d6; }
+  #ant-game .ant-metrics > span,#ant-game .ant-metrics > div { min-width:0; }
+  #ant-game .ant-metrics b,#ant-game .ant-metrics strong { font-size:18px; }
+  #ant-game .ant-layout { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto; gap:16px; padding:0 14px 17px; overflow:visible; }
+  #ant-game .ant-world { height:clamp(400px,58dvh,460px); border-radius:12px; }
+  #ant-game .ant-scene-label { top:13px; left:13px; max-width:calc(100% - 26px); font-size:8px; letter-spacing:.13em; }
+  #ant-game .ant-camera { bottom:10px; left:10px; max-width:calc(100% - 20px); gap:4px; }
+  #ant-game .ant-camera button { padding:8px 10px; font-size:10px; }
+  #ant-game .ant-toolbar { gap:6px; margin-top:10px; }
+  #ant-game .ant-toolbar [data-tool] { flex:1 1 25%; min-width:70px; }
+  #ant-game .ant-toolbar > select,#ant-game .ant-toolbar > label { flex:0 1 auto; }
+  #ant-game .ant-tool-options { gap:7px; padding-top:10px; }
+  #ant-game .ant-tool-options > label { min-width:0; max-width:100%; }
+  #ant-game .ant-tool-options select { max-width:100%; }
+  #ant-game .ant-mobile-board { display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+  #ant-game .ant-sidebar { display:none; padding:0; border:0; }
+  #ant-game.ant-show-sidebar .ant-sidebar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:12px; }
+  #ant-game .ant-sidebar > section { padding:14px; }
+  #ant-game .ant-bottom { gap:6px; padding:11px 15px; font-size:9px; }
+  #ant-game .ant-overlay { padding:16px; }
+  #ant-game .ant-overlay > div,#ant-game .ant-overlay > article { padding:22px 18px; }
+}
+@media (max-width:420px) {
+  #ant-game.ant-terrarium { width:100vw; max-height:100dvh; border:0; border-radius:0; }
+  #ant-game .ant-top { flex-wrap:wrap; gap:6px 9px; padding:8px 12px; }
+  #ant-game .ant-brand { flex:1 1 auto; }
+  #ant-game .ant-mode { order:3; flex:1 1 100%; }
+  #ant-game .ant-mode button { flex:1 1 0; }
+  #ant-game .ant-heading { padding:16px 12px; }
+  #ant-game .ant-layout { padding-right:10px; padding-left:10px; }
+  #ant-game .ant-heading h2 { font-size:28px; }
+  #ant-game .ant-world { height:420px; }
+  #ant-game .ant-toolbar [data-tool] { flex-basis:25%; font-size:11px; }
+  #ant-game .ant-tool-options label { width:100%; }
+  #ant-game .ant-tool-options label > select { flex:1 1 auto; }
+  #ant-game.ant-show-sidebar .ant-sidebar { grid-template-columns:minmax(0,1fr); }
+  #ant-game .ant-metrics { font-size:10px; }
+  #ant-game .ant-metrics b,#ant-game .ant-metrics strong { font-size:17px; }
+  #ant-game .ant-play-footer { gap:5px; }
+  #ant-game .ant-play-footer p { flex-basis:100%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #ant-game *,#ant-game *::before,#ant-game *::after { transition:none!important; animation:none!important; scroll-behavior:auto!important; }
+}

@@ -9,6 +9,8 @@ const { sendEmail, sendMail, formatEmail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 const pkg = require('./package.json');
+const { createColonyRouter } = require('./colony-api');
+const { createMongoColonyStore } = require('./colony-store');
 
 // Odstrani diakritiku (á→a, č→c, …) — pay by square poznamka inak nemusi fungovat
 function bezDiakritiky(str) {
@@ -43,6 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/api/colony', createColonyRouter({ store: createMongoColonyStore(mongoose) }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 

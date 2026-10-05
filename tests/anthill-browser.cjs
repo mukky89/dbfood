@@ -62,5 +62,5 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await mobile.locator('#ant-game').evaluate(el => el.open), true);
     assert.deepEqual(errors, []);
     console.log('PASS: autonomous background without opening the observer, unobstructed ordering, compact controls, pause, persistence, mobile, theme cleanup and hidden-tab suspension.');
-  } finally { await browser.close(); }
-})().catch(e => { console.error(e); process.exitCode = 1; });
+  } finally { await Promise.race([browser.close(), new Promise(resolve => setTimeout(resolve, 2000))]); }
+})().then(() => process.exit(0), e => { console.error(e); process.exit(1); });
