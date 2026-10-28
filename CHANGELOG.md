@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.27.0] — 2026-10-28
+
+### Pridané
+- Jemná stúpajúca para nad trubičkami vo vianočnej téme; mimo obrazovky sa pozastaví a pri obmedzenom pohybe sa nezobrazuje.
+- Kliknutie alebo aktivácia fotografie klávesnicou prehrá hlasovú hlášku Práve sa dopieklo čerstvé pečivo. Ďalšie kliknutie, skrytie stránky alebo zmena témy prehrávanie zastaví.
+- Lokálna hlasová nahrávka vytvorená cez WaveSpeed / ElevenLabs, bez automatického prehrávania.
+
 ## [1.26.3] — 2026-10-28
 
 ### Zmenené
