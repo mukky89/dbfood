@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.24.1] — 2026-10-28
+
+### Zmenené
+- Operátorov v Sylex Tower Defence nahradili zombíci so zelenkastou pokožkou, otrhaným oblečením, vystretými rukami a potácavou chôdzou v 3D aj náhradnom 2D zobrazení.
+
 ## [1.24.0] — 2026-10-28
 
 ### Pridané

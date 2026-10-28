@@ -157,14 +157,14 @@ export async function createSylex3D({ onPick, onFailure }) {
     }
     root.userData.head=head;root.userData.ownedMaterials=[trim];scene.add(root);return root;
   }
-  const clothes=standard('#314c61'),vest=standard('#c4a945'),skin=standard('#bf9979'),helmet=standard('#d2b356'),reflect=standard('#d6e3bb'),slowVest=standard('#62abc1');
+  const clothes=standard('#343c35'),vest=standard('#55513d'),skin=standard('#8b9d68'),rot=standard('#4c6041'),eyes=standard('#d7d885'),slowVest=standard('#62abc1');
   function person(){
     const g=new THREE.Group(),left=new THREE.Group(),right=new THREE.Group();g.add(left,right);left.position.set(-3.1,12,0);right.position.set(3.1,12,0);
     box(left,0,-5,0,4.5,10,4.5,clothes);box(right,0,-5,0,4.5,10,4.5,clothes);box(left,0,-10,-1,5,3,7,rubber);box(right,0,-10,-1,5,3,7,rubber);
-    const torso=box(g,0,19,0,11,14,6,vest);box(g,0,17,0,11.3,1.2,6.3,reflect);for(const x of [-3,3])box(g,x,21,-3.1,1.2,11,.3,reflect);
-    const arms=[];for(const x of [-7,7]){const arm=new THREE.Group();g.add(arm);arm.position.set(x,24,0);box(arm,0,-5,0,3,10,3.5,clothes);const hand=mesh(new THREE.SphereGeometry(1.8,8,6),skin,arm);hand.position.y=-11;arms.push(arm);}
+    const torso=box(g,0,19,0,11,14,6,vest);torso.rotation.x=-.12;for(const x of [-4,-1,3])box(g,x,12,-3.2,1.6,4,1,clothes);box(g,2,20,-3.4,3,4,.6,skin);box(g,-3,24,-3.3,2,2,.5,rot);
+    const arms=[];for(const x of [-7,7]){const arm=new THREE.Group();g.add(arm);arm.position.set(x,24,0);box(arm,0,-3,0,3.5,6,4,vest);box(arm,0,-8,0,2.8,5,3,skin);const hand=mesh(new THREE.SphereGeometry(1.8,8,6),skin,arm);hand.position.y=-11;for(const dx of [-1,0,1])box(arm,dx,-13,-.5,.55,3,.7,skin);arms.push(arm);}
     const face=mesh(new THREE.SphereGeometry(3.7,12,8),skin,g);face.scale.y=1.2;face.position.y=29;
-    const hat=mesh(new THREE.SphereGeometry(4.4,16,10,0,Math.PI*2,0,Math.PI/2),helmet,g);hat.position.y=31;cylinder(g,0,31,0,5,5,.8,helmet,20);box(g,0,34,0,.7,.8,7,reflect);
+    face.rotation.z=.18;box(g,-1.5,30,-3.3,2,1.5,.8,rot);box(g,1.5,30,-3.3,2,1.5,.8,rot);for(const x of [-1.5,1.5])box(g,x,30,-3.8,.7,.7,.4,eyes);box(g,.4,27,-3.4,3.2,1.5,.7,dark);box(g,-2,32,0,2,1.7,4,clothes);
     g.userData={left,right,arms,torso};scene.add(g);return g;
   }
   let preview=towerModel('rapid'),previewType='rapid';preview.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.4;o.castShadow=false;}});
@@ -185,7 +185,7 @@ export async function createSylex3D({ onPick, onFailure }) {
     for(const t of game.towers){let model=towerModels.get(t.slot);if(!model){model=towerModel(t.type);model.position.set(slots[t.slot][0],4,slots[t.slot][1]);model.userData.slot=t.slot;towerModels.set(t.slot,model);}model.visible=true;model.scale.setScalar(1+(t.level-1)*.09);const target=game.enemies.filter(e=>Math.hypot(e.x-model.position.x,e.y-model.position.z)<=types[t.type].range+(t.level-1)*15).sort((a,b)=>b.distance-a.distance)[0];if(target)model.userData.head.rotation.y=Math.atan2(model.position.x-target.x,model.position.z-target.y);}
     const alive=new Set(game.enemies);
     for(const [e,model] of operatorModels)if(!alive.has(e)){disposeObject(model);operatorModels.delete(e);}
-    for(const e of game.enemies){let model=operatorModels.get(e);if(!model){model=person();operatorModels.set(e,model);}model.visible=playing;model.position.set(e.x,2,e.y);const p=position(e.distance+1);model.rotation.y=Math.atan2(e.x-p.x,e.y-p.y);const stride=Math.sin(e.distance*.23)*.5;model.userData.left.rotation.x=stride;model.userData.right.rotation.x=-stride;model.userData.arms[0].rotation.x=-stride;model.userData.arms[1].rotation.x=stride;model.userData.torso.material=e.slow?slowVest:vest;}
+    for(const e of game.enemies){let model=operatorModels.get(e);if(!model){model=person();operatorModels.set(e,model);}model.visible=playing;model.position.set(e.x,2,e.y);const p=position(e.distance+1);model.rotation.y=Math.atan2(e.x-p.x,e.y-p.y);const stride=Math.sin(e.distance*.18)*.28;model.position.y+=Math.sin(e.distance*.36)*.45;model.rotation.z=Math.sin(e.distance*.18)*.045;model.userData.left.rotation.x=stride;model.userData.right.rotation.x=-stride;model.userData.arms[0].rotation.x=1.15+stride*.25;model.userData.arms[1].rotation.x=.95-stride*.3;model.userData.arms[0].rotation.z=-.15;model.userData.arms[1].rotation.z=.2;model.userData.torso.material=e.slow?slowVest:vest;}
     let count=0;for(const e of game.effects.slice(0,9)){effectPositions.set([e.x,32,e.y,e.tx,22,e.ty],count*6);count++;}effectGeometry.attributes.position.needsUpdate=true;effectGeometry.setDrawRange(0,playing?count*2:0);
     const width=Math.max(320,canvas.clientWidth||innerWidth),height=Math.max(240,canvas.clientHeight||innerHeight);
     if(canvas.width!==Math.round(width*renderer.getPixelRatio())||canvas.height!==Math.round(height*renderer.getPixelRatio()))renderer.setSize(width,height,false);

@@ -12,13 +12,13 @@ Voliteľná téma existujúceho obedového systému. V administrácii v nastaven
 
 Spustenie: `npm start` s existujúcou konfiguráciou aplikácie a MongoDB. Testy: `npm test`. Scénu otváraj cez HTTP server aplikácie; používa JavaScript moduly a lokálne textúry.
 
-Hra začína s 210 kreditmi. Veže stoja 70 / 90 / 120 kreditov. Zastavený operátor prinesie 12 kreditov a 10 bodov; dokončená vlna 35 kreditov a 100 bodov. Prienik uberie 10 zo 100 bodov odolnosti. Maximálna úroveň veže je 3. Vylepšenie pridáva dosah a poškodenie. WebGL mení zobrazenie, simulácia zostáva zdrojom herného stavu.
+Hra začína s 210 kreditmi. Veže stoja 70 / 90 / 120 kreditov. Zastavený zombík prinesie 12 kreditov a 10 bodov; dokončená vlna 35 kreditov a 100 bodov. Prienik uberie 10 zo 100 bodov odolnosti. Maximálna úroveň veže je 3. Vylepšenie pridáva dosah a poškodenie. WebGL mení zobrazenie, simulácia zostáva zdrojom herného stavu.
 
 Miesto vyber kliknutím na podstavec alebo vežu v 3D scéne, tlačidlami miest alebo klávesmi 1–9. Potiahnutie areálu otáča kameru v obmedzenom rozsahu. Tlačidlá **+** a **−** ovládajú priblíženie, **Detail** obnoví blízky predvolený pohľad (zoom 1,6), **Celý areál** širší pohľad (1,2). Tab a Enter sprístupňujú akcie klávesnicou, Escape sa vráti k obedom.
 
 Skutočný 3D canvas tvorí pevné pozadie stránky. Spustenie hry zobrazí ovládací HUD nad tým istým svetom pomocou nemodálneho `dialog.show()`; obedové rozhranie je počas hry skryté a neinteraktívne (`inert`). Návrat k obedom obnoví rozhranie a pôvodné hodnoty `inert`, hru pozastaví a ponechá areál v pozadí bez priebežnej animácie. Skrytie karty alebo vypnutie témy tiež pozastaví hru. Postup zostáva v pamäti stránky; obnovenie stránky začína novú hru.
 
-Primárne zobrazenie je 3D WebGL scéna s perspektívou. Herné súradnice 960 × 540 sa mapujú na vodorovnú rovinu sveta. Budova má svetlú striebornú fasádu, väčšie presklenie a vyššie podlažia. Budova, autá, operátori a otáčajúce sa veže sú priestorové mesh modely; lístie tvoria inštancované plochy s lokálne vytvorenou priehľadnou textúrou. Budova je štylizovaná, nie presná reprodukcia skutočného sídla.
+Primárne zobrazenie je 3D WebGL scéna s perspektívou. Herné súradnice 960 × 540 sa mapujú na vodorovnú rovinu sveta. Budova má svetlú striebornú fasádu, väčšie presklenie a vyššie podlažia. Budova, autá, zombíki a otáčajúce sa veže sú priestorové mesh modely; lístie tvoria inštancované plochy s lokálne vytvorenou priehľadnou textúrou. Budova je štylizovaná, nie presná reprodukcia skutočného sídla.
 
 Fotografické PBR textúry trávy, asfaltu, betónu, kôry a kovového obkladu používajú farebné, normálové a drsnostné mapy. Scénu osvetľuje hemisférické svetlo a smerové slnko s tieňmi; odrazy využívajú lokálne generované prostredie. Ovládanie zachováva tmavomodrú (#152e3a), tyrkysovú obranu a žltú akciu (#e8c979).
 

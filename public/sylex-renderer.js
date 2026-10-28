@@ -144,14 +144,15 @@
     const next=position(e.distance+2),facing=Math.sign(next.x-e.x);
     const stride=Math.sin(e.distance*.24)*3;
     c.save();c.translate(e.x,e.y);shadow(c,7,6,14,8);
-    // Legs, boots, jacket, articulated sleeves, reflective vest and hard hat.
-    box(c,-6,2+stride,5,12,2,'#2c4659');box(c,1,2-stride,5,12,2,'#35546a');
-    box(c,-7,11+stride,7,5,2,'#1b2b36');box(c,0,11-stride,7,5,2,'#1b2b36');
-    box(c,-11,-6-stride*.4,4,15,2,gradient(c,-11,0,4,0,['#314d62','#738894']));box(c,7,-6+stride*.4,4,15,2,'#49697a');
-    ellipse(c,-9,9-stride*.4,2,2.5,'#d6b294');ellipse(c,9,9+stride*.4,2,2.5,'#c6a282');
-    box(c,-7,-9,14,19,4,gradient(c,-7,0,14,0,e.slow?['#426f87','#a1e4ee','#365c78']:['#a67330','#eed06a','#b48738']),'#686746');
-    box(c,-5,-7,2,14,.4,'#e6edcc');box(c,3,-7,2,14,.4,'#e6edcc');box(c,-7,3,14,2,0,'#d4e2c2');line(c,[[0,-7],[0,8]],'#685b39',.6);box(c,1,-3,3,4,.5,'#7b724c');
-    ellipse(c,0,-11,4.5,5,'#cba98b');ellipse(c,facing*4,-10,1.5,2,'#d9b899');ellipse(c,0,-14,7,5.5,gradient(c,-5,-19,10,10,['#f5e4a2','#d9b450','#a98334']));ellipse(c,0,-12,8,2,'#d7bb65');line(c,[[0,-18],[0,-13]],'#fff0ba',1);c.restore();
+    // Shambling undead with ragged clothes, reaching arms and sunken eyes.
+    box(c,-6,2+stride*.5,5,12,2,'#343c35');box(c,1,2-stride*.5,5,12,2,'#485044');
+    box(c,-7,11+stride*.5,7,5,2,'#242923');box(c,0,11-stride*.5,7,5,2,'#242923');
+    box(c,-7,-9,14,19,4,e.slow?'#62abc1':'#55513d');
+    for(const x of [-5,0,4])box(c,x,7,2,5,1,'#343c35');box(c,2,-4,3,5,.5,'#8b9d68');
+    box(c,-12,-10-stride*.3,4,13,2,'#8b9d68');box(c,8,-13+stride*.3,4,13,2,'#8b9d68');
+    ellipse(c,-10,-11-stride*.3,3,3,'#a3af7d');ellipse(c,10,-14+stride*.3,3,3,'#8b9d68');
+    ellipse(c,1,-13,5,6,'#8b9d68');ellipse(c,-1,-14,1.7,1.5,'#38452f');ellipse(c,3,-14,1.7,1.5,'#38452f');
+    ellipse(c,-1,-14,.6,.6,'#d7d885');ellipse(c,3,-14,.6,.6,'#d7d885');line(c,[[-1,-10],[3,-9]],'#303c29',1.5);c.restore();
     box(c,e.x-11,e.y-27,22,3,1,'#253a40');box(c,e.x-11,e.y-27,Math.max(.1,22*e.hp/e.max),3,1,'#a9d9a0');
   }
   function paint(c,game,selected,type,playing){
