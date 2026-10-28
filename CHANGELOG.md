@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.27.4] — 2026-10-28
+
+### Zmenené
+- Para nad trubičkami stúpa na polovici pôvodnej rýchlosti. Plynulá slučka aj hlasová nahrávka zostávajú zachované.
+
 ## [1.27.3] — 2026-10-28
 
 ### Zmenené

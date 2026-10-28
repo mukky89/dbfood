@@ -13,8 +13,8 @@
   video.className = 'bakery-video';
   video.muted = true;
   video.loop = true;
-  video.defaultPlaybackRate = 0.75;
-  video.playbackRate = 0.75;
+  video.defaultPlaybackRate = 0.5;
+  video.playbackRate = 0.5;
   video.playsInline = true;
   video.preload = 'none';
   video.setAttribute('aria-hidden', 'true');
