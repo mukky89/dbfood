@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.25.0] — 2026-10-28
+
+### Zmenené
+- Vlny zombíkov sa spúšťajú automaticky: 30 herných sekúnd na úvod, 15 sekúnd medzi ubránenými vlnami, s viditeľným odpočítavaním.
+- Stavba začína až po spustení obrany; pauza zastaví odpočítavanie aj stavbu. Rýchlosť 2× zrýchli celý herný čas.
+- Server overuje automatický harmonogram. Rebríček zobrazuje iba nové pravidlá; staré výsledky zostávajú uložené.
+
 ## [1.24.3] — 2026-10-28
 
 ### Zmenené

@@ -40,3 +40,9 @@ Three.js aj všetkých 15 JPG máp sa načítavajú z aplikácie; vykresľovanie
 
 Overenie: celá sada `npm test` prešla (90 testov: 84 pôvodných a 6 testov skóre/API). Prehliadačové kontroly cez HTTP server overili uloženie výsledku, jeho čítanie z iného kontextu, raycasting a obnovenie objednávkového rozhrania. Produkčné MongoDB ani nasadenie neboli testované; kontroly nepotvrdzujú výkon na konkrétnych GPU.
 
+
+## Automatické vlny (1.25.0)
+
+Hráč zadá prezývku a zvolí Začať obranu. Predtým sa nedá stavať. Prvá vlna začne po 30 herných sekundách, každá ďalšia po 15 sekundách od ubránenia predchádzajúcej. Odpočet je v hornom hernom paneli. Pauza zastaví simuláciu aj odpočet a zakáže stavbu a vylepšenia; rýchlosť 2× zrýchľuje aj odpočet. Návrat k obedom hru stále pozastaví.
+
+Klient a server používajú rovnaký automatický harmonogram a krok 30 Hz. Ručné akcie wave sú odmietnuté. Pravidlá majú verziu 2: rebríček filtruje len túto verziu; predchádzajúce výsledky sa nemažú. Rozbehnuté hry staršej verzie vyžadujú obnovenie stránky a novú obranu.
