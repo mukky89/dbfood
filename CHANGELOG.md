@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.27.2] — 2026-10-28
+
+### Opravené
+- Animácia trubičiek má plynulú slučku s prelínaním konca a začiatku, bez pôvodného ostrého skoku.
+
 ## [1.27.1] — 2026-10-28
 
 ### Zmenené

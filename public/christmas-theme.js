@@ -71,7 +71,7 @@
       if (reducedMotion.matches) button.classList.remove('video-ready');
       return;
     }
-    if (!video.getAttribute('src')) video.src = '/assets/christmas/trubicky-steam.mp4';
+    if (!video.getAttribute('src')) video.src = '/assets/christmas/trubicky-steam-loop.mp4';
     video.play().catch(() => button.classList.remove('video-ready'));
   }
   video.addEventListener('playing', () => button.classList.add('video-ready'));
