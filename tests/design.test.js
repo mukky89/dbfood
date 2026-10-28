@@ -89,3 +89,11 @@ test('early load, runtime switch and admin selection all support blocks', () => 
     assert.equal((html.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1);
   }
 });
+
+test('sylex theme persists through the existing admin API and reload', async () => {
+  const api = appearance('rc');
+  const saved = await api.request('POST', { adminPass: 'test-only', theme: 'sylex' });
+  assert.equal(saved.status, 200);
+  assert.equal(saved.data.theme, 'sylex');
+  assert.equal((await api.request('GET')).data.theme, 'sylex');
+});

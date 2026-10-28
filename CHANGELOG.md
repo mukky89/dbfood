@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.24.0] — 2026-10-28
+
+### Pridané
+- Voliteľná téma Sylex Tower Defence s detailným 3D areálom v pozadí stránky, striebornou fasádou a preskleným vstupom.
+- Hrateľná obrana budovy s tromi typmi veží, vlnami operátorov a ovládaním kamery.
+- Spoločný rebríček hráčov s ukladaním výsledkov do MongoDB a serverovým overovaním skóre.
+
 ## [1.23.1] — 2026-10-28
 
 ### Pridané

@@ -1,0 +1,92 @@
+[
+  {
+    "file": "grass_ground-rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_ground/grass_ground_rough_1k.jpg",
+    "asset": "https://polyhaven.com/a/grass_ground",
+    "license": "CC0"
+  },
+  {
+    "file": "concrete_pavement-rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_rough_1k.jpg",
+    "asset": "https://polyhaven.com/a/concrete_pavement",
+    "license": "CC0"
+  },
+  {
+    "file": "grass_ground-color.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_ground/grass_ground_diff_1k.jpg",
+    "asset": "https://polyhaven.com/a/grass_ground",
+    "license": "CC0"
+  },
+  {
+    "file": "aerial_asphalt_01-normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_nor_gl_1k.jpg",
+    "asset": "https://polyhaven.com/a/aerial_asphalt_01",
+    "license": "CC0"
+  },
+  {
+    "file": "bark_brown_02-rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_rough_1k.jpg",
+    "asset": "https://polyhaven.com/a/bark_brown_02",
+    "license": "CC0"
+  },
+  {
+    "file": "corrugated_iron_03-color.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_diff_1k.jpg",
+    "asset": "https://polyhaven.com/a/corrugated_iron_03",
+    "license": "CC0"
+  },
+  {
+    "file": "grass_ground-normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_ground/grass_ground_nor_gl_1k.jpg",
+    "asset": "https://polyhaven.com/a/grass_ground",
+    "license": "CC0"
+  },
+  {
+    "file": "bark_brown_02-normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_nor_gl_1k.jpg",
+    "asset": "https://polyhaven.com/a/bark_brown_02",
+    "license": "CC0"
+  },
+  {
+    "file": "aerial_asphalt_01-rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_rough_1k.jpg",
+    "asset": "https://polyhaven.com/a/aerial_asphalt_01",
+    "license": "CC0"
+  },
+  {
+    "file": "corrugated_iron_03-rough.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_rough_1k.jpg",
+    "asset": "https://polyhaven.com/a/corrugated_iron_03",
+    "license": "CC0"
+  },
+  {
+    "file": "aerial_asphalt_01-color.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_diff_1k.jpg",
+    "asset": "https://polyhaven.com/a/aerial_asphalt_01",
+    "license": "CC0"
+  },
+  {
+    "file": "corrugated_iron_03-normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_03/corrugated_iron_03_nor_gl_1k.jpg",
+    "asset": "https://polyhaven.com/a/corrugated_iron_03",
+    "license": "CC0"
+  },
+  {
+    "file": "bark_brown_02-color.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/bark_brown_02/bark_brown_02_diff_1k.jpg",
+    "asset": "https://polyhaven.com/a/bark_brown_02",
+    "license": "CC0"
+  },
+  {
+    "file": "concrete_pavement-normal.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_nor_gl_1k.jpg",
+    "asset": "https://polyhaven.com/a/concrete_pavement",
+    "license": "CC0"
+  },
+  {
+    "file": "concrete_pavement-color.jpg",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_pavement/concrete_pavement_diff_1k.jpg",
+    "asset": "https://polyhaven.com/a/concrete_pavement",
+    "license": "CC0"
+  }
+]

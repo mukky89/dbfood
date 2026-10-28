@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -1559,6 +1559,7 @@
   <link rel="stylesheet" href="/rc-theme.css">
   <link rel="stylesheet" href="/blocks-theme.css">
   <link rel="stylesheet" href="/anthill-theme.css">
+  <link rel="stylesheet" href="/sylex-theme.css">
   <link rel="stylesheet" href="/colony-ui.css">
   <link rel="stylesheet" href="/christmas-countdown.css">
   <link rel="stylesheet" href="/chinchilla-runner.css">
@@ -2369,6 +2370,7 @@
             <div class="t-desc">Interaktívny off-road trail s ovládateľným RC autíčkom.</div>
             <div class="theme-dots"><span style="background:#15251c"></span><span style="background:#526b3f"></span><span style="background:#d9b678"></span></div>
           </div>
+          <button type="button" class="theme-option sylex-theme-option" data-theme="sylex" onclick="saveDesignConfig('sylex')" aria-pressed="false"><span class="t-check">✓</span><span class="t-name">Sylex Tower Defence</span><span class="t-desc">Detailný areál Sylex. Postav veže, zastav operátorov a ubráň ďalšiu zmenu.</span></button>
           <button type="button" class="theme-option anthill-theme-option" data-theme="anthill" onclick="saveDesignConfig('anthill')" aria-pressed="false">
             <span class="t-check">✅</span><span class="t-emoji">🐜</span>
             <span class="t-name">Živé mravenisko</span>
@@ -4132,8 +4134,9 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex'];
 const THEME_LABELS = {
+  sylex: { name: 'Sylex Tower Defence', toast: 'Sylex je pripravený na obranu', state: 'Aktívna téma: Sylex Tower Defence. Hru otvoríš tlačidlom Brániť Sylex.' },
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
   trattoria:  { name: '🍝 Retro Trattoria',  toast: '🍝 Benvenuti! Retro Trattoria zapnutá', state: 'Aktívna téma: Retro Trattoria — talianska osteria.' },
@@ -4147,6 +4150,7 @@ const THEME_LABELS = {
   blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a hra Kuchynské kocky s padajúcim jedlom.' }
 };
 function applyTheme(theme) {
+  document.documentElement.classList.toggle('theme-sylex', theme === 'sylex');
   if (!APP_THEMES.includes(theme)) theme = 'classic';
   document.documentElement.classList.toggle('theme-futuristic', theme === 'futuristic');
   document.documentElement.classList.toggle('theme-trattoria',  theme === 'trattoria');
@@ -6128,6 +6132,10 @@ function updateFloatingBar() {
 <script src="/blocks-engine.js"></script>
 <script src="/blocks-food.js"></script>
 <script src="/blocks-theme.js"></script>
+<script src="/sylex-engine.js"></script>
+<script src="/sylex-score.js"></script>
+<script src="/sylex-renderer.js"></script>
+<script src="/sylex-theme.js"></script>
 <script src="/anthill-engine.js"></script>
 <script src="/colony-challenge.js"></script>
 <script src="/colony-renderer.js"></script>

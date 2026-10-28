@@ -10,6 +10,7 @@ const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
 const pkg = require('./package.json');
 const { createColonyRouter } = require('./colony-api');
+const { createSylexRouter, createMongoSylexStore } = require('./sylex-api');
 const { createMongoColonyStore } = require('./colony-store');
 
 // Odstrani diakritiku (á→a, č→c, …) — pay by square poznamka inak nemusi fungovat
@@ -45,6 +46,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/api/sylex', createSylexRouter({store:createMongoSylexStore(mongoose)}));
 app.use('/api/colony', createColonyRouter({ store: createMongoColonyStore(mongoose) }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -165,7 +167,7 @@ async function getPlatba() {
 function clearPlatbaCache() { _platbaCache = null; }
 
 // ── Nastavenia vzhladu ─────────────────────────────────────────────────────
-const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill'];
+const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex'];
 let _vzhladCache = null;
 async function getVzhlad() {
   if (_vzhladCache) return _vzhladCache;

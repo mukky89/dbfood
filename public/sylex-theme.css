@@ -1,0 +1,61 @@
+html.theme-sylex{--brand:#234852;--accent:#147c76;--bg:#dae3d6;--card:#f6f7ee;--border:#bdccc0;--text:#233d43;--muted:#546b6d;--green:#307559;--radius:8px}
+.theme-sylex body{background:#60866a}.theme-sylex header{background:#193542}.theme-sylex main,.theme-sylex #countdown-bar{position:relative;z-index:1}.theme-sylex .card{background:#f6f7eef5;box-shadow:none}.theme-sylex .hdr-brand{background:none;-webkit-text-fill-color:#eff4df;color:#eff4df}.theme-sylex .hdr-sub{color:#c6dece}
+#sylex-background{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:auto;pointer-events:none;z-index:0}#sylex-background[hidden],#sylex-launch[hidden]{display:none}
+#sylex-launch{position:fixed;bottom:86px;left:18px;z-index:120;background:#193542;color:#f7e5a9;border:2px solid #d2bf74;padding:14px 22px;font:700 15px 'Segoe UI',sans-serif;cursor:pointer}
+#sylex-game{padding:0;border:2px solid #6b918b;border-radius:8px;background:#152e3a;color:#eaf1df;width:min(1360px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 24px);overflow:auto;scrollbar-color:#638d87 #152e3a;font:14px/1.5 'Segoe UI',sans-serif}#sylex-game::backdrop{background:#10262de8}#sylex-game *{box-sizing:border-box}#sylex-game ::selection{background:#eed086;color:#193542}
+.sx-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 26px}.sx-top h2{font-size:28px;margin:0;color:#f4e7b6}.sx-top h2 span{font-size:18px;color:#b9d3cd;margin-left:12px}.sx-top p{margin:3px 0 0;color:#b9d3cd}.sx-stats{display:flex;flex-wrap:wrap;gap:14px 36px;background:#203e49;padding:13px 26px;font-variant-numeric:tabular-nums}.sx-stats b{color:#f7d77d;margin-left:8px}
+.sx-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:22px;padding:22px}.sx-map{overflow:hidden;border:2px solid #73988b;background:#60866a}.sx-map canvas{display:block;width:100%;height:auto;image-rendering:auto}.sx-slots{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}.sx-status{min-height:42px;color:#f1d78f;margin:12px 0 0}.sx-layout aside h3{margin:0;font-size:20px}.sx-layout aside p{color:#b9d3cd;margin:6px 0 14px}
+#sylex-game button{font:600 13px 'Segoe UI',sans-serif;min-height:42px;padding:9px 12px;border:1px solid #6b918b;border-radius:4px;color:#eaf1df;background:#284954;cursor:pointer}#sylex-game button:hover:not(:disabled){background:#3b6268}#sylex-game button:disabled{opacity:.45;cursor:not-allowed}#sylex-game button:focus-visible,#sylex-game summary:focus-visible,#sylex-launch:focus-visible{outline:3px solid #f9d77e;outline-offset:3px}#sylex-game button[aria-pressed=true]{border-color:#f9d77e;background:#496354;color:#fff0bb}#sylex-game .sx-primary{background:#e8c979;color:#193542;border-color:#e8c979}#sylex-game .sx-primary:hover:not(:disabled){background:#ffe1a0}.sx-types{display:grid;gap:8px;margin:16px 0}.sx-types button{display:flex;align-items:center;gap:14px;text-align:left}.sx-types small{display:block;color:#c9ded7;font-weight:400;margin-top:3px}.sx-types i{width:22px;height:26px;background:var(--tower);border:5px solid #142d38;position:relative;flex-shrink:0}.sx-types i:before{content:'';position:absolute;left:3px;top:-14px;width:6px;height:17px;background:var(--tower)}.sx-layout aside>button{width:100%;margin-bottom:8px}.sx-controls{display:flex;gap:6px;margin-bottom:8px}.sx-controls button{flex:1}.sx-layout hr{border:0;border-top:1px solid #47646a;margin:18px 0}.sx-layout details{margin-top:16px;font-size:12px}.sx-layout summary{cursor:pointer;color:#f1d78f}.sylex-theme-option{font:inherit;color:inherit;text-align:left}.sylex-theme-option span{display:block}
+@media(max-width:850px){.sx-layout{grid-template-columns:1fr;padding:12px;gap:14px}.sx-top{padding:16px;align-items:flex-start}.sx-top h2 span{display:block;margin:0}.sx-top h2{font-size:24px}.sx-stats{padding:12px 16px;gap:8px 18px}.sx-types{grid-template-columns:repeat(3,minmax(0,1fr))}.sx-types button{flex-direction:column;align-items:flex-start;padding:10px 6px!important}.sx-types small{font-size:11px}.sx-types i{margin-top:8px}#sylex-game{width:calc(100vw - 12px)}.sx-slots button{flex:1;min-width:30px;padding:8px 3px!important}.sx-top>button{max-width:110px}.sx-layout aside>button{min-height:44px}#sylex-launch{bottom:80px;left:10px}}
+
+.sx-tower-icon{width:44px;height:44px;object-fit:contain;flex-shrink:0}
+.sx-map canvas[hidden]{display:none}.sx-map canvas[data-renderer=webgl]{aspect-ratio:16/9;height:auto;touch-action:pan-y;cursor:grab}.sx-map canvas[data-renderer=webgl]:active{cursor:grabbing}.sx-camera{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px}.sx-camera>span{flex:1;color:#b9d3cd;font-size:12px}.sx-camera button{min-width:40px}#sylex-game .sx-camera button{min-height:36px;padding:6px 10px}
+.sx-credit{font-size:11px}.sx-credit a{color:#c9dcae;text-underline-offset:3px}
+/* The game world is the page background; its HUD is a transparent overlay. */
+#sylex-world{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#687b57}
+#sylex-world[hidden],#sylex-intro[hidden],#sylex-board[hidden]{display:none}
+#sylex-world canvas{display:block;width:100%;height:100%;image-rendering:auto}
+#sylex-world canvas[hidden]{display:none}
+.sylex-playing #sylex-world{pointer-events:auto}
+.sylex-playing #sylex-world canvas{touch-action:none;cursor:grab}
+.sylex-playing #sylex-world canvas:active{cursor:grabbing}
+.theme-sylex #main-content{margin-top:clamp(260px,42vh,440px)}
+#sylex-intro{position:absolute;top:150px;left:max(24px,calc((100vw - 1200px)/2));z-index:1;color:#f6f7e9;text-shadow:0 2px 12px #142e32;font-family:'Segoe UI',sans-serif;pointer-events:none}
+#sylex-intro strong{display:block;font-size:clamp(36px,5vw,64px);letter-spacing:.02em;line-height:1}
+#sylex-intro span{display:block;font-size:22px;margin-top:8px}#sylex-intro p{font-size:14px}
+.sylex-playing #main-content,.sylex-playing #countdown-bar,.sylex-playing #sylex-intro,.sylex-playing #sylex-launch,.sylex-playing #sylex-board{visibility:hidden}
+#sylex-game[open]{position:fixed;inset:0;margin:0;width:100vw;max-width:none;height:100dvh;max-height:none;padding:0;border:0;border-radius:0;background:transparent;overflow:visible;pointer-events:none;z-index:150}
+#sylex-game .sx-layout{display:contents;padding:0}
+#sylex-game .sx-top{position:absolute;top:82px;left:20px;right:320px;padding:12px 16px;background:#152e3aeb;border-radius:8px;pointer-events:auto;box-shadow:0 6px 20px #11262f20}
+#sylex-game .sx-top h2{font-size:22px}#sylex-game .sx-top p{font-size:12px}
+#sylex-game .sx-stats{position:absolute;left:20px;top:178px;padding:10px 16px;background:#203e49ed;border-radius:6px;gap:20px;pointer-events:auto}
+#sylex-game .sx-layout aside{position:absolute;right:18px;top:82px;bottom:20px;width:278px;padding:18px;background:#152e3af5;overflow:auto;border-radius:8px;pointer-events:auto;scrollbar-color:#638d87 #152e3a}
+#sylex-game .sx-map-tools{position:absolute;left:20px;bottom:22px;width:min(760px,calc(100vw - 350px));padding:12px 16px;background:#152e3aed;border-radius:8px;pointer-events:auto}
+#sylex-game .sx-camera{margin-top:0}#sylex-game .sx-status{min-height:20px;margin:9px 0 0}#sylex-game .sx-slots{gap:6px}#sylex-game .sx-slots button{min-width:38px}
+#sylex-game input{width:100%;padding:10px 12px;margin:7px 0 12px;border:1px solid #789891;border-radius:4px;background:#24414c;color:#f3f4df;font:inherit;caret-color:#e8c979}
+#sylex-game input::placeholder{color:#b9cbc3}#sylex-game input:focus-visible{outline:3px solid #e8c979;outline-offset:2px}#sylex-game label{font-size:12px}
+#sylex-game .sx-save-status{font-size:12px;color:#f1d78f;min-height:0}
+#sylex-board{position:fixed;right:18px;bottom:86px;z-index:110;width:300px;max-width:calc(100vw - 36px);max-height:50vh;overflow:auto;padding:12px 16px;background:#152e3af5;color:#edf1dd;border-radius:8px;font:13px/1.5 'Segoe UI',sans-serif;scrollbar-color:#638d87 #152e3a}
+#sylex-board summary{cursor:pointer;font-weight:700;color:#f1d78f}#sylex-board button{margin-top:10px;border:1px solid #76928a;background:#294b54;color:#edf1dd;padding:8px 12px;border-radius:4px;cursor:pointer}
+[data-sylex-scores] table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;font-variant-numeric:tabular-nums}
+[data-sylex-scores] caption{padding:10px 0;color:#bed1c6;text-align:left;font-size:11px}
+[data-sylex-scores] th,[data-sylex-scores] td{text-align:left;padding:7px 3px;border-bottom:1px solid #476066;overflow-wrap:anywhere}
+[data-sylex-scores] th:first-child{width:22px}[data-sylex-scores] th:nth-child(3){width:48px}[data-sylex-scores] th:last-child{width:35px}
+[data-sylex-scores] .sx-me{color:#ffe0a0}
+@media(max-width:850px){
+ .theme-sylex #main-content{margin-top:230px}#sylex-intro{top:120px;left:18px}#sylex-intro strong{font-size:38px}#sylex-intro span{font-size:18px}
+ #sylex-game .sx-top{top:10px;left:10px;right:10px;padding:10px 12px}#sylex-game .sx-top h2{font-size:18px}#sylex-game .sx-top h2 span{display:inline;font-size:12px;margin-left:5px}#sylex-game .sx-top p{display:none}
+ #sylex-game .sx-top>button{max-width:none;white-space:nowrap;padding:6px 8px;font-size:12px}
+ #sylex-game .sx-stats{top:74px;left:10px;right:10px;gap:8px 14px;padding:8px 10px;font-size:12px}
+ #sylex-game .sx-layout aside{top:auto;bottom:0;right:0;width:100%;height:37dvh;border-radius:10px 10px 0 0;padding:14px}
+ #sylex-game .sx-layout aside h3{font-size:18px}#sylex-game .sx-layout aside>p{font-size:12px}
+ #sylex-game .sx-map-tools{bottom:calc(37dvh + 8px);left:10px;width:calc(100vw - 20px);padding:8px 10px}
+ #sylex-game .sx-camera>span{display:none}#sylex-game .sx-camera button{min-height:30px;font-size:11px;padding:4px 8px}
+ #sylex-game .sx-slots{gap:4px;margin-top:6px}#sylex-game .sx-slots button{min-width:0;min-height:34px}
+ #sylex-game .sx-status{font-size:11px;margin-top:5px}#sylex-board{right:10px;bottom:145px;width:280px}
+}
+.sylex-playing{overflow:hidden}
+.sylex-playing body > :not(#sylex-world):not(#sylex-game),.sylex-playing body > :not(#sylex-world):not(#sylex-game) *{visibility:hidden!important}
+#sylex-game .sx-map-tools>.sx-controls{max-width:260px;margin-bottom:10px}
+@media(min-width:851px){#sylex-game .sx-top,#sylex-game .sx-layout aside{top:18px}#sylex-game .sx-stats{top:114px}}
+@media(max-width:850px){#sylex-intro{top:300px;left:18px}#sylex-intro strong{font-size:30px}#sylex-intro span{font-size:15px}#sylex-intro p{display:none}#sylex-game .sx-map-tools>.sx-controls{max-width:none;margin-bottom:6px}#sylex-game .sx-map-tools>.sx-controls button{min-height:32px;padding:5px 10px;font-size:12px}}
