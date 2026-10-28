@@ -1,11 +1,4 @@
 /* Optional Christmas world. All rules are scoped so other themes remain intact. */
-@font-face {
-  font-family: 'Yvonka Display';
-  src: url('/assets/christmas/comforter.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
 html.theme-christmas {
   --brand: #213e33; --accent: #8d333c; --green: #356448;
   --orange: #98661f; --bg: #f5efe3; --card: #fffcf5;
@@ -44,9 +37,9 @@ html.theme-christmas .oblatky-promo {
 }
 html.theme-christmas .oblatky-promo-content { padding: 38px 46px; position: relative; }
 html.theme-christmas .oblatky-promo h2 {
-  font-family: 'Yvonka Display', Georgia, serif; font-weight: 400;
-  font-size: clamp(40px, 4.5vw, 68px); line-height: 1.08; text-wrap: balance;
-  color: #213e33; max-width: 12ch; margin-bottom: 22px;
+  font-family: Georgia, Cambria, serif; font-weight: 400;
+  font-size: clamp(34px, 3.5vw, 50px); line-height: 1.18; text-wrap: balance;
+  color: #213e33; max-width: 17ch; margin-bottom: 22px;
 }
 html.theme-christmas .oblatky-promo p { color: #4f5947; font-size: 15px; line-height: 1.7; max-width: 34ch; margin-bottom: 24px; }
 html.theme-christmas .oblatky-promo-link { background: #82323b; border-radius: 6px; padding: 14px 20px; }
@@ -101,7 +94,7 @@ html.theme-christmas .fob { background: #fffcf5; border-color: #dfd4bf; }
   html.theme-christmas .oblatky-promo { grid-template-columns: 1fr; }
   html.theme-christmas .oblatky-promo img { grid-row: 1; height: 220px; min-height: 0; }
   html.theme-christmas .oblatky-promo-content { padding: 26px; }
-  html.theme-christmas .oblatky-promo h2 { max-width: 15ch; font-size: 46px; }
+  html.theme-christmas .oblatky-promo h2 { max-width: 17ch; font-size: 34px; }
   html.theme-christmas .card { padding: 18px; }
   html.theme-christmas .card-title { font-size: 22px; }
 }
