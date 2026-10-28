@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.23.1] — 2026-10-28
+
+### Pridané
+- Pozvánka na domáce oblátky od Yvonky s odkazom na ich objednávku.
+
 ## [1.23.0] — 2026-09-25
 
 ### Zmenené

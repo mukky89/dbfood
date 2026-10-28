@@ -115,6 +115,22 @@
     .grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
 
+    /* Pozvánka na oblátky od Yvonky */
+    .oblatky-promo { display:grid; grid-template-columns:minmax(0, 1fr) minmax(220px, 36%); overflow:hidden; margin-bottom:20px; border-radius:14px; background:#f8eedb; color:#173c31; box-shadow:0 5px 18px rgba(30, 36, 26, .12); }
+    .oblatky-promo-content { padding:24px 28px; align-self:center; }
+    .oblatky-promo h2 { color:#173c31; font-size:clamp(21px, 2.5vw, 28px); line-height:1.15; margin:0 0 9px; }
+    .oblatky-promo p { color:#365248; font-size:14px; line-height:1.5; margin:0 0 16px; max-width:48ch; }
+    .oblatky-promo-link { display:inline-flex; align-items:center; gap:10px; min-height:44px; padding:10px 16px; border-radius:8px; background:#173c31; color:#fff; font-size:14px; font-weight:700; line-height:1.3; text-decoration:none; transition:background .2s; }
+    .oblatky-promo-link:hover { background:#285b49; color:#fff; }
+    .oblatky-promo-link:focus-visible { outline:3px solid #a76c19; outline-offset:3px; }
+    .oblatky-promo .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0, 0, 0, 0); white-space:nowrap; border:0; }
+    .oblatky-promo img { display:block; width:100%; height:100%; min-height:190px; object-fit:cover; }
+    @media (max-width:600px) {
+      .oblatky-promo { grid-template-columns:1fr; }
+      .oblatky-promo img { grid-row:1; height:150px; min-height:0; }
+      .oblatky-promo-content { padding:20px; }
+    }
+
     /* Card */
     .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
     .card-title { font-size: 16px; font-weight: 700; color: var(--brand); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--bg); }
@@ -1872,6 +1888,14 @@
 
   <!-- Hlavna stranka -->
   <div id="order-section">
+    <section class="oblatky-promo" aria-labelledby="oblatky-title">
+      <div class="oblatky-promo-content">
+        <h2 id="oblatky-title">Kúsok domova na sviatočný stôl</h2>
+        <p>Domáce trubičky od Yvonky – vanilkové, škoricové aj slané s rascou.</p>
+        <a class="oblatky-promo-link" href="https://oblatky.mmucka.xyz/" target="_blank" rel="noopener noreferrer">Pozrieť ponuku a objednať <span aria-hidden="true">→</span><span class="sr-only"> (otvorí sa v novom okne)</span></a>
+      </div>
+      <img src="/assets/oblatky/trubicky.webp" alt="Zlatisté trubičky na sviatočnom stole" width="1500" height="1000">
+    </section>
     <div class="grid">
         <section id="blocks-game" aria-label="Kuchynské kocky — hra s padajúcimi jedlami">
           <div class="blocks-heading">
