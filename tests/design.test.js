@@ -97,3 +97,14 @@ test('sylex theme persists through the existing admin API and reload', async () 
   assert.equal(saved.data.theme, 'sylex');
   assert.equal((await api.request('GET')).data.theme, 'sylex');
 });
+
+test('Christmas is optional, persists and leaves the existing choice intact', async () => {
+  const api = appearance('sylex');
+  assert.equal((await api.request('GET')).data.theme, 'sylex');
+  assert.equal(api.writes(), 0);
+  assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'christmas' })).data.theme, 'christmas');
+  vm.runInContext('clearVzhladCache()', api.sandbox);
+  assert.equal((await api.request('GET')).data.theme, 'christmas');
+  assert.equal(api.doc().designVersion, 2);
+  assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'sylex' })).data.theme, 'sylex');
+});

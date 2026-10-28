@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -1563,6 +1563,7 @@
   <link rel="stylesheet" href="/colony-ui.css">
   <link rel="stylesheet" href="/christmas-countdown.css">
   <link rel="stylesheet" href="/chinchilla-runner.css">
+  <link rel="stylesheet" href="/christmas-theme.css">
 </head>
 <body>
 
@@ -2314,6 +2315,7 @@
           <strong>ℹ️ Výber témy</strong> je <strong>globálny</strong> — prejaví sa všetkým návštevníkom stránky. Zmena sa aplikuje okamžite.
         </div>
         <div id="vzhlad-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+          <button type="button" class="theme-option christmas-theme-option" data-theme="christmas" onclick="saveDesignConfig('christmas')" aria-pressed="false"><span class="t-check">✓</span><span class="t-name">Vianoce u Yvonky</span><span class="t-desc">Sviatočný stôl, domáce trubičky a čaro Vianoc. Krémová, ihličnanová zelená a bordová.</span><span class="theme-dots"><span style="background:#213e33"></span><span style="background:#f5efe3"></span><span style="background:#82323b"></span></span></button>
           <div class="theme-option" data-theme="classic" onclick="saveDesignConfig('classic')">
             <span class="t-check">✅</span>
             <div class="t-emoji">🏛️</div>
@@ -3079,7 +3081,7 @@ function renderMenu(menu) {
 
   const datumDisplay = menuLang === 'sk' ? menu.datum : (menu['datum_' + menuLang] || menu.datum);
   if (menu.datum) html += `
-    <div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;padding:14px 18px;margin-bottom:20px">
+    <div class="menu-date-banner" style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;padding:14px 18px;margin-bottom:20px">
       <div style="font-size:36px;line-height:1">📅</div>
       <div>
         <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Denné menu</div>
@@ -4134,8 +4136,9 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas'];
 const THEME_LABELS = {
+  christmas: { name: 'Vianoce u Yvonky', toast: 'Vianočný vzhľad je zapnutý', state: 'Aktívna téma: Vianoce u Yvonky.' },
   sylex: { name: 'Sylex Tower Defence', toast: 'Sylex je pripravený na obranu', state: 'Aktívna téma: Sylex Tower Defence. Hru otvoríš tlačidlom Brániť Sylex.' },
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
   futuristic: { name: '🚀 Neon Cyber',       toast: '🚀 Neon Cyber zapnutý',         state: 'Aktívna téma: Neon Cyber — neónová téma.' },
@@ -4150,6 +4153,7 @@ const THEME_LABELS = {
   blocks:      { name: '🧩 Obedové kocky', toast: '🧩 Obedové kocky zapnuté', state: 'Aktívna téma: Obedové kocky — tmavý dizajn a hra Kuchynské kocky s padajúcim jedlom.' }
 };
 function applyTheme(theme) {
+  document.documentElement.classList.toggle('theme-christmas', theme === 'christmas');
   document.documentElement.classList.toggle('theme-sylex', theme === 'sylex');
   if (!APP_THEMES.includes(theme)) theme = 'classic';
   document.documentElement.classList.toggle('theme-futuristic', theme === 'futuristic');

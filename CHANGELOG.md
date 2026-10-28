@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.26.0] — 2026-10-28
+
+### Pridané
+- Voliteľná téma Vianoce u Yvonky: krémové pozadie, zelené menu, bordové ovládanie a veľká fotografia domácich trubičiek.
+- Responzívny sviatočný vzhľad a lokálne načítavané písmo vrátane licencie. Existujúca voľba témy zostáva zachovaná.
+
 ## [1.25.0] — 2026-10-28
 
 ### Zmenené

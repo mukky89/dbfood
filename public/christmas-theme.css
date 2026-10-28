@@ -1,0 +1,107 @@
+/* Optional Christmas world. All rules are scoped so other themes remain intact. */
+@font-face {
+  font-family: 'Yvonka Display';
+  src: url('/assets/christmas/comforter.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+html.theme-christmas {
+  --brand: #213e33; --accent: #8d333c; --green: #356448;
+  --orange: #98661f; --bg: #f5efe3; --card: #fffcf5;
+  --border: #dfd4bf; --text: #263e34; --muted: #686451; --radius: 14px;
+  scrollbar-color: #a89570 #f5efe3;
+}
+html.theme-christmas body { background: #f5efe3; color: var(--text); }
+html.theme-christmas ::selection { background: #dfc68d; color: #213e33; }
+html.theme-christmas :focus-visible { outline: 3px solid #a16a22; outline-offset: 4px; }
+html.theme-christmas body > header {
+  background: #213e33; box-shadow: none; border-bottom: 1px solid #b99a5e;
+  padding: 15px 28px; min-height: 84px;
+}
+html.theme-christmas .hdr-brand {
+  font-family: Georgia, serif; font-weight: 400; font-size: 29px;
+  background: none; -webkit-text-fill-color: #f4e6c9; color: #f4e6c9; animation: none;
+}
+html.theme-christmas .hdr-sub { color: #e6dcc8; animation: none; font-weight: 400; font-size: 14px; }
+html.theme-christmas .hdr-sep { color: #b99a5e; margin: 0 9px; }
+html.theme-christmas .hdr-pizza { animation: none; font-size: 21px; }
+html.theme-christmas .nav-link { color: #f4e6c9; }
+html.theme-christmas :is(.phone-btn, .hdr-weather, .contact-card, .secrets-btn) {
+  background: #2c4b3e; border-color: #6c7c61; color: #fff4dc; box-shadow: none;
+}
+html.theme-christmas .christmas-countdown { background: transparent; border: 0; box-shadow: none; }
+html.theme-christmas #countdown-bar .cd-inner { background: #eae4d5; color: #364f40; padding: 12px 20px; }
+html.theme-christmas #countdown-bar.red .cd-inner { background: #f4ded6; color: #7e3033; }
+html.theme-christmas #countdown-bar.closed .cd-inner { background: #e9e2d3; color: #625b48; }
+html.theme-christmas #countdown-bar.blok .cd-inner { background: #f4ded6; color: #7e3033; }
+html.theme-christmas #countdown-bar.orange .cd-inner { background: #f4e5c5; color: #78501c; }
+html.theme-christmas #cd-info { background: #ede5d5 !important; color: #615740; }
+html.theme-christmas main { max-width: 1240px; padding: 38px 32px 64px; }
+html.theme-christmas .oblatky-promo {
+  grid-template-columns: 1fr 1fr; min-height: 360px; background: #e9dfc9;
+  border-radius: 14px; box-shadow: none; margin-bottom: 36px; position: relative;
+}
+html.theme-christmas .oblatky-promo-content { padding: 38px 46px; position: relative; }
+html.theme-christmas .oblatky-promo h2 {
+  font-family: 'Yvonka Display', Georgia, serif; font-weight: 400;
+  font-size: clamp(40px, 4.5vw, 68px); line-height: 1.08; text-wrap: balance;
+  color: #213e33; max-width: 12ch; margin-bottom: 22px;
+}
+html.theme-christmas .oblatky-promo p { color: #4f5947; font-size: 15px; line-height: 1.7; max-width: 34ch; margin-bottom: 24px; }
+html.theme-christmas .oblatky-promo-link { background: #82323b; border-radius: 6px; padding: 14px 20px; }
+html.theme-christmas .oblatky-promo-link:hover { background: #65252d; }
+html.theme-christmas .oblatky-promo img { height: 100%; min-height: 360px; object-position: center; }
+html.theme-christmas .grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; }
+html.theme-christmas .grid > * { min-width: 0; }
+html.theme-christmas .card { background: #fffcf5; border: 1px solid #dfd4bf; box-shadow: none; padding: 26px; border-radius: 14px; }
+html.theme-christmas .card-title { font: 400 24px/1.3 Georgia, serif; color: #213e33; padding-bottom: 16px; border-color: #dfd4bf; }
+html.theme-christmas .menu-date-banner { background: #294a3b !important; border-radius: 8px !important; padding: 20px !important; }
+html.theme-christmas .menu-date-banner > div > div { color: #fff3db !important; }
+html.theme-christmas .menu-section { margin-top: 25px; }
+html.theme-christmas .menu-section-title { color: #675332; letter-spacing: 1.2px; font-size: 12px; }
+html.theme-christmas .menu-item { background: #f6f0e4; border: 1px solid #e5dbc9; border-radius: 8px; padding: 14px; }
+html.theme-christmas .menu-item:hover { background: #ede6d6; border-color: #a59068; box-shadow: none; }
+html.theme-christmas .menu-item.selected { background: #e6ebdf; border-color: #456749; box-shadow: none; }
+html.theme-christmas .menu-item.hot-dish { background: #f6f0e4 !important; border-color: #dfd4bf !important; }
+html.theme-christmas .menu-item.hot-dish.selected { background: #e6ebdf !important; border-color: #456749 !important; }
+html.theme-christmas :is(.menu-item-num, .order-avatar, .summary-num) { background: #294a3b; color: #fff3db; }
+html.theme-christmas .price-badge { background: #ede0c4; color: #664c23; }
+html.theme-christmas .menu-lang-switch { background: transparent; border-color: #dfd4bf; box-shadow: none; }
+html.theme-christmas :is(.menu-lang-switch, .menu-lang-btn, .mls-globe) { animation: none !important; }
+html.theme-christmas :is(input, textarea, select) { accent-color: #294a3b; caret-color: #82323b; }
+html.theme-christmas :is(input[type=text], input[type=email], input[type=password], textarea, select) { background: #fffcf5; color: #263e34; border-color: #c7b99d; }
+html.theme-christmas :is(.btn-primary, .btn-qr) { background: #294a3b; color: #fff3db; box-shadow: none; }
+html.theme-christmas :is(.btn-primary, .btn-qr):hover { background: #193629; }
+html.theme-christmas .btn-primary:disabled { background: #d8d5c7; color: #666453; }
+html.theme-christmas .btn-secondary { background: #eee3cd; color: #55472c; }
+html.theme-christmas #login-banner { background: #294a3b !important; }
+html.theme-christmas #price-calculator { background: #356448 !important; }
+html.theme-christmas :is(.modal, .qr-modal, .phone-dropdown) { background: #fffcf5; color: #263e34; }
+html.theme-christmas .modal-tab.active { background: #294a3b; color: #fff3db; }
+html.theme-christmas :is(.summary-table, .admin-table) th { background: #294a3b; color: #fff3db; }
+html.theme-christmas :is(.summary-table, .admin-table) td { border-color: #dfd4bf; }
+html.theme-christmas :is(.empty-state, .loading) { color: #686451; }
+html.theme-christmas .allergen-legend { background: #f6f0e4; border-color: #dfd4bf; }
+html.theme-christmas .fob { background: #fffcf5; border-color: #dfd4bf; }
+.christmas-theme-option { text-align: left; font: inherit; }
+.christmas-theme-option .t-name, .christmas-theme-option .t-desc { display: block; }
+@media (max-width: 800px) {
+  html.theme-christmas main { padding: 24px 18px 48px; }
+  html.theme-christmas .grid { grid-template-columns: 1fr; gap: 20px; }
+  html.theme-christmas .oblatky-promo { grid-template-columns: 1fr 1fr; min-height: 300px; }
+  html.theme-christmas .oblatky-promo-content { padding: 28px; }
+  html.theme-christmas .oblatky-promo img { grid-row: auto; min-height: 300px; }
+}
+@media (max-width: 560px) {
+  html.theme-christmas #countdown-bar .cd-inner { flex-wrap: wrap; gap: 10px; }
+  html.theme-christmas #cd-time { flex-basis: 100%; justify-content: center; }
+  html.theme-christmas body > header { position: relative; padding: 14px; }
+  html.theme-christmas .header-right { gap: 7px; justify-content: center; width: 100%; }
+  html.theme-christmas .oblatky-promo { grid-template-columns: 1fr; }
+  html.theme-christmas .oblatky-promo img { grid-row: 1; height: 220px; min-height: 0; }
+  html.theme-christmas .oblatky-promo-content { padding: 26px; }
+  html.theme-christmas .oblatky-promo h2 { max-width: 15ch; font-size: 46px; }
+  html.theme-christmas .card { padding: 18px; }
+  html.theme-christmas .card-title { font-size: 22px; }
+}
