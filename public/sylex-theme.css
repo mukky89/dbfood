@@ -59,3 +59,28 @@ html.theme-sylex{--brand:#234852;--accent:#147c76;--bg:#dae3d6;--card:#f6f7ee;--
 #sylex-game .sx-map-tools>.sx-controls{max-width:260px;margin-bottom:10px}
 @media(min-width:851px){#sylex-game .sx-top,#sylex-game .sx-layout aside{top:18px}#sylex-game .sx-stats{top:114px}}
 @media(max-width:850px){#sylex-intro{top:300px;left:18px}#sylex-intro strong{font-size:30px}#sylex-intro span{font-size:15px}#sylex-intro p{display:none}#sylex-game .sx-map-tools>.sx-controls{max-width:none;margin-bottom:6px}#sylex-game .sx-map-tools>.sx-controls button{min-height:32px;padding:5px 10px;font-size:12px}}
+/* Landing layout follows the actual header and announcement height. */
+.theme-sylex #main-content{margin-top:20px}
+#sylex-intro{position:relative;top:auto;left:auto;box-sizing:border-box;width:calc(100% - 40px);max-width:1070px;min-height:290px;margin:0 auto;padding:38px 0 24px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:24px;pointer-events:auto;text-shadow:0 2px 5px #102b2f}
+#sylex-intro strong{font-size:clamp(32px,3.5vw,48px);letter-spacing:0;line-height:1.05}
+#sylex-intro span{font-size:20px;margin-top:6px}
+#sylex-intro p{font-size:14px;line-height:1.5;margin:10px 0 0;display:block;max-width:32ch}
+.sx-intro-copy{padding:18px 22px;background:#152e3a;border-radius:12px;text-shadow:none;box-shadow:0 8px 24px #10262d26}
+.sx-intro-actions{display:flex;align-items:flex-start;gap:10px;position:relative;text-shadow:none}
+#sylex-launch{position:static;min-height:46px;padding:12px 20px;border:0;border-radius:8px;background:#e8c979;color:#193542;box-shadow:0 4px 12px #10262d26;white-space:nowrap}
+#sylex-launch:hover{background:#ffe1a0}
+#sylex-board{position:relative;right:auto;bottom:auto;box-sizing:border-box;width:240px;max-width:none;max-height:none;overflow:visible;padding:0;border-radius:8px;background:#152e3a;z-index:3}
+#sylex-board summary{padding:13px 16px;min-height:46px;box-sizing:border-box;color:#eef2df}
+#sylex-board[open]{box-shadow:0 8px 24px #10262d40}
+#sylex-board [data-sylex-scores]{padding:0 14px;max-height:240px;overflow:auto}
+#sylex-board button{margin:10px 14px 14px;min-height:40px}
+#sylex-board summary:focus-visible,#sylex-board button:focus-visible{outline:3px solid #e8c979;outline-offset:3px}
+.theme-sylex .card{background:#f6f7ee}
+@media(max-width:850px){
+ #sylex-intro{width:calc(100% - 32px);min-height:260px;padding:24px 0 12px;gap:16px;top:auto;left:auto}
+ #sylex-intro strong{font-size:32px}#sylex-intro span{font-size:18px}#sylex-intro p{display:block;font-size:13px}
+ .sx-intro-copy{padding:16px 18px}.sx-intro-actions{flex-wrap:wrap;width:100%;gap:8px}
+ #sylex-board{width:210px;right:auto;bottom:auto;max-width:100%}
+ #sylex-launch{left:auto;bottom:auto;min-height:46px;font-size:14px}
+ .theme-sylex #main-content{margin-top:12px}
+}

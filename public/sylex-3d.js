@@ -189,7 +189,7 @@ export async function createSylex3D({ onPick, onFailure }) {
     let count=0;for(const e of game.effects.slice(0,9)){effectPositions.set([e.x,32,e.y,e.tx,22,e.ty],count*6);count++;}effectGeometry.attributes.position.needsUpdate=true;effectGeometry.setDrawRange(0,playing?count*2:0);
     const width=Math.max(320,canvas.clientWidth||innerWidth),height=Math.max(240,canvas.clientHeight||innerHeight);
     if(canvas.width!==Math.round(width*renderer.getPixelRatio())||canvas.height!==Math.round(height*renderer.getPixelRatio()))renderer.setSize(width,height,false);
-    camera.aspect=width/height;camera.zoom=zoom*Math.min(1,camera.aspect/(16/9));camera.setViewOffset(width,height,playing&&width>850?130:0,playing&&width<=850?height*.19:0,width,height);camera.updateProjectionMatrix();
+    camera.aspect=width/height;camera.zoom=(playing?zoom:1.18)*Math.min(1,camera.aspect/(16/9));camera.setViewOffset(width,height,playing&&width>850?130:0,playing&&width<=850?height*.19:0,width,height);camera.updateProjectionMatrix();
     const labelSize=18*2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))/(height*camera.zoom);
     padLabels.forEach((sprite,i)=>{sprite.visible=playing;sprite.scale.set(labelSize,labelSize,1);sprite.material.color.set(i===selected?'#ffdc83':'#ffffff');});
     renderer.render(scene,camera);

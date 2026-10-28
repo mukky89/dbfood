@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.24.2] — 2026-10-28
+
+### Opravené
+- Úvod Sylex sa prispôsobuje výške horných líšt a neprekrýva oznamy. Tlačidlo hry a rebríček sú spolu pri nadpise.
+- Širší pohľad na pozadie zobrazuje celú budovu; herný režim zachováva detailnú kameru.
+- Čitateľné nepriehľadné karty a responzívne rozloženie ovládania na mobile.
+
 ## [1.24.1] — 2026-10-28
 
 ### Zmenené
