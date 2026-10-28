@@ -84,3 +84,12 @@ html.theme-sylex{--brand:#234852;--accent:#147c76;--bg:#dae3d6;--card:#f6f7ee;--
  #sylex-launch{left:auto;bottom:auto;min-height:46px;font-size:14px}
  .theme-sylex #main-content{margin-top:12px}
 }
+/* Keep the lunch promotion first; game controls stay at the page edge. */
+.theme-sylex #sylex-intro{position:fixed;inset:auto 18px 86px auto;width:240px;max-width:calc(100vw - 36px);min-height:0;margin:0;padding:0;gap:0;z-index:90}
+#sylex-intro .sx-intro-copy{display:none}
+#sylex-intro .sx-intro-actions{width:100%;flex-direction:column;gap:8px}
+#sylex-intro #sylex-launch,#sylex-intro #sylex-board{width:100%;max-width:100%}
+#sylex-intro #sylex-board{max-height:50dvh;overflow:auto}
+.theme-sylex #main-content{margin-top:24px}
+@media(max-width:1550px){.theme-sylex #sylex-intro{width:180px}#sylex-intro #sylex-launch{padding:12px 10px;font-size:14px}#sylex-intro #sylex-board summary{padding:12px 10px;font-size:12px}}
+@media(max-width:850px){.theme-sylex #sylex-intro{right:12px;bottom:80px;width:170px;max-width:calc(100vw - 24px)}.theme-sylex #main-content{margin-top:16px}}

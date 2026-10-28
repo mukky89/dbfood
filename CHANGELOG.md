@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.24.3] — 2026-10-28
+
+### Zmenené
+- Ponuka trubičiek je na začiatku obsahu. Tlačidlo Tower Defence a rebríček sú na boku stránky bez úvodného panelu.
+
 ## [1.24.2] — 2026-10-28
 
 ### Opravené

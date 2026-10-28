@@ -7,7 +7,7 @@ let runId=null,starting=false,submitting=false,submitted=false,finished=false;
 const root=document.documentElement;
 const world=document.createElement('div');world.id='sylex-world';world.hidden=true;
 const canvas=document.createElement('canvas');canvas.width=1920;canvas.height=1080;canvas.setAttribute('aria-label','Areál Sylex');canvas.setAttribute('role','img');world.append(canvas);const ctx=canvas.getContext('2d');
-const dock=document.createElement('button');dock.id='sylex-launch';dock.type='button';dock.textContent='Brániť Sylex';
+const dock=document.createElement('button');dock.id='sylex-launch';dock.type='button';dock.textContent='Tower Defence';
 const intro=document.createElement('div');intro.id='sylex-intro';intro.innerHTML='<strong>SYLEX</strong><span>Tower Defence</span><p>Postav obranu. Zastav zombíkov. Ochráň Sylex.</p>';
 const board=document.createElement('details');board.id='sylex-board';board.innerHTML='<summary>Rebríček obrany</summary><div data-sylex-scores></div><button type="button" data-refresh>Obnoviť výsledky</button>';
 const dialog=document.createElement('dialog');dialog.id='sylex-game';dialog.setAttribute('aria-labelledby','sylex-title');
