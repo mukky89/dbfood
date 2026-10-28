@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.27.3] — 2026-10-28
+
+### Zmenené
+- Animácia pary sa prehráva na 75 % pôvodnej rýchlosti pre pokojnejší pohyb. Plynulá slučka aj rýchlosť hlasovej nahrávky zostávajú zachované.
+
 ## [1.27.2] — 2026-10-28
 
 ### Opravené
