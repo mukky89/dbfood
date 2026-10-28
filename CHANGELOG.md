@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.26.3] — 2026-10-28
+
+### Zmenené
+- Obnovený nadpis Kúsok domova na sviatočný stôl pri zachovaní čitateľného písma Georgia.
+
 ## [1.26.2] — 2026-10-28
 
 ### Zmenené
