@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.27.1] — 2026-10-28
+
+### Zmenené
+- Hlasová hláška nahradená dodanou nahrávkou Sarah: Práve sa dopiekli čerstvé vianočné oblátky.
+- Pôvodnú kreslenú paru nahrádza animácia fotografie vytvorená cez WaveSpeed. Tiché video sa pozastaví mimo obrazovky; pri obmedzenom pohybe zostáva statická fotografia.
+
 ## [1.27.0] — 2026-10-28
 
 ### Pridané

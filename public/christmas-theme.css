@@ -87,20 +87,8 @@ html.theme-christmas .christmas-bakery {
 html.theme-christmas .christmas-bakery:focus-visible { outline-offset: -6px; outline-color: #fff8e9; }
 html.theme-christmas .christmas-bakery img { transition: filter 180ms ease-out; }
 html.theme-christmas .christmas-bakery:hover img { filter: brightness(1.05); }
-.bakery-steam { position: absolute; inset: 0; pointer-events: none; }
-.bakery-steam svg { width: 100%; height: 100%; overflow: visible; }
-.bakery-steam path {
-  stroke-width: 11px; filter: blur(5px); opacity: 0;
-  transform-origin: center bottom; animation: bakery-steam-rise 5.8s ease-in-out infinite;
-}
-.bakery-steam path:nth-child(2) { animation-delay: -2s; stroke-width: 15px; }
-.bakery-steam path:nth-child(3) { animation-delay: -4s; }
-@keyframes bakery-steam-rise {
-  0% { opacity: 0; transform: translate(0, 55px) scaleX(.8); }
-  30% { opacity: .72; }
-  65% { opacity: .45; }
-  100% { opacity: 0; transform: translate(18px, -75px) scaleX(1.2); }
-}
+.bakery-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; }
+.christmas-bakery.video-ready .bakery-video { opacity: 1; }
 .bakery-caption {
   position: absolute; bottom: 18px; left: 18px; right: 18px;
   display: flex; align-items: center; gap: 9px; width: fit-content; max-width: calc(100% - 36px);
@@ -109,9 +97,8 @@ html.theme-christmas .christmas-bakery:hover img { filter: brightness(1.05); }
 }
 .bakery-caption svg { flex-shrink: 0; }
 .christmas-bakery.is-playing .bakery-caption { background: #82323b; }
-.christmas-bakery:is(.steam-paused, .page-hidden) .bakery-steam path { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .bakery-steam { display: none; }
+  .bakery-video { display: none; }
   html.theme-christmas .christmas-bakery img { transition: none; }
 }
 @media (max-width: 800px) {
