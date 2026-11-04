@@ -2,7 +2,7 @@
  * and combat effects are repainted during simulation. Logical map: 960 x 540. */
 (function () {
   'use strict';
-  const {path, routes, slots, types, position} = window.SylexTD;
+  const {path, routes, slots, types, position, river, portals} = window.SylexTD;
   // Every route after the first is drawn only up to where it joins the main road.
   const onPath=([x,y])=>path.some((a,i)=>i&&Math.min(a[0],path[i-1][0])<=x&&x<=Math.max(a[0],path[i-1][0])&&Math.min(a[1],path[i-1][1])<=y&&y<=Math.max(a[1],path[i-1][1]));
   const roads=[path,...routes.slice(1).map(r=>r.slice(0,r.findIndex((p,i)=>i&&onPath(p))+1))];
@@ -99,10 +99,22 @@
     for(let i=0;i<1600;i++){const x=27+rand()*292,y=427+rand()*88;c.fillStyle=i%2?'#f0f2dc14':'#172b351a';c.fillRect(x,y,1,1);}
     ['#a9babf','#617b93','#5b6164','#bdc0b4','#73828b','#c6c9bf'].forEach((color,i)=>car(c,61+i*46,468,color));
     c.lineJoin='round';c.lineCap='round';
+    // River with sandy banks; the east road crosses it on a bridge.
+    c.save();c.lineJoin='round';c.lineCap='round';const curve=()=>{c.beginPath();c.moveTo(...river[0]);for(let i=1;i<river.length-1;i++){const m=[(river[i][0]+river[i+1][0])/2,(river[i][1]+river[i+1][1])/2];c.quadraticCurveTo(...river[i],...m);}c.lineTo(...river.at(-1));};
+    curve();c.strokeStyle='#8a8062';c.lineWidth=78;c.stroke();curve();c.strokeStyle=gradient(c,820,330,180,280,['#3d6f7e','#2a5664','#36697a']);c.lineWidth=56;c.stroke();
+    c.setLineDash([10,22]);curve();c.strokeStyle='#bfe0e855';c.lineWidth=1.5;c.stroke();c.setLineDash([]);c.restore();
     c.save();c.shadowColor='#193c3140';c.shadowBlur=5;c.shadowOffsetY=3;roads.forEach(r=>line(c,r,'#4d5e4f',46));c.restore();
     roads.forEach(r=>line(c,r,'#c2c4af',43));roads.forEach(r=>line(c,r,'#8c988e',39));roads.forEach(r=>line(c,r,gradient(c,0,0,960,540,['#7a8380','#515f65']),34));
     c.save();c.lineWidth=32;c.strokeStyle='#ffffff07';roads.forEach(r=>{c.beginPath();r.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();});c.restore();
     c.setLineDash([6,16]);roads.forEach(r=>line(c,r,'#e4ddae',1.3));c.setLineDash([]);
+    // Bridge railings and abutments.
+    for(const y of [448,492]){line(c,[[856,y],[924,y]],'#3d4b4f',4);line(c,[[856,y-1],[924,y-1]],'#cdd6d2',1.5);for(let x=858;x<=922;x+=8)ellipse(c,x,y-1,1.4,1.2,'#e3e8e2');}
+    // Data centre: server racks with status LEDs and the fibre trunk to Sylex.
+    box(c,883,169,70,78,3,'#a9ab9f','#7d8378');for(let i=0;i<5;i++){const y=176+i*13;box(c,900,y,14,11,1.5,'#20282d','#3a464d');for(let k=0;k<5;k++)for(let j=0;j<3;j++){c.fillStyle=['#57ff8c','#4fc9ff','#ffb02e','#1d3a28'][(i*7+k*3+j)%4];c.fillRect(902+k*2.4,y+2+j*3,1.2,1.2);}}
+    box(c,928,190,16,30,2,'#c9cfcc','#8d9692');ellipse(c,936,198,5,4,'#3a464d');ellipse(c,936,212,5,4,'#3a464d');
+    c.save();c.beginPath();c.moveTo(900,182);c.bezierCurveTo(880,170,850,160,832,146);c.strokeStyle='#f2b233';c.lineWidth=2;c.shadowColor='#ffcf4a';c.shadowBlur=6;c.stroke();c.restore();
+    // Portal frames (their membranes glow in paint()).
+    routes.forEach(r=>{const [x,y]=r[0],[nx,ny]=r[1],a=Math.atan2(ny-y,nx-x)+Math.PI/2;c.save();c.translate(x,y);c.rotate(a);box(c,-26,-6,52,12,3,'#9a9d92','#6d7268');box(c,-25,-4,6,8,1,'#7d8378');box(c,19,-4,6,8,1,'#7d8378');c.restore();});
     // Inset utility covers and planted beds.
     for(const [x,y] of [[150,339],[360,310],[570,300]]){box(c,x-7,y-6,14,12,2,'#445457','#a4ada0');for(let j=-4;j<6;j+=3)line(c,[[x-5,y+j],[x+5,y+j]],'#89948b',.7);}
     for(let x=28;x<925;x+=18){line(c,[[x+5,40],[x+10,45]],'#34473650',1);line(c,[[x,24],[x,42]],'#536c67',1.5);}
@@ -113,7 +125,7 @@
     box(c,18,315,6,34,2,'#879b91');box(c,17,310,9,8,2,'#c9d0b6');
     for(let x=24;x<69;x+=7)box(c,x,311,7,3,0,x%2?'#b65343':'#ede6cd');
     building(c);
-    for(const [x,y,size,seed] of [[53,110,28,1],[111,133,31,2],[230,91,30,3],[420,77,34,4],[501,171,26,5],[890,405,40,6],[847,478,34,7],[696,487,32,8],[351,510,26,9],[83,201,23,10]])tree(c,x,y,size,seed);
+    for(const [x,y,size,seed] of [[53,110,28,1],[111,133,31,2],[230,91,30,3],[420,77,34,4],[501,171,26,5],[948,318,38,6],[780,525,32,7],[610,520,30,11],[330,40,30,12],[20,190,26,13],[958,528,32,14],[696,487,32,8],[351,510,26,9],[83,201,23,10]])tree(c,x,y,size,seed);
     slots.forEach(([x,y],i)=>{
       shadow(c,x+5,y+5,29,18);ellipse(c,x,y+3,23,16,'#526461');ellipse(c,x,y,23,16,gradient(c,x-15,y-12,30,24,['#c1c8b6','#879989']));ellipse(c,x,y,18,12,'#758a7d');
       for(let j=0;j<4;j++){const a=j*Math.PI/2+.6;ellipse(c,x+Math.cos(a)*19,y+Math.sin(a)*12,1.4,1,'#d4dac3');}
@@ -150,13 +162,14 @@
     c.restore();for(let j=0;j<level;j++)box(c,x-8+j*7,y+7,4,2,1,'#eac775');c.restore();
   }
   function operator(c,e){
-    const next=position(e.distance+2,e.route),facing=Math.sign(next.x-e.x),size={boss:1.6,brute:1.2,swarm:.7,runner:.9}[e.kind]||1;
+    const next=position(e.distance+2,e.route),facing=Math.sign(next.x-e.x),size={boss:1.6,brute:1.2,leader:1.4,spore:1.2,crawler:.8,swarm:.7,runner:.9}[e.kind]||1;
     const stride=Math.sin(e.distance*.24)*3;
     c.save();c.translate(e.x,e.y);c.scale(size,size);if(e.cloak&&!e.revealed)c.globalAlpha=.35;shadow(c,7,6,14,8);
     // Shambling undead with ragged clothes, reaching arms and sunken eyes.
     box(c,-6,2+stride*.5,5,12,2,'#343c35');box(c,1,2-stride*.5,5,12,2,'#485044');
     box(c,-7,11+stride*.5,7,5,2,'#242923');box(c,0,11-stride*.5,7,5,2,'#242923');
-    box(c,-7,-9,14,19,4,e.slow?'#62abc1':e.kind==='armored'?'#c8b23c':'#55513d');
+    box(c,-7,-9,14,19,4,e.slow?'#62abc1':e.kind==='armored'?'#c8b23c':e.kind==='leader'?'#3b2f2a':e.kind==='spore'?'#6f6650':'#55513d');
+    if(['spore','leader','boss','brute','crawler'].includes(e.kind)){ellipse(c,4,-5,3,2,'#c9a46a');ellipse(c,-3,-17,2.6,1.6,'#c9a46a');ellipse(c,6,-15,1.8,1.2,'#d9b77a');}
     for(const x of [-5,0,4])box(c,x,7,2,5,1,'#343c35');box(c,2,-4,3,5,.5,'#8b9d68');
     box(c,-12,-10-stride*.3,4,13,2,'#8b9d68');box(c,8,-13+stride*.3,4,13,2,'#8b9d68');
     ellipse(c,-10,-11-stride*.3,3,3,'#a3af7d');ellipse(c,10,-14+stride*.3,3,3,'#8b9d68');
@@ -177,7 +190,10 @@
       const angle=target?Math.atan2(target.y-y,target.x-x)+Math.PI/2:0;tower(c,x,y,t.type,t.level,angle);
     }})),...game.enemies.map(e=>({y:e.y,draw:()=>operator(c,e)}))].sort((a,b)=>a.y-b.y);
     actors.forEach(a=>a.draw());
-    for(const e of game.effects){c.save();c.globalAlpha=Math.min(1,e.life/.12);if(e.kind==='blast'){c.beginPath();c.ellipse(e.tx,e.ty,60*(1.2-e.life*2),36*(1.2-e.life*2),0,0,Math.PI*2);c.strokeStyle=e.color;c.lineWidth=2;c.stroke();}else{line(c,[[e.x,e.y-22],[e.tx,e.ty]],e.color,e.kind==='beam'?2.6:1.6);ellipse(c,e.tx,e.ty,4,3,'#fff0be');}c.restore();}
+    const soon=new Set();if(game.state==='wave')for(const q of game.queue){if(q.at-game.time>4)break;soon.add(q.route);}
+    const t=performance.now()/1000;routes.forEach((r,i)=>{const [x,y]=r[0],on=soon.has(i),g=c.createRadialGradient(x,y-14,1,x,y-14,on?24:16);g.addColorStop(0,on?'#f4ffe0':'#cfe9c0');g.addColorStop(.5,on?'#9dff7acc':'#7ccf6a55');g.addColorStop(1,'#4c2f7a00');c.fillStyle=g;c.beginPath();c.ellipse(x,y-14,on?20+Math.sin(t*6)*2:15,on?24:18,0,0,Math.PI*2);c.fill();c.strokeStyle='#3a4146';c.lineWidth=3;c.beginPath();c.ellipse(x,y-14,17,21,0,0,Math.PI*2);c.stroke();});
+    for(const d of game.drones){shadow(c,d.x,d.y,10,5);const y=d.y-38;line(c,[[d.x-9,y-5],[d.x+9,y+5]],'#33414a',2);line(c,[[d.x-9,y+5],[d.x+9,y-5]],'#33414a',2);for(const [dx,dy] of [[-9,-5],[9,5],[-9,5],[9,-5]])ellipse(c,d.x+dx,y+dy,5,2,'#c9d6dc88');box(c,d.x-4,y-3,8,6,2,'#e8ecea','#7d878a');ellipse(c,d.x,y+3,1.4,1.4,'#7fe8ff');}
+    for(const e of game.effects){c.save();c.globalAlpha=Math.min(1,e.life/.12);if(e.kind==='spores'){c.fillStyle='#b7d36a55';c.beginPath();c.arc(e.tx,e.ty,70*(1-e.life),0,Math.PI*2);c.fill();}else if(e.kind==='drone'){line(c,[[e.x,e.y-38],[e.tx,e.ty]],e.color,1.4);ellipse(c,e.tx,e.ty,3,2,'#dff8ff');}else if(e.kind==='blast'){c.beginPath();c.ellipse(e.tx,e.ty,60*(1.2-e.life*2),36*(1.2-e.life*2),0,0,Math.PI*2);c.strokeStyle=e.color;c.lineWidth=2;c.stroke();}else{line(c,[[e.x,e.y-22],[e.tx,e.ty]],e.color,e.kind==='beam'?2.6:1.6);ellipse(c,e.tx,e.ty,4,3,'#fff0be');}c.restore();}
   }
   function icon(type){const el=document.createElement('canvas');el.width=100;el.height=100;const c=el.getContext('2d');c.scale(1.6,1.6);tower(c,31,47,type,1,0);return el.toDataURL();}
   window.SylexRenderer={paint,icon};

@@ -1,5 +1,5 @@
 const test=require('node:test');const assert=require('node:assert/strict');
-const {Game,types,enemyTypes,slots,routes,totals,position,wavePlan,waveSummary,upgradeCost,specCost,sellValue,CREDIT_CAP}=require('../public/sylex-engine');
+const {Game,types,enemyTypes,slots,routes,totals,position,wavePlan,waveSummary,portalCount,TOTAL_WAVES,upgradeCost,specCost,sellValue,CREDIT_CAP}=require('../public/sylex-engine');
 
 // A wave-state game with no spawns left, so tests control every enemy.
 function arena(){const g=new Game();g.start();g.queue=[];return g;}
@@ -9,12 +9,18 @@ function hold(){return ()=>{};}
 function step(g,seconds,pins=[]){for(let t=0;t<seconds;t+=1/30){g.tick(1/30);pins.forEach(p=>p());}}
 
 test('construction protects budget and occupied slots; upgrades stop at level three',()=>{const g=new Game();assert.equal(g.build(-1,'rapid'),false);assert.equal(g.build(slots.length,'rapid'),false);assert.equal(g.build(0,'rapid'),true);assert.equal(g.credits,150);assert.equal(g.build(0,'pulse'),false);assert.equal(g.build(1,'pulse'),true);assert.equal(g.build(2,'rapid'),false);g.credits=1000;assert.ok(g.upgrade(0));assert.ok(g.upgrade(0));assert.equal(g.upgrade(0),false);assert.equal(upgradeCost(g.tower(0)),null);});
-test('map has two entrances that merge before the gate and build pads stay off the road',()=>{assert.equal(routes.length,2);assert.deepEqual(routes[0].at(-1),routes[1].at(-1));assert.ok(totals[1]<totals[0]);assert.ok(slots.length>=12);
+test('map has four portals that merge before the gate and build pads stay off the road',()=>{assert.equal(routes.length,4);for(const r of routes)assert.deepEqual(r.at(-1),[805,150]);assert.ok(slots.length>=12);
  for(const s of slots)for(const r of routes)for(let d=0;d<totals[routes.indexOf(r)];d+=4){const p=position(d,routes.indexOf(r));assert.ok(Math.sqrt((p.x-s[0])**2+(p.y-s[1])**2)>=48,`pad ${s} touches road`);}});
 test('undefended waves damage building and eventually end the game',()=>{const g=new Game();g.start();assert.equal(g.start(),false);for(let i=0;i<20000&&g.state!=='over';i++){if(g.state==='ready')g.start();g.tick(.1);}assert.equal(g.health,0);assert.equal(g.state,'over');assert.equal(g.build(0,'rapid'),false);assert.equal(g.start(),false);assert.equal(g.callWave(),false);});
-test('prepared first-wave defence wins and awards kill rewards and the wave bonus',()=>{const g=new Game();g.build(1,'rapid');g.build(3,'rapid');g.build(6,'rapid');g.start();for(let i=0;i<10000&&g.state==='wave';i++)g.tick(.1);assert.equal(g.state,'ready');assert.equal(g.health,100);assert.equal(g.kills,8);assert.equal(g.points,80);assert.equal(g.credits,10+8*enemyTypes.walker.reward+35);});
-test('waves come from data, use both routes and repeat with growing counts',()=>{assert.deepEqual(waveSummary(1),{walker:8});assert.ok(wavePlan(2).some(g=>g.route===1));assert.ok(waveSummary(5).boss>=1);assert.ok(waveSummary(10).boss>=1);assert.ok(waveSummary(6).cloaked);assert.ok(waveSummary(16).walker>waveSummary(6).walker);
- const g=new Game();g.start();assert.equal(g.pending,8);g.callWave();assert.equal(g.wave,1);});
+test('prepared first-wave defence wins and awards kill rewards and the wave bonus',()=>{const g=new Game();g.build(1,'rapid');g.build(3,'rapid');g.build(6,'rapid');g.start();for(let i=0;i<10000&&g.state==='wave';i++)g.tick(.1);assert.equal(g.state,'ready');assert.equal(g.health,300);assert.equal(g.kills,9);assert.equal(g.points,80+enemyTypes.leader.points);assert.equal(g.credits,10+8*enemyTypes.walker.reward+enemyTypes.leader.reward+35);});
+test('waves come from data, end with a leader or colossus and open more portals over time',()=>{assert.deepEqual(waveSummary(1),{walker:8,leader:1});assert.ok(waveSummary(5).boss>=1);assert.equal(waveSummary(5).leader,undefined);assert.ok(waveSummary(6).cloaked);assert.ok(waveSummary(16).walker>waveSummary(6).walker);
+ for(let n=1;n<=TOTAL_WAVES;n++){const plan=wavePlan(n,7),last=plan.reduce((a,b)=>b.delay+(b.count-1)*b.gap>=a.delay+(a.count-1)*a.gap?b:a);assert.ok(['leader','boss'].includes(last.kind),`wave ${n} ends with ${last.kind}`);assert.ok(plan.every(g=>g.route<portalCount(n)));}
+ assert.ok(wavePlan(1,1).every(g=>g.route===0));
+ const portalsOf=seed=>JSON.stringify(Array.from({length:12},(_,i)=>wavePlan(i+1,seed).map(g=>g.route)));assert.equal(portalsOf(5),portalsOf(5));assert.notEqual(portalsOf(5),portalsOf(6));
+ const g=new Game();g.start();assert.equal(g.pending,9);g.callWave();assert.equal(g.wave,1);});
+test('spore carriers heal nearby zombies when they die; crawlers ignore slowing',()=>{const g=arena();const s=place(g,3,'spore'),w=place(g,3,'walker',10);w.hp=w.max/2;s.hp=0;g.tick(1/30);assert.ok(w.hp>w.max/2);assert.ok(g.effects.some(e=>e.kind==='spores'));
+ const c=place(g,3,'crawler');g.chill(c,.4,2);assert.equal(c.slow,0);});
+test('clearing the last wave wins the defence with a bonus',()=>{const g=new Game();g.wave=TOTAL_WAVES-1;assert.ok(g.start());g.queue=[];g.enemies=[];const before=g.points;g.tick(1/30);assert.equal(g.state,'won');assert.equal(g.points,before+1000+g.health*2);assert.equal(g.start(),false);assert.equal(g.callWave(),false);});
 test('armor reduces discrete hits; pierce specialization and laser ignore it',()=>{
  const g=arena();g.credits=5000;g.build(0,'rapid');const a=place(g,0,'armored',20);const pin=hold(a);g.tick(1/30);pin();const plain=a.max-a.hp;assert.ok(plain>0&&plain<types.rapid.damage*.5,'armor blunts a rapid shot');
  const p=arena();p.credits=5000;p.build(0,'rapid');p.upgrade(0);p.upgrade(0);assert.ok(p.specialize(0,'pierce'));const b=place(p,0,'armored',20);p.tick(1/30);assert.ok(b.max-b.hp>=types.rapid.damage*2*1.4-1e-9);
@@ -34,3 +40,6 @@ test('selling refunds 70 % of everything invested; specialization needs level th
 test('calling a wave early pays a bonus; credits are capped',()=>{const g=new Game({automatic:true});for(let i=0;i<290;i++)g.tick(1/30);const before=g.credits;assert.ok(g.callWave());assert.equal(g.credits,before+20*2);assert.equal(g.points,20);assert.equal(g.callWave(),false);g.earn(1e6);assert.equal(g.credits,CREDIT_CAP);});
 test('identical actions replay to identical state',()=>{const play=()=>{const g=new Game({automatic:true});g.build(3,'pulse');g.build(9,'slow');g.build(4,'radar');for(let i=0;i<9000&&g.state!=='over';i++){if(i===3000){g.build(11,'laser');g.setTarget(3,'strong');}g.tick(1/30);}return JSON.stringify(g);};assert.equal(play(),play());});
 test('idle simulation is frozen and the path ends at the gate',()=>{const g=new Game();const before=JSON.stringify(g);g.tick(10);assert.equal(JSON.stringify(g),before);assert.deepEqual(position(totals[0]),{x:805,y:150});assert.deepEqual(position(totals[1],1),{x:805,y:150});});
+test('drones cost credits, have a cooldown, chase zombies and damage them',()=>{const {DRONES}=require('../public/sylex-engine');const g=new Game();assert.equal(g.launchDrones(),false,'only during a wave');g.start();g.queue=[];g.credits=DRONES.cost*2;
+ const e=place(g,7,'walker');e.hp=e.max=1e4;assert.ok(g.apply({action:'drone'}));assert.equal(g.credits,DRONES.cost);assert.equal(g.drones.length,DRONES.count);assert.equal(g.launchDrones(),false,'cooling down');
+ step(g,DRONES.time-.5);assert.ok(e.hp<1e4,'drones hit');assert.ok(g.effects.some(f=>f.kind==='drone')||e.hp<1e4);step(g,1);assert.equal(g.drones.length,0);assert.ok(g.droneCooldown>0);});
