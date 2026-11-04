@@ -5,6 +5,20 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.28.0] — 2026-11-04
+
+### Pridané
+- Sylex Tower Defence má novú mechaniku. Zombíci prichádzajú dvoma vstupmi, zo západu a z juhu, a stretnú sa pred bránou. Stavebných miest je 14.
+- Dve nové veže: Laserová so súvislým lúčom, ktorého sila rastie, kým drží cieľ, a Radarová, ktorá zväčší dosah okolitých veží a odhalí maskovaných zombíkov.
+- Nové typy zombíkov: rýchly Bežec, Obrnený s pancierom, Roj, Maskovaný a Kolos, ktorý každú piatu vlnu príde ako boss a pri polovici života sa rozpadne na dva úlomky.
+- Panel vybranej veže: cielenie (prvý, posledný, najsilnejší, najbližší), špecializácia po úrovni 3 (dve voľby pre každú vežu) a predaj za 70 % investície.
+- Vlnu možno privolať skôr za bonusové kredity a body. Pred každou vlnou je vidieť jej zloženie a vstupy.
+
+### Zmenené
+- Vlny sú zadané tabuľkou a po desiatej vlne sa opakujú s rastúcim počtom a odolnosťou zombíkov. Kredity majú strop 1 500.
+- Skóre tvoria body za typ zastaveného zombíka a 100 bodov za ubránenú vlnu. Server overuje aj nové akcie hráča.
+- Rebríček začína odznova (pravidlá verzie 3). Staré výsledky zostávajú uložené, no nezobrazujú sa.
+
 ## [1.27.4] — 2026-10-28
 
 ### Zmenené

@@ -93,3 +93,13 @@ html.theme-sylex{--brand:#234852;--accent:#147c76;--bg:#dae3d6;--card:#f6f7ee;--
 .theme-sylex #main-content{margin-top:24px}
 @media(max-width:1550px){.theme-sylex #sylex-intro{width:180px}#sylex-intro #sylex-launch{padding:12px 10px;font-size:14px}#sylex-intro #sylex-board summary{padding:12px 10px;font-size:12px}}
 @media(max-width:850px){.theme-sylex #sylex-intro{right:12px;bottom:80px;width:170px;max-width:calc(100vw - 24px)}.theme-sylex #main-content{margin-top:16px}}
+/* Selected tower: targeting, specialization and selling. */
+#sylex-game [hidden]{display:none!important}
+.sx-tower-panel{margin:4px 0 8px;padding:10px;border:1px solid #476066;border-radius:6px;background:#1c3a45}
+.sx-tower-panel p{margin:0 0 6px;font-size:12px}.sx-tower-panel .sx-tower-name{font-size:13px;color:#f4e7b6}.sx-tower-stat{color:#c9ded7}
+.sx-target{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin:6px 0}
+#sylex-game .sx-target button{min-height:34px;padding:4px 6px;font-size:12px}
+.sx-specs{display:grid;gap:4px;margin:6px 0}
+#sylex-game .sx-specs button{text-align:left;padding:6px 8px}.sx-specs b{display:block;font-size:12px}.sx-specs small{display:block;font-weight:400;font-size:11px;color:#c9ded7}
+#sylex-game .sx-tower-panel [data-action=sell]{width:100%;min-height:36px}
+.sx-next{margin:0 0 10px;font-size:12px;color:#c9ded7}

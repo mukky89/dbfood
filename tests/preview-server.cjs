@@ -8,6 +8,8 @@ const { createColonyRouter } = require('../colony-api');
 const { MemoryColonyStore } = require('../colony-store');
 const app = express();
 app.use('/api/colony', createColonyRouter({ store: new MemoryColonyStore() }));
+const { createSylexRouter, MemorySylexStore } = require('../sylex-api');
+app.use('/api/sylex', createSylexRouter({ store: new MemorySylexStore(), rateLimits: false }));
 app.use(express.json());
 let appearance = { tema: 'rc', designVersion: 2 }, orders = {};
 const source = fs.readFileSync(path.join(__dirname, '../server.js'), 'utf8');

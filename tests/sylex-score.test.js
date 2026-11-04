@@ -1,9 +1,20 @@
 const test=require('node:test');const assert=require('node:assert/strict');const express=require('express');
-const {Game}=require('../public/sylex-engine');const {replay,result,STEP,MAX_STEPS}=require('../public/sylex-score');
+const {Game}=require('../public/sylex-engine');const {replay,result,STEP,MAX_STEPS,RULES}=require('../public/sylex-score');
 const {createSylexRouter,MemorySylexStore}=require('../sylex-api');
 function winningRun(){const game=new Game({automatic:true}),actions=[];for(const slot of [1,3,6]){game.build(slot,'rapid');actions.push({t:0,action:'build',slot,type:'rapid'});}let steps=0;while((!game.wave||game.state==='wave')&&steps<MAX_STEPS){game.tick(STEP);steps++;}return {actions,steps,expected:result(game)};}
 test('server replay recomputes first-wave score from actual deliveries and waves',()=>{const run=winningRun();assert.deepEqual(run.expected,{score:180,kills:8,waves:1});assert.deepEqual(replay(run.actions,run.steps),run.expected);});
-test('replay rejects overspending, backwards times, invalid slots and oversized simulation',()=>{assert.throws(()=>replay([{t:0,action:'build',slot:0,type:'pulse'},{t:0,action:'build',slot:1,type:'pulse'}],1));assert.throws(()=>replay([{t:2,action:'wave'},{t:1,action:'wave'}],3));assert.throws(()=>replay([{t:0,action:'build',slot:99,type:'rapid'}],1));assert.throws(()=>replay([],MAX_STEPS+1));assert.throws(()=>replay([],1));});
+test('replay rejects overspending, backwards times, invalid slots and oversized simulation',()=>{assert.throws(()=>replay([{t:0,action:'build',slot:0,type:'pulse'},{t:0,action:'build',slot:1,type:'pulse'}],1));assert.throws(()=>replay([{t:2,action:'call'},{t:1,action:'call'}],3));assert.throws(()=>replay([{t:0,action:'build',slot:99,type:'rapid'}],1));assert.throws(()=>replay([],MAX_STEPS+1));assert.throws(()=>replay([],1));});
+test('replay verifies selling, targeting, specialization and early calls',()=>{
+ const ok=[{t:0,action:'build',slot:3,type:'rapid'},{t:0,action:'target',slot:3,mode:'strong'},{t:0,action:'build',slot:4,type:'rapid'},{t:1,action:'sell',slot:4},{t:2,action:'call'}];
+ const r=replay(ok,1500);assert.ok(r.waves>=0&&r.score>=30);
+ assert.throws(()=>replay([{t:0,action:'sell',slot:3},{t:1,action:'call'}],10),/nepovolenú/);
+ assert.throws(()=>replay([{t:0,action:'build',slot:3,type:'rapid'},{t:0,action:'target',slot:3,mode:'random'},{t:1,action:'call'}],10),/cielenie/);
+ assert.throws(()=>replay([{t:0,action:'build',slot:3,type:'rapid'},{t:0,action:'specialize',slot:3,spec:'twin'},{t:1,action:'call'}],10),/nepovolenú/);
+ assert.throws(()=>replay([{t:0,action:'build',slot:3,type:'rapid',mode:'first'},{t:1,action:'call'}],10),/Neplatná akcia/);
+ assert.throws(()=>replay([{t:0,action:'call'},{t:1,action:'call'}],10),/nepovolenú/);
+ assert.throws(()=>replay([{t:0,action:'build',slot:3,type:'nuke'}],10),/veža/);
+ assert.equal(RULES,3);
+});
 async function fixture(t,rateLimits=false){let now=100000;const store=new MemorySylexStore(),app=express();app.use('/api/sylex',createSylexRouter({store,now:()=>now,rateLimits}));const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();server.close();});const base='http://127.0.0.1:'+server.address().port+'/api/sylex';return {store,advance:ms=>now+=ms,async call(path='',body,cookie,origin){const response=await fetch(base+path,{method:body?'POST':'GET',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{cookie}:{}),...(origin?{origin}:{})},body:body?JSON.stringify(body):undefined});return {status:response.status,data:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};}};}
 test('shared scoreboard persists one verified result per run and selects each player best',async t=>{const api=await fixture(t),a=await api.call('/runs',{name:'Marek'}),run=winningRun();assert.equal(a.status,200);api.advance(run.steps*STEP*1000);const payload={actions:run.actions,steps:run.steps};const first=await api.call('/runs/'+a.data.id+'/finish',payload,a.cookie);assert.equal(first.status,200);assert.equal(first.data.result.score,180);const duplicate=await api.call('/runs/'+a.data.id+'/finish',payload,a.cookie);assert.equal(duplicate.data.result.score,180);assert.equal(api.store.results.size,1);
  const b=await api.call('/runs',{name:'Jana'});api.advance(run.steps*STEP*1000);await api.call('/runs/'+b.data.id+'/finish',payload,b.cookie);const board=await api.call('',null,a.cookie);assert.equal(board.data.rows.length,2);assert.equal(board.data.rows[0].name,'Marek');assert.equal(board.data.rows[0].isMe,true);assert.equal('player' in board.data.rows[0],false);
@@ -18,7 +29,7 @@ test('automatic waves share exact preparation intervals and replay rejects manua
  const a=new Game({automatic:true}),b=new Game({automatic:true});
  for(let i=0;i<899;i++){a.tick(STEP);b.tick(STEP);}assert.equal(a.wave,0);assert.equal(b.wave,0);
  a.tick(STEP);b.tick(STEP);assert.equal(a.wave,1);assert.equal(b.wave,1);
- a.pending=0;a.enemies=[];a.tick(STEP);assert.equal(a.state,'ready');assert.equal(a.countdown,15);
+ a.queue=[];a.enemies=[];a.tick(STEP);assert.equal(a.state,'ready');assert.equal(a.countdown,15);assert.equal(a.credits,220+35);
  for(let i=0;i<449;i++)a.tick(STEP);assert.equal(a.wave,1);a.tick(STEP);assert.equal(a.wave,2);
  assert.throws(()=>replay([{t:0,action:'wave'}],900));assert.throws(()=>replay([{t:900,action:'wave'}],901));
 });

@@ -59,6 +59,8 @@ API kľúče, IBAN ani reálne objednávky či emaily používateľov.
 - Testy a náhľad nesmú siahať na produkčnú MongoDB ani posielať emaily, push
   či platby — používaj pamäťové úložiská a náhľadový server.
 - Pri zmene pravidiel dennej výzvy Mraveniska zvýš `VERSION` v `colony-api.js`.
+- Pri zmene pravidiel Sylex Tower Defence zvýš `RULES` v `public/sylex-engine.js`;
+  engine musí ostať deterministický, lebo server prehráva záznam akcií (`public/sylex-score.js`).
 - Nové témy pridávaj ako samostatný pár `public/<nazov>-theme.{js,css}`; téma sa
   musí vedieť čisto zastaviť pri prepnutí a rešpektovať obmedzený pohyb.
 

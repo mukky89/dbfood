@@ -3,7 +3,9 @@ import * as THREE from './vendor/three/three.module.js';
 // A real WebGL scene. Game coordinates (x,y) map to world (x,0,z).
 // No simulation state lives here; the original engine remains authoritative.
 export async function createSylex3D({ onPick, onFailure }) {
-  const { path, slots, types, position } = window.SylexTD;
+  const { path, routes, slots, types, position } = window.SylexTD;
+  const onPath=([x,y])=>path.some((a,i)=>i&&Math.min(a[0],path[i-1][0])<=x&&x<=Math.max(a[0],path[i-1][0])&&Math.min(a[1],path[i-1][1])<=y&&y<=Math.max(a[1],path[i-1][1]));
+  const roads=[path,...routes.slice(1).map(r=>r.slice(0,r.findIndex((p,i)=>i&&onPath(p))+1))];
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.setSize(1280,720,false);
@@ -56,8 +58,8 @@ export async function createSylex3D({ onPick, onFailure }) {
   plane(2400,1800,grass,480,-.3,270);
   
   // Road is raised slightly above terrain; segments follow the unchanged simulation path.
-  for(let i=1;i<path.length;i++){
-    const a=path[i-1],b=path[i],len=Math.hypot(b[0]-a[0],b[1]-a[1]),angle=Math.atan2(b[0]-a[0],b[1]-a[1]);
+  for(const lane of roads)for(let i=1;i<lane.length;i++){
+    const a=lane[i-1],b=lane[i],len=Math.hypot(b[0]-a[0],b[1]-a[1]),angle=Math.atan2(b[0]-a[0],b[1]-a[1]);
     const curb=box(scene,(a[0]+b[0])/2,.1,(a[1]+b[1])/2,44,2,len+42,concrete);curb.rotation.y=angle;
     const road=box(scene,(a[0]+b[0])/2,1,(a[1]+b[1])/2,36,1,len+34,asphalt);road.rotation.y=angle;
     for(let d=12;d<len-8;d+=24){const f=d/len;const dash=box(scene,a[0]+(b[0]-a[0])*f,1.55,a[1]+(b[1]-a[1])*f,1.2,.1,7,white);dash.rotation.y=angle;dash.castShadow=false;}
@@ -149,7 +151,11 @@ export async function createSylex3D({ onPick, onFailure }) {
     cylinder(root,0,5,0,16,19,6,steel,24);cylinder(root,0,9,0,13,16,3,lightMetal,24);cylinder(root,0,16,0,7,9,13,steel,16);cylinder(root,0,22,0,11,10,3,lightMetal,20);
     for(let j=0;j<8;j++){const a=j*Math.PI/4;cylinder(root,Math.cos(a)*13,11,Math.sin(a)*13,1,1,1.4,lightMetal,6);}
     box(head,0,4,0,type==='pulse'?23:19,10,19,steel);box(head,0,8,0,18,2,16,lightMetal);
-    if(type==='slow'){
+    if(type==='radar'){
+      cylinder(head,0,8,0,2,2.5,14,steel,10);const dish=cylinder(head,0,18,0,14,4,4,lightMetal,28);dish.rotation.x=-.7;rod(head,[0,18,0],[0,24,-8],.6,steel);const tip=mesh(new THREE.SphereGeometry(2.2,12,8),trim,head);tip.position.set(0,24,-8);
+    }else if(type==='laser'){
+      const tube=cylinder(head,0,8,-14,3,3.6,30,lightMetal,18);tube.rotation.x=Math.PI/2;for(const z of [-6,-14,-22]){const fin=cylinder(head,0,8,z,5.5,5.5,1.2,steel,18);fin.rotation.x=Math.PI/2;}const lens=cylinder(head,0,8,-30,3.2,3.2,1,trim,18);lens.rotation.x=Math.PI/2;
+    }else if(type==='slow'){
       cylinder(head,0,15,0,5,7,19,lightMetal,16);for(let y=8;y<29;y+=5){cylinder(head,0,y,0,9,9,2,trim,24);cylinder(head,0,y+2,0,7,7,1,steel,24);}const orb=mesh(new THREE.SphereGeometry(4,16,10),trim,head);orb.position.y=30;
     }else{
       for(const x of type==='rapid'?[-4,4]:[0]){const barrel=cylinder(head,x,6,-19,type==='rapid'?1.4:4,type==='rapid'?2:5,26,lightMetal,16);barrel.rotation.x=Math.PI/2;const muzzle=cylinder(head,x,6,-33,type==='rapid'?2:5,type==='rapid'?2:5,3,steel,16);muzzle.rotation.x=Math.PI/2;const bore=cylinder(head,x,6,-34.6,type==='rapid'?1.2:3.5,type==='rapid'?1.2:3.5,.2,dark,16);bore.rotation.x=Math.PI/2;}
@@ -173,19 +179,20 @@ export async function createSylex3D({ onPick, onFailure }) {
   let lastGame=null,lastRenderKey="";
   function disposeObject(obj){obj.removeFromParent();obj.userData.ownedMaterials?.forEach(m=>m.dispose());obj.traverse(o=>{if(o.isMesh&&o.geometry!==geoBox)o.geometry.dispose();});}
   function render(game,selected,type,playing=true){
-    const renderKey=[playing,selected,type,canvas.clientWidth,canvas.clientHeight,game.credits,game.health,...game.towers.flatMap(t=>[t.slot,t.type,t.level]),...game.enemies.flatMap(e=>[e.distance,e.hp,e.slow]),...game.effects.map(e=>e.life)].join('|');
+    const renderKey=[playing,selected,type,canvas.clientWidth,canvas.clientHeight,game.credits,game.health,...game.towers.flatMap(t=>[t.slot,t.type,t.level,t.spec,t.target]),...game.enemies.flatMap(e=>[e.distance,e.hp,e.slow]),...game.effects.map(e=>e.life)].join('|');
     if(game===lastGame&&!cameraDirty&&renderKey===lastRenderKey)return;
     lastRenderKey=renderKey;cameraDirty=false;
     if(lastGame!==game){for(const o of towerModels.values())disposeObject(o);for(const o of operatorModels.values())disposeObject(o);towerModels.clear();operatorModels.clear();lastGame=game;}
     const placed=game.towers.find(t=>t.slot===selected);
     ring.position.set(slots[selected][0],4.4,slots[selected][1]);ring.visible=range.visible=playing;
-    const radius=types[placed?.type||type].range+((placed?.level||1)-1)*15;range.position.set(slots[selected][0],2,slots[selected][1]);range.scale.set(radius,radius,1);
+    const radius=placed?game.stats(placed).range:types[type].range;range.position.set(slots[selected][0],2,slots[selected][1]);range.scale.set(radius,radius,1);
     if(previewType!==type){preview.traverse(o=>{if(o.isMesh)o.material.dispose();});disposeObject(preview);preview=towerModel(type);preview.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.4;o.castShadow=false;}});previewType=type;}
     preview.position.set(slots[selected][0],4,slots[selected][1]);preview.visible=playing&&!placed;
-    for(const t of game.towers){let model=towerModels.get(t.slot);if(!model){model=towerModel(t.type);model.position.set(slots[t.slot][0],4,slots[t.slot][1]);model.userData.slot=t.slot;towerModels.set(t.slot,model);}model.visible=true;model.scale.setScalar(1+(t.level-1)*.09);const target=game.enemies.filter(e=>Math.hypot(e.x-model.position.x,e.y-model.position.z)<=types[t.type].range+(t.level-1)*15).sort((a,b)=>b.distance-a.distance)[0];if(target)model.userData.head.rotation.y=Math.atan2(model.position.x-target.x,model.position.z-target.y);}
+    for(const [slot,model] of towerModels)if(!game.towers.some(t=>t.slot===slot&&t.type===model.userData.type)){disposeObject(model);towerModels.delete(slot);}
+    for(const t of game.towers){let model=towerModels.get(t.slot);if(!model){model=towerModel(t.type);model.userData.type=t.type;model.position.set(slots[t.slot][0],4,slots[t.slot][1]);model.userData.slot=t.slot;towerModels.set(t.slot,model);}model.visible=true;model.scale.setScalar(1+(t.level-1)*.09);const target=types[t.type].support?null:game.targets(t,game.stats(t).range)[0];if(types[t.type].support)model.userData.head.rotation.y+=.02;else if(target)model.userData.head.rotation.y=Math.atan2(model.position.x-target.x,model.position.z-target.y);}
     const alive=new Set(game.enemies);
     for(const [e,model] of operatorModels)if(!alive.has(e)){disposeObject(model);operatorModels.delete(e);}
-    for(const e of game.enemies){let model=operatorModels.get(e);if(!model){model=person();operatorModels.set(e,model);}model.visible=playing;model.position.set(e.x,2,e.y);const p=position(e.distance+1);model.rotation.y=Math.atan2(e.x-p.x,e.y-p.y);const stride=Math.sin(e.distance*.18)*.28;model.position.y+=Math.sin(e.distance*.36)*.45;model.rotation.z=Math.sin(e.distance*.18)*.045;model.userData.left.rotation.x=stride;model.userData.right.rotation.x=-stride;model.userData.arms[0].rotation.x=1.15+stride*.25;model.userData.arms[1].rotation.x=.95-stride*.3;model.userData.arms[0].rotation.z=-.15;model.userData.arms[1].rotation.z=.2;model.userData.torso.material=e.slow?slowVest:vest;}
+    for(const e of game.enemies){let model=operatorModels.get(e);if(!model){model=person();operatorModels.set(e,model);}model.visible=playing;model.scale.setScalar({boss:1.7,brute:1.25,swarm:.7,runner:.9}[e.kind]||1);model.position.set(e.x,2,e.y);const p=position(e.distance+1,e.route);model.rotation.y=Math.atan2(e.x-p.x,e.y-p.y);const stride=Math.sin(e.distance*.18)*.28;model.position.y+=Math.sin(e.distance*.36)*.45;model.rotation.z=Math.sin(e.distance*.18)*.045;model.userData.left.rotation.x=stride;model.userData.right.rotation.x=-stride;model.userData.arms[0].rotation.x=1.15+stride*.25;model.userData.arms[1].rotation.x=.95-stride*.3;model.userData.arms[0].rotation.z=-.15;model.userData.arms[1].rotation.z=.2;model.userData.torso.material=e.slow?slowVest:vest;}
     let count=0;for(const e of game.effects.slice(0,9)){effectPositions.set([e.x,32,e.y,e.tx,22,e.ty],count*6);count++;}effectGeometry.attributes.position.needsUpdate=true;effectGeometry.setDrawRange(0,playing?count*2:0);
     const width=Math.max(320,canvas.clientWidth||innerWidth),height=Math.max(240,canvas.clientHeight||innerHeight);
     if(canvas.width!==Math.round(width*renderer.getPixelRatio())||canvas.height!==Math.round(height*renderer.getPixelRatio()))renderer.setSize(width,height,false);

@@ -1,8 +1,7 @@
 'use strict';
 const express=require('express');
 const crypto=require('node:crypto');
-const {replay}=require('./public/sylex-score');
-const RULES=2;
+const {replay,RULES}=require('./public/sylex-score');
 const TTL=2*60*60*1000;
 class MemorySylexStore{
  constructor(){this.runs=new Map();this.results=new Map();}
