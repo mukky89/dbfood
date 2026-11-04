@@ -99,6 +99,7 @@ export function createHorde(scene, { position }) {
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.count = 0; mesh.frustumCulled = false;
       mesh.castShadow = shadows; mesh.receiveShadow = shadows;
       if (tint) { mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX * 3), 3); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage); }
+      mesh.userData.outlineable = shadows; mesh.userData.noOutline = !shadows;
       scene.add(mesh); return mesh;
     });
   }
@@ -107,7 +108,7 @@ export function createHorde(scene, { position }) {
   // Health bars are camera-facing quads drawn over the scene.
   const quad = own(new THREE.PlaneGeometry(1, 1));
   const barMaterial = c => own(new THREE.MeshBasicMaterial({ color: c, depthTest: false, depthWrite: false, transparent: true, opacity: .92, toneMapped: false }));
-  const bars = [barMaterial('#14232a'), barMaterial('#ffffff')].map((m, i) => { const b = new THREE.InstancedMesh(quad, m, MAX); b.count = 0; b.frustumCulled = false; b.renderOrder = 20 + i; if (i) b.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX * 3), 3); scene.add(b); return b; });
+  const bars = [barMaterial('#14232a'), barMaterial('#ffffff')].map((m, i) => { const b = new THREE.InstancedMesh(quad, m, MAX); b.count = 0; b.userData.noOutline = true; b.frustumCulled = false; b.renderOrder = 20 + i; if (i) b.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(MAX * 3), 3); scene.add(b); return b; });
 
   const states = new Map(), dying = [];
   const ZERO = new THREE.Matrix4().makeScale(0, 0, 0), M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S = new THREE.Vector3(), RIGHT = new THREE.Vector3();
@@ -196,7 +197,7 @@ export function createHorde(scene, { position }) {
       pose(d.kind, d.phase, time, d.id, d); root.rotation.y = d.yaw; root.position.x = d.x; root.position.z = d.z;
       if (counts[0] < MAX) write(rigs[0], counts[0]++, d.kind, d.variant, false, 0);
     }
-    rigs.forEach((r, g) => r.forEach(mesh => { mesh.count = counts[g]; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true; }));
+    rigs.forEach((r, g) => r.forEach(mesh => { mesh.count = counts[g]; if (mesh.userData.outline) mesh.userData.outline.count = counts[g]; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true; }));
     bars.forEach(b => { b.count = barCount; b.instanceMatrix.needsUpdate = true; if (b.instanceColor) b.instanceColor.needsUpdate = true; });
     return dying.length > 0;
   }

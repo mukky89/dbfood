@@ -80,11 +80,12 @@
     for(const y of [63,100]){polygon(c,[[756,y],[853,y],[859,y-4],[762,y-4]],'#9bb3a9');box(c,756,y,98,2,0,'#304e55');}
     box(c,796,122,24,23,0,'#1e3e4c');box(c,798,124,20,20,0,gradient(c,798,124,20,20,['#b5cbd0','#4c717d']));line(c,[[808,123],[808,145]],'#d9e4d8',1.7);
     for(let i=0;i<3;i++){box(c,785-i*4,146+i*3,48+i*8,3,0,i%2?'#9fa99c':'#dce0cf');}
-    // Photographed red triangular roof logo.
-    line(c,[[603,25],[623,1],[641,25],[603,25]],'#9e2532',2);c.font='bold 17px Georgia';c.fillStyle='#ad2938';c.fillText('sylex',602,21);
+    // Company logo standing on the roof (one shared file, see LOGO in sylex-theme.js).
+    if(logo.complete&&logo.naturalWidth){c.drawImage(logo,596,-6,52,46);}else{line(c,[[603,25],[623,1],[641,25],[603,25]],'#e3312d',2);c.font='bold 17px Arial';c.fillStyle='#e3312d';c.fillText('sylex',602,21);}
     for(const x of [745,857]){box(c,x,144,10,10,2,'#8c8470');ellipse(c,x+5,142,9,7,gradient(c,x,135,8,14,['#a3ad67','#315a3e']));}
     box(c,866,148,28,4,1,'#8d684a');line(c,[[870,151],[870,157]],'#3c504e',2);line(c,[[891,151],[891,157]],'#3c504e',2);
   }
+  const logo=new Image();logo.src='/assets/sylex/logo.svg';
   const terrain=document.createElement('canvas');terrain.width=960*SCALE;terrain.height=540*SCALE;
   const ground=terrain.getContext('2d');ground.scale(SCALE,SCALE);
   function terrainPaint(c){
@@ -132,7 +133,7 @@
       c.font='600 12px Segoe UI';c.textAlign='center';c.fillStyle='#edf0da';c.fillText(String(i+1),x,y+4);c.textAlign='start';
     });
   }
-  terrainPaint(ground);
+  terrainPaint(ground);logo.onload=()=>terrainPaint(ground);
   function tower(c,x,y,type,level,angle=0,ghost=false){
     const color=types[type].color;c.save();if(ghost)c.globalAlpha=.5;
     shadow(c,x+10,y+6,30,16);
@@ -196,5 +197,9 @@
     for(const e of game.effects){c.save();c.globalAlpha=Math.min(1,e.life/.12);if(e.kind==='spores'){c.fillStyle='#b7d36a55';c.beginPath();c.arc(e.tx,e.ty,70*(1-e.life),0,Math.PI*2);c.fill();}else if(e.kind==='drone'){line(c,[[e.x,e.y-38],[e.tx,e.ty]],e.color,1.4);ellipse(c,e.tx,e.ty,3,2,'#dff8ff');}else if(e.kind==='blast'){c.beginPath();c.ellipse(e.tx,e.ty,60*(1.2-e.life*2),36*(1.2-e.life*2),0,0,Math.PI*2);c.strokeStyle=e.color;c.lineWidth=2;c.stroke();}else{line(c,[[e.x,e.y-22],[e.tx,e.ty]],e.color,e.kind==='beam'?2.6:1.6);ellipse(c,e.tx,e.ty,4,3,'#fff0be');}c.restore();}
   }
   function icon(type){const el=document.createElement('canvas');el.width=100;el.height=100;const c=el.getContext('2d');c.scale(1.6,1.6);tower(c,31,47,type,1,0);return el.toDataURL();}
-  window.SylexRenderer={paint,icon};
+  function droneIcon(){const el=document.createElement('canvas');el.width=108;el.height=64;const c=el.getContext('2d');c.scale(2,2);c.translate(27,16);
+    c.lineCap='round';line(c,[[-18,-8],[18,8]],'#3b2414',4);line(c,[[-18,8],[18,-8]],'#3b2414',4);
+    for(const [x,y] of [[-18,-8],[18,8],[-18,8],[18,-8]]){ellipse(c,x,y,9,3,'#3b2414');ellipse(c,x,y,7.5,2,'#d7e3e8');}
+    box(c,-8,-6,16,12,4,'#eef1ec','#3b2414');ellipse(c,0,3,2.4,2.4,'#2b3640');ellipse(c,5,-2,1.4,1.4,'#5fd0ff');return el.toDataURL();}
+  window.SylexRenderer={paint,icon,droneIcon};
 })();

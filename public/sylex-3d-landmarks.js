@@ -44,7 +44,7 @@ export function createLandmarks(scene, { routes, river: RIVER, concrete, steel, 
   const ripples = own(rippleNormals()); ripples.wrapS = ripples.wrapT = THREE.RepeatWrapping; ripples.repeat.set(1, 1);
   const bank = add(own(ribbon(RIVER, 78, .25)), own(new THREE.MeshStandardMaterial({ color: '#7d7357', roughness: .95 }))); bank.castShadow = false;
   const water = add(own(ribbon(RIVER, 56, .6)), own(new THREE.MeshPhysicalMaterial({ color: '#2d5866', roughness: .08, metalness: .05, clearcoat: 1, clearcoatRoughness: .05, normalMap: ripples, normalScale: new THREE.Vector2(.45, .45), envMapIntensity: 1.4 })));
-  water.castShadow = false;
+  water.castShadow = false; water.material.userData.keepPBR = true;
   // The east road crosses at z = 470; the deck is the road itself, framed by girders and railings.
   const bridge = new THREE.Group(); scene.add(bridge);
   for (const z of [449, 491]) {

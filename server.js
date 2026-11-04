@@ -46,7 +46,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/sylex', createSylexRouter({store:createMongoSylexStore(mongoose)}));
+app.use('/api/sylex', createSylexRouter({store:createMongoSylexStore(mongoose),contest:{endsAt:config.sylexContestEnd,prize:config.sylexContestPrize}}));
 app.use('/api/colony', createColonyRouter({ store: createMongoColonyStore(mongoose) }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

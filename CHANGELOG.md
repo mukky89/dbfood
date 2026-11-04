@@ -5,6 +5,18 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.30.0] — 2026-11-04
+
+### Pridané
+- Súťaž v rebríčku Sylex Tower Defence: prvý v tabuľke získa balíček vianočných trubičiek (25 ks). Vyhodnotenie je 1. 12. 2026; potom rebríček ukáže konečné poradie a víťaza a neskoršie výsledky sa už nezapočítajú. Výhru a odpočet ukazuje spúšťač hry, úvodná karta aj menu.
+- Logo Sylex ako vektorový súbor (`public/assets/sylex/logo.svg`), prekreslené podľa dodaného loga. Je na streche a pri vchode budovy v 3D, v HUD, na úvodnej karte a na 2D mape.
+
+### Zmenené
+- Nové rozhranie hry v kreslenom štýle: panel Sylexu s logom, životmi, kreditmi a skóre; červená stuha s vlnou, odpočtom a počtom zombíkov; náhľad ďalšej vlny; spodná lišta veží s cenami (klávesy 1–5); panel vybranej veže priamo pri nej; okrúhle tlačidlo dronov s nabíjaním; menu s rebríčkom, kamerou, stavebnými miestami a návodom; úvodná karta s prezývkou. Medzerník pozastaví hru.
+- Veža sa stavia výberom podstavca a kliknutím na vežu v lište (alebo klávesom 1–5).
+- 3D scéna v kreslenom štýle: toon tieňovanie, tmavé obrysy, piesočné cesty s okrajovými kameňmi, kreslené stromy, teplejšie svetlo. Sklo a voda ostávajú lesklé.
+- Budova Sylexu prerobená podľa fotografií: strieborný horizontálny plech, pásové okná s bielymi rámami a žalúziami, presklená stena so šikmým vrchom a oceľovými rímsami, vchod so schodmi, menšie okná vpravo, výrobná hala s olivovým pásom a zelený plot.
+
 ## [1.29.0] — 2026-11-04
 
 ### Pridané

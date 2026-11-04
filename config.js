@@ -19,5 +19,8 @@ module.exports = {
   mymemoryEmail: process.env.MYMEMORY_EMAIL,
   ntfyTopic: process.env.NTFY_TOPIC,
   ntfyUrl: process.env.NTFY_URL || "https://ntfy.sh",
+  // Sylex Tower Defence leaderboard contest: results recorded before this moment decide the winner.
+  sylexContestEnd: process.env.SYLEX_CONTEST_END || '2026-12-01T00:00:00+01:00',
+  sylexContestPrize: process.env.SYLEX_CONTEST_PRIZE || 'Balíček vianočných trubičiek (25 ks)',
   allowedEmails: process.env.ALLOWED_EMAILS ? process.env.ALLOWED_EMAILS.split(',').map(e => e.trim()) : []
 };
