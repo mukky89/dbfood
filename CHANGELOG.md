@@ -5,6 +5,49 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.30.0] — 2026-11-04
+
+### Pridané
+- Súťaž v rebríčku Sylex Tower Defence: prvý v tabuľke získa balíček vianočných trubičiek (25 ks). Vyhodnotenie je 1. 12. 2026; potom rebríček ukáže konečné poradie a víťaza a neskoršie výsledky sa už nezapočítajú. Výhru a odpočet ukazuje spúšťač hry, úvodná karta aj menu.
+- Logo Sylex ako vektorový súbor (`public/assets/sylex/logo.svg`), prekreslené podľa dodaného loga. Je na streche a pri vchode budovy v 3D, v HUD, na úvodnej karte a na 2D mape.
+
+### Zmenené
+- Nové rozhranie hry v kreslenom štýle: panel Sylexu s logom, životmi, kreditmi a skóre; červená stuha s vlnou, odpočtom a počtom zombíkov; náhľad ďalšej vlny; spodná lišta veží s cenami (klávesy 1–5); panel vybranej veže priamo pri nej; okrúhle tlačidlo dronov s nabíjaním; menu s rebríčkom, kamerou, stavebnými miestami a návodom; úvodná karta s prezývkou. Medzerník pozastaví hru.
+- Veža sa stavia výberom podstavca a kliknutím na vežu v lište (alebo klávesom 1–5).
+- 3D scéna v kreslenom štýle: toon tieňovanie, tmavé obrysy, piesočné cesty s okrajovými kameňmi, kreslené stromy, teplejšie svetlo. Sklo a voda ostávajú lesklé.
+- Budova Sylexu prerobená podľa fotografií: strieborný horizontálny plech, pásové okná s bielymi rámami a žalúziami, presklená stena so šikmým vrchom a oceľovými rímsami, vchod so schodmi, menšie okná vpravo, výrobná hala s olivovým pásom a zelený plot.
+
+## [1.29.0] — 2026-11-04
+
+### Pridané
+- Realistickejšia 3D scéna Sylex Tower Defence. Veže majú betónový podstavec, výstražný pás, LED stav, optické káble, plynulé otáčanie a spätný ráz; úrovne a špecializácie menia ich vzhľad.
+- Impulzná veža strieľa optické LC konektory so svietiacim vláknom. Pribudli záblesky, iskry, dym, letiace mínometné granáty s oblúkom, výbuchy so spáleniskom a laserový lúč so žiarou.
+- Zombíci majú kostru s kĺbmi a chôdzu podľa rýchlosti. Každý typ má vlastnú siluetu (prilba a reflexná vesta, kapucňa, plazenie, pliesňové výrastky); pri smrti padnú a zmiznú. Nad každým je vždy vidieť lištu životov.
+- Mapa má štyri portály, rieku s mostom, dátové centrum so servermi a optickým káblom k budove a viac stromov. Portál sa rozžiari pár sekúnd pred príchodom zombíkov.
+- Drony: počas vlny ich vyšleš za 80 kreditov (kláves D). Tri drony 8 sekúnd útočia na zombíkov a potom sa 40 sekúnd nabíjajú.
+- Noví zombíci: Plazivec (kryo ho nespomalí), Výtrusník (pri smrti lieči okolie) a Vodca hordy, ktorý uzatvára každú vlnu bez Kolosa.
+- HUD stále ukazuje životy Sylexu, vlnu z 20, čas do ďalšej vlny a počet zostávajúcich zombíkov. Nad budovou je lišta životov.
+
+### Zmenené
+- Sylex má 300 životov a obrana má 20 vĺn; po poslednej vyhrávaš s bonusom.
+- Portál každej skupiny určuje náhodný seed behu od servera, takže vstup sa nedá vopred zistiť. Server prehráva záznam s rovnakým seedom.
+- Pri obmedzenom pohybe sa vypnú častice, spätný ráz a pád zombíkov; pri pomalom vykresľovaní sa automaticky zníži kvalita.
+- Rebríček začína odznova (pravidlá verzie 4).
+
+## [1.28.0] — 2026-11-04
+
+### Pridané
+- Sylex Tower Defence má novú mechaniku. Zombíci prichádzajú dvoma vstupmi, zo západu a z juhu, a stretnú sa pred bránou. Stavebných miest je 14.
+- Dve nové veže: Laserová so súvislým lúčom, ktorého sila rastie, kým drží cieľ, a Radarová, ktorá zväčší dosah okolitých veží a odhalí maskovaných zombíkov.
+- Nové typy zombíkov: rýchly Bežec, Obrnený s pancierom, Roj, Maskovaný a Kolos, ktorý každú piatu vlnu príde ako boss a pri polovici života sa rozpadne na dva úlomky.
+- Panel vybranej veže: cielenie (prvý, posledný, najsilnejší, najbližší), špecializácia po úrovni 3 (dve voľby pre každú vežu) a predaj za 70 % investície.
+- Vlnu možno privolať skôr za bonusové kredity a body. Pred každou vlnou je vidieť jej zloženie a vstupy.
+
+### Zmenené
+- Vlny sú zadané tabuľkou a po desiatej vlne sa opakujú s rastúcim počtom a odolnosťou zombíkov. Kredity majú strop 1 500.
+- Skóre tvoria body za typ zastaveného zombíka a 100 bodov za ubránenú vlnu. Server overuje aj nové akcie hráča.
+- Rebríček začína odznova (pravidlá verzie 3). Staré výsledky zostávajú uložené, no nezobrazujú sa.
+
 ## [1.27.4] — 2026-10-28
 
 ### Zmenené

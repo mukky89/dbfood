@@ -16,4 +16,8 @@ Všetky uvedené textúry pochádzajú z **Poly Haven** a sú poskytované pod l
 
 Three.js **0.180.0** je uložený v `public/vendor/three/` a používa licenciu MIT; úplné znenie je v [LICENSE](../../vendor/three/LICENSE). Scéna nepotrebuje externé runtime požiadavky ani CDN. Odkaz na Poly Haven v návode hry slúži ako uvedenie zdroja.
 
-Geometria budovy, áut, operátorov a veží vzniká v kóde. Textúra listov, popisky a prostredie pre odrazy sa generujú lokálne; nie sú súčasťou týchto 15 fotografických máp. Pri nedostupnosti WebGL alebo zlyhaní načítania scény integrácia používa pôvodný canvas renderer.
+Geometria budovy, áut, zombíkov, veží, dronov, portálov, mosta a dátového centra vzniká v kóde (`sylex-3d*.js`). Textúra listov, popisky a prostredie pre odrazy sa generujú lokálne; nie sú súčasťou týchto 15 fotografických máp. Pri nedostupnosti WebGL alebo zlyhaní načítania scény integrácia používa pôvodný canvas renderer.
+
+## Logo
+
+`logo.svg` je logo Sylex prekreslené do vektora podľa obrázka, ktorý dodal používateľ (červený trojuholník prerušený nápisom „sylex“, ®). Písmená sú obrysy písma Liberation Sans Bold (SIL OFL) zaoblené ťahom. Súbor používa HUD, 3D strecha a vchod aj 2D mapa; pri výmene loga stačí nahradiť tento súbor.
