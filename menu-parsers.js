@@ -1,5 +1,11 @@
 const cheerio = require('cheerio');
 const { todaySK } = require('./restaurants');
+const { LUPO_PREPARATION_FEE, LUPO_PRICING_NOTE } = require('./public/menu-pricing');
+function applyLupoCharges(menu) {
+  if (menu.pricing) menu.pricing = { ...menu.pricing, preparationFee: LUPO_PREPARATION_FEE };
+  menu.pricingNote = LUPO_PRICING_NOTE;
+  return menu;
+}
 const clean = text => String(text || '').replace(/\s+/g, ' ').trim();
 function dateKey(text) {
   const m = text.match(/\b(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\b/);
@@ -51,7 +57,7 @@ function parseLupo(html) {
     m.pricing = { soup: m.informational.find(i => /Polievka samostatne/i.test(i.text))?.cena ?? null, soupIncluded: true, withoutSoupDiscount: m.informational.find(i => /Menu bez polievky/i.test(i.text))?.cena ?? null };
     m.sideOptions = m.informational.filter(i => /^Prílohy$/i.test(i.category)).flatMap(i => item(i.text, 0).nazov.split('/'));
     for (const p of section(m, 'Hlavné jedlo').polozky) if (/\bpríloha\b/i.test(p.nazov)) p.sideOptions = m.sideOptions;
-    m.pricingNote = 'Cena menu zahŕňa polievku a prílohu. Rozvoz: príprava a expedícia 0,50 € za jedlo; doprava podľa dohody. Doplatky za rozvoz nie sú zahrnuté v odhade.';
+    applyLupoCharges(m);
   }
   return days;
 }
@@ -93,4 +99,4 @@ function parseNevadzka(html) {
 function selectDay(days, date = todaySK()) {
   return days[date] || { datum: date, date, sekcie: [], informational: [], unavailable: true };
 }
-module.exports = { parseLupo, parseNevadzka, selectDay, dateKey, money };
+module.exports = { parseLupo, parseNevadzka, selectDay, dateKey, money, applyLupoCharges };

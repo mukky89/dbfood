@@ -1,6 +1,6 @@
 # Jedálne a overenie integrácie
 
-Verzia 1.32.0, 16. 11. 2026. Testy objednávok používajú izolované úložiská. Overenie zdrojov na Railway iba načítava verejné menu a nemení produkčnú MongoDB, objednávky ani neposiela správy.
+Verzia 1.32.4, 16. 11. 2026. Testy objednávok používajú izolované úložiská. Overenie cien a QR na Railway nevytvára objednávky, neodosiela správy ani nevykonáva platby.
 
 ## Zdroje a výsledky
 
@@ -27,7 +27,7 @@ Parsery vyberajú dátum, nie iba názov dňa. Na víkend, nezverejnený budúci
 
 ## Ceny
 
-- LUPO: bežné menu s polievkou 8,00 €, pondelkový teľací paprikáš 8,90 €, štvrtková kačka 9,50 €. Bez polievky mínus 1,00 €, samostatná polievka 2,80 €, dezerty podľa položky. Ceny sa parsujú zo zdroja. Poplatok za prípravu a expedíciu 0,50 € a prípadná doprava sú zobrazené ako upozornenie a nie sú započítané do odhadu; firemné podmienky treba overiť s jedálňou.
+- LUPO: bežné menu s polievkou 8,00 €, pondelkový teľací paprikáš 8,90 €, štvrtková kačka 9,50 €. K obedu sa pripočíta poplatok za prípravu a expedíciu 0,50 €, teda výsledné sumy sú 8,50 € / 9,40 € / 10,00 €. Poplatok sa účtuje raz za obed, nie osobitne za polievku či dezert. Bez polievky sa od ceny menu odpočíta 1,00 €; samostatná polievka 2,80 €, dezerty podľa položky. Doprava 1 € je podľa webu pri aspoň dvoch obedoch na jednu adresu zdarma a do individuálnej QR platby sa nepripočítava. Predbežný súčet aj QR používajú rovnaké pravidlo; pri viacerých porciách sa násobí celá suma vrátane prípravy a expedície.
 - Nevädzka: hlavné jedlo 7,40 €, polievka k jedlu 0,60 €, spolu 8,00 €, polievka samostatne 2,50 €. Ceny sa čítajú zo spoločného cenníka, nie z prázdnych cenových polí pri položkách.
 - Nové jedálne pri chýbajúcej cene nevytvoria QR podľa starého Fantozzi cenníka. Frontend a backend používajú rovnaký výpočet v `public/menu-pricing.js`.
 - Existujúce nastavenie príjemcu e-mailov, účtu a uzávierky ostáva spoločné pre aplikáciu. Pri prepnutí jedálne sa automaticky nemení účet príjemcu platby ani neodosiela objednávka jedálni.

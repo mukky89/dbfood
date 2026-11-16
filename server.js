@@ -772,12 +772,12 @@ app.post('/api/admin/design', async (req, res) => {
 
 // POST /api/qr
 app.post('/api/qr', async (req, res) => {
-  const { meno, polievka, jedlo, pizza, dezert } = req.body;
+  const { meno, polievka, jedlo, pizza, dezert, porcie } = req.body;
   const platba = await getPlatba();
   if (!platba.iban) return res.status(400).json({ ok: false, error: 'IBAN nie je nastavený — nastav ho v Admin → Platba' });
   try {
     const menu = await fetchMenu();
-    const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu);
+    const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu, porcie);
     if (!cena) return res.status(400).json({ ok: false, error: 'Nepodarilo sa vypocitat cenu' });
     const sprava = qrSprava(meno);
     const qrBase64 = await generatePayBySquareQR({
@@ -805,7 +805,7 @@ app.get('/api/easter-qr', async (req, res) => {
 
 // POST /api/send-qr-email
 app.post('/api/send-qr-email', async (req, res) => {
-  const { email, meno, polievka, jedlo, pizza, dezert, poznamka } = req.body;
+  const { email, meno, polievka, jedlo, pizza, dezert, poznamka, porcie } = req.body;
   if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return res.status(400).json({ ok: false, error: 'Neplatný email' });
   }
@@ -814,7 +814,7 @@ app.post('/api/send-qr-email', async (req, res) => {
 
   try {
     const menu = await fetchMenu();
-    const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu);
+    const cena = vypocitajCenu(polievka, jedlo, pizza, dezert, menu, porcie);
     if (!cena) return res.status(400).json({ ok: false, error: 'Nepodarilo sa vypočítať cenu' });
 
     const sprava = qrSprava(meno);

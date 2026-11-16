@@ -45,12 +45,12 @@ test('Nevädzka: rímske čísla, hmotnosť bez medzery a alergény', () => {
 });
 test('ceny nových jedální sú rovnaké na serveri aj v prehliadači', () => {
   const cases = [
-    [lupo[dates[0]], 'P1 Polievka', 'J1 Jedlo', null, 8],
-    [lupo[dates[0]], 'P2 Polievka', 'J3 Jedlo', null, 8.9],
-    [lupo[dates[0]], 'P1 Polievka', 'J3 Jedlo', 'D1 Palacinka', 10.8],
-    [lupo[dates[0]], null, 'J3 Jedlo', null, 7.9],
+    [lupo[dates[0]], 'P1 Polievka', 'J1 Jedlo', null, 8.5],
+    [lupo[dates[0]], 'P2 Polievka', 'J3 Jedlo', null, 9.4],
+    [lupo[dates[0]], 'P1 Polievka', 'J3 Jedlo', 'D1 Palacinka', 11.3],
+    [lupo[dates[0]], null, 'J3 Jedlo', null, 8.4],
     [lupo[dates[0]], 'P1 Polievka', null, null, 2.8],
-    [lupo[dates[3]], 'P1 Polievka', 'J1 Kačka', null, 9.5],
+    [lupo[dates[3]], 'P1 Polievka', 'J1 Kačka', null, 10],
     [nevadzka[dates[0]], 'P1 Polievka', 'J4 Jedlo', null, 8],
     [nevadzka[dates[0]], null, 'J2 Jedlo', null, 7.4],
     [nevadzka[dates[0]], 'P1 Polievka', null, null, 2.5]
