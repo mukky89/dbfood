@@ -5,6 +5,15 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.32.2] — 2026-11-16
+
+### Opravené
+- Jednorazová archivácia ukladá snapshot do existujúceho denného dokumentu namiesto vytvárania ďalšej kolekcie. Nové nastavenie jedálne môže použiť existujúci dokument vzhľadu; skoršie samostatné nastavenia sa zachovávajú. Obchádza sa potreba vytvárať nové úložné tabuľky, nie bezpečnostný limit MongoDB, a kapacita disku sa nemení.
+- Chyba voliteľnej údržby nezastaví štart aplikácie.
+
+### Pridané
+- Voliteľné štatistiky fyzického a logického úložiska cez `MAINTENANCE_DATABASE_STATS=1`; čítajú iba súhrnné veľkosti a počty, bez obsahu objednávok.
+
 ## [1.32.1] — 2026-11-16
 
 ### Pridané

@@ -14,6 +14,7 @@ module.exports = {
   maintenanceRestaurantTask: process.env.MAINTENANCE_RESTAURANT_TASK || '',
   maintenanceRestaurantCount: Number(process.env.MAINTENANCE_RESTAURANT_COUNT),
   maintenanceRestaurantDate: process.env.MAINTENANCE_RESTAURANT_DATE || '',
+  maintenanceDatabaseStats: process.env.MAINTENANCE_DATABASE_STATS === '1',
   platbaIban: process.env.PLATBA_IBAN,
   platbaBic: process.env.PLATBA_BIC,
   platbaMeno: process.env.PLATBA_MENO,

@@ -13,9 +13,11 @@ async function archiveAndSwitch({ Daily, Settings, Archive, target, task, expect
   if (!previous && currentId === target) { log('RESTAURANT_MAINTENANCE ' + JSON.stringify({ task, status: 'already-selected', target })); return null; }
   const daily = await Daily.findOne({ datum: now.toDateString() });
   if (!daily) throw new Error('Dnešný záznam objednávok sa nenašiel');
+  const dailySnapshot = daily.toObject ? daily.toObject() : { ...daily };
+  delete dailySnapshot.restaurantArchives;
   const snapshot = previous || { _id: task, status: 'pending', date, target, archivedAt: now.toISOString(),
     originalRestaurant: currentId, originalSettings: settings?.toObject ? settings.toObject() : settings,
-    daily: daily.toObject ? daily.toObject() : daily, count: Object.keys(daily.orders || {}).length };
+    daily: dailySnapshot, count: Object.keys(daily.orders || {}).length };
   if (snapshot.target !== target || snapshot.date !== date || snapshot.count !== expectedCount) throw new Error('Parametre sa nezhodujú s archívom');
   const count = Object.keys(daily.orders || {}).length;
   if (!previous && count !== expectedCount) throw new Error('Počet objednávok sa zmenil; údržba sa zastavila');
@@ -32,7 +34,7 @@ async function archiveAndSwitch({ Daily, Settings, Archive, target, task, expect
     if (currentId !== target) {
       if (snapshot.originalSettings) {
         const revision = snapshot.originalSettings.revision === undefined ? { $exists: false } : snapshot.originalSettings.revision;
-        const updated = await Settings.updateOne({ _id: snapshot.originalSettings._id, revision }, { $set: { restaurantId: target }, $inc: { revision: 1 } });
+        const updated = await Settings.updateOne({ _id: snapshot.originalSettings._id, _storage: snapshot.originalSettings._storage, revision }, { $set: { restaurantId: target }, $inc: { revision: 1 } });
         if (updated.matchedCount !== 1) throw new Error('Nastavenie jedálne sa počas údržby zmenilo');
       } else await Settings.create({ key: 'restaurant', restaurantId: target, revision: 1 });
     }
@@ -50,21 +52,23 @@ async function archiveAndSwitch({ Daily, Settings, Archive, target, task, expect
 
 async function main() {
   const config = require('../config');
-  if (!config.maintenanceRestaurantTarget) return;
+  if (!config.maintenanceRestaurantTarget && !config.maintenanceDatabaseStats) return;
   const mongoose = require('mongoose');
   try {
+    await mongoose.connect(config.mongoUri, { autoCreate: false, autoIndex: false });
+    if (config.maintenanceDatabaseStats) console.log('DATABASE_STORAGE_STATS ' + JSON.stringify(await require('./database-stats.cjs').databaseStats(mongoose.connection.db)));
+    if (!config.maintenanceRestaurantTarget) return;
     const now = new Date();
     const [hh, mm] = config.orderDeadline.split(':').map(Number);
     const time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Bratislava', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now);
     if (time < `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`) throw new Error('Údržba nie je povolená pred uzávierkou');
-    await mongoose.connect(config.mongoUri);
-    const Daily = mongoose.model('DenneObjednavky', new mongoose.Schema({ datum: String, orders: mongoose.Schema.Types.Mixed, history: Array }, { strict: false }));
-    const Settings = mongoose.model('RestaurantSettings', new mongoose.Schema({ key: {type:String,unique:true}, restaurantId: String, revision: Number }));
-    const Archive = mongoose.model('RestaurantSwitchArchive', new mongoose.Schema({ _id: String, status: String, date: String, target: String, count: Number, daily: mongoose.Schema.Types.Mixed, originalSettings: mongoose.Schema.Types.Mixed, originalRestaurant: String, archivedAt: String, completedAt: String }));
-    await Settings.init();
+    const Daily = mongoose.model('DenneObjednavky', new mongoose.Schema({ datum: String, orders: mongoose.Schema.Types.Mixed, history: Array }, { strict: false, autoCreate: false, autoIndex: false }));
+    const { createRestaurantSettingsStore, createEmbeddedArchiveStore } = require('../restaurant-storage');
+    const Settings = createRestaurantSettingsStore(mongoose.connection.collection('restaurantsettings'), mongoose.connection.collection('nastaveniavzhlads'));
+    const Archive = createEmbeddedArchiveStore(Daily.collection);
     await archiveAndSwitch({ Daily, Settings, Archive, target: config.maintenanceRestaurantTarget, task: config.maintenanceRestaurantTask,
       expectedCount: config.maintenanceRestaurantCount, date: config.maintenanceRestaurantDate, now });
   } finally { await mongoose.disconnect(); }
 }
 if (require.main === module) main().catch(error => { console.error('RESTAURANT_MAINTENANCE_FAILED ' + error.message); process.exitCode = 1; });
-module.exports = { archiveAndSwitch };
+module.exports = { archiveAndSwitch, runMaintenance: main };
