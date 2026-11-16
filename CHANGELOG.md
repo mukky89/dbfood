@@ -5,6 +5,21 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.31.0] — 2026-11-16
+
+### Pridané
+- Výber jedálne v administrácii: Fantozzi, Jedáleň LUPO a Jedáleň Nevädzka. Voľba sa ukladá do MongoDB; názov, kontakty a súhrnné e-maily používajú aktuálnu jedáleň.
+- Samostatné parsery týždenného menu LUPO a Nevädzky s výberom presného dátumu v pásme Europe/Bratislava. Rozlišujú polievky, hlavné jedlá, dezerty, hmotnosť, ceny a doplnkovú ponuku.
+- Voľba prílohy pri jedlách LUPO s voľnou prílohou, ceny jednotlivých jedál a spoločný výpočet cien pre server aj prehliadač.
+- Diagnostika zdroja a import uloženej HTML stránky pri blokovaní automatického prístupu; ručne vložené menu pre konkrétnu jedáleň a dátum prežije reštart.
+
+### Opravené
+- Menu sa nepoužíva pre iný dátum ani inú jedáleň. Staré otvorené formuláre server odmietne. Prepnutie jedálne a nahradenie menu sa zastaví, ak už existujú dnešné objednávky.
+- Ceny nových jedální sa nenahrádzajú pôvodnými cenami Fantozzi. Minútky Nevädzky bez ceny zostávajú informatívne; poplatky za rozvoz LUPO nie sú súčasťou odhadu.
+
+### Obmedzenia
+- Menučka.sk pri priamom serverovom prístupe počas overenia vracala Cloudflare HTTP 403. Parser Nevädzky je overený na HTML načítanom v prehliadači; pri blokovaní treba použiť HTML import. Automatické načítanie z Railway zatiaľ nie je overené.
+
 ## [1.30.0] — 2026-11-04
 
 ### Pridané

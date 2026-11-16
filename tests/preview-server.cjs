@@ -12,6 +12,38 @@ const { createSylexRouter, MemorySylexStore } = require('../sylex-api');
 app.use('/api/sylex', createSylexRouter({ store: new MemorySylexStore(), rateLimits: false, contest: { endsAt: '2026-12-01T00:00:00+01:00', prize: 'Balíček vianočných trubičiek (25 ks)' } }));
 app.use(express.json());
 let appearance = { tema: 'rc', designVersion: 2 }, orders = {};
+const { createRestaurantState } = require('../restaurant-state');
+const { parseLupo, parseNevadzka, selectDay } = require('../menu-parsers');
+let restaurantDoc = null;
+const restaurantState = createRestaurantState({
+  store: { findOne: async () => restaurantDoc, findOneAndUpdate: async (_, u) => { restaurantDoc = { ...restaurantDoc, ...u.$set, revision: (restaurantDoc?.revision || 0) + (u.$inc?.revision || 0) }; } },
+  loadOrders: async () => orders, adminPassword: 'preview-only', clearCache: () => {}
+});
+app.use('/api', restaurantState.router);
+if (process.env.RESTAURANT_PREVIEW === '1') {
+  let imported = null;
+  async function fixtureMenu() {
+    const ctx = await restaurantState.context();
+    if (imported?.key === ctx.key) return imported;
+    const id = ctx.restaurant.id;
+    if (id === 'fantozzi') return { ...ctx, datum: ctx.date, sekcie: [{ nazov:'Polievka',polozky:[{cislo:1,nazov:'Testovacia polievka',hmotnost:'0,33l'}] }, { nazov:'Hlavné jedlo',cena:'6.50 €',polozky:[{cislo:1,nazov:'Testovacie jedlo',hmotnost:'120g'}] }] };
+    const days = (id === 'lupo' ? parseLupo : parseNevadzka)(fs.readFileSync(path.join(__dirname, 'fixtures', id + '.html'), 'utf8'));
+    return { ...selectDay(days, '2026-11-16'), ...ctx };
+  }
+  app.get('/api/menu', async (_, res) => res.json({ok:true,menu:await fixtureMenu()}));
+  const routeSandbox = {
+    app, restaurantState, config:{adminPassword:'preview-only'}, parseLupo,parseNevadzka,selectDay,
+    validSelection:require('../menu-selection').validSelection,fetchMenu:fixtureMenu,
+    isTodayBlocked:async()=>({blocked:false}),isOrderingOpen:()=>true,loadOrders:async()=>orders,
+    loadTodayHistory:async()=>[],getCasSK:()=> '09:00',saveOrders:async o=>{orders=o;},
+    setManualMenu:async menu=>{imported={...menu,...await restaurantState.context()};}
+  };
+  vm.createContext(routeSandbox);
+  const productionSource = fs.readFileSync(path.join(__dirname, '../server.js'), 'utf8');
+  vm.runInContext(productionSource.slice(productionSource.indexOf("app.post('/api/admin/menu-import'"), productionSource.indexOf('// Feedback od používateľov')),routeSandbox);
+  vm.runInContext(productionSource.slice(productionSource.indexOf("app.post('/api/orders'"), productionSource.indexOf('// DELETE /api/orders/:meno')),routeSandbox);
+  app.get('/api/admin/menu-debug',(_,res)=>res.json({ok:true,httpStatus:200,availableDates:['2026-11-16','2026-11-17','2026-11-18','2026-11-19','2026-11-20']}));
+}
 const source = fs.readFileSync(path.join(__dirname, '../server.js'), 'utf8');
 const sandbox = {
   app, config: { adminPassword: 'preview-only' }, NastaveniaVzhlad: {

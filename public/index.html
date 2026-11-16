@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍕 Fantozzi Objednávky</title>
+  <title>Objednávky obedov</title>
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
@@ -1571,7 +1571,7 @@
   <h1>
     <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:2px">
       <span class="hdr-pizza">🍕</span>
-      <span class="hdr-brand">Fantozzi</span>
+      <span class="hdr-brand">Objednávky obedov</span>
       <span class="hdr-sep">|</span>
       <span class="hdr-sub">Objednávky</span>
     </a>
@@ -1599,7 +1599,7 @@
     </button>
     <div class="phone-wrap">
       <button class="phone-btn" onclick="togglePhoneDropdown()" id="phone-btn">
-        📞 <span class="phone-btn-label">Fantozzi</span>
+        📞 <span class="phone-btn-label">Jedáleň</span>
       </button>
       <div class="phone-dropdown" id="phone-dropdown">
         <div class="phone-drop-title">📞 Kontakt Fantozzi</div>
@@ -1756,7 +1756,7 @@
 <!-- RC Trail — ovládateľná off-road minihra, viditeľná iba v RC téme. -->
 <section id="rc-expedition" aria-label="RC trail expedícia">
   <div class="rc-hero-copy">
-    <span class="rc-eyebrow">FANTOZZI BASE CAMP · RUŽINOV</span>
+    <span class="rc-eyebrow"><span data-restaurant-name>Jedáleň</span> · BASE CAMP · RUŽINOV</span>
     <h2>Vyber obed.<br><em>Vyraz na trail.</em></h2>
     <p>Malý off-road, veľká výprava. Prejdi checkpointmi šípkami alebo WASD.</p>
     <div class="rc-key-hints" aria-label="Ovládanie auta">
@@ -1934,7 +1934,8 @@
       <div>
         <div class="card" id="menu-card">
           <div class="card-title">📋 Dnešné menu</div>
-          <div id="menu-loading" class="loading">⏳ Načítavam menu z Fantozzi...</div>
+          <div id="restaurant-today" class="alert alert-info" role="status">Načítavam názov jedálne...</div>
+          <div id="menu-loading" class="loading">⏳ Načítavam dnešné menu...</div>
           <div id="menu-content" style="display:none"></div>
           <div id="menu-error" style="display:none" class="alert alert-warning"></div>
           <div id="order-form" style="display:none">
@@ -2003,7 +2004,7 @@
 
     <!-- Pätička s verziou -->
     <footer style="text-align:center;margin-top:28px;padding:16px 0 8px;color:var(--muted);font-size:12px;opacity:.85">
-      🍕 Fantozzi Objednávky ·
+      🍽️ <span data-restaurant-name>Objednávky obedov</span> ·
       <a href="#" onclick="showChangelog(event)" title="Zobraziť changelog" style="color:var(--muted);text-decoration:none;border-bottom:1px dotted var(--border)"><span id="app-version">v…</span></a>
     </footer>
   </div>
@@ -2031,6 +2032,21 @@
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">🍽️ Výber jedálne</div>
+      <label for="restaurant-select">Dnes sa objednáva z:</label>
+      <select id="restaurant-select" style="max-width:100%;padding:10px;margin:8px" aria-label="Jedáleň"></select>
+      <button id="restaurant-save" class="btn btn-primary" style="width:auto" onclick="saveRestaurant()">Uložiť jedáleň</button>
+      <p>Voľba sa zachová aj po reštarte. Jedáleň možno zmeniť pred prvou dnešnou objednávkou.</p>
+      <p><a id="restaurant-source" target="_blank" rel="noopener">Menu a kontakty</a></p>
+      <button class="btn btn-secondary" onclick="diagnoseRestaurant()">Overiť automatické načítanie</button>
+      <p id="restaurant-diagnostic" role="status"></p>
+      <details><summary>Import menu pri blokovaní zdroja (LUPO / Nevädzka)</summary>
+        <p>Otvorte web vybranej jedálne, uložte stránku cez Ctrl+S ako HTML a vyberte súbor. Importuje sa iba dnešný dátum. Menu zostane uložené aj po reštarte; import je možný pred prvou objednávkou.</p>
+        <label for="restaurant-html">HTML stránka s menu</label>
+        <input id="restaurant-html" type="file" accept=".html,.htm" onchange="importRestaurantHtml(this)">
+      </details>
+    </div>
     <div id="admin-config-info" style="display:none;margin-bottom:12px" class="card">
       <div class="card-title" style="margin-bottom:10px">⚙️ Nastavenia systému</div>
       <div id="admin-config-content" style="font-size:13px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px"></div>
@@ -2486,6 +2502,8 @@
   </div>
 </div>
 
+<script src="/menu-pricing.js"></script>
+<script src="/restaurant-ui.js"></script>
 <script>
 // ── Cookie helpers (musia byt definovane ako prve) ─────────────────────────
 function loadUserFromCookiesEarly() {
@@ -2614,6 +2632,8 @@ function parseHmotnost(raw) {
 
 // ── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadRestaurant();
+  setInterval(() => loadRestaurant(true), 30000);
   await loadKnownUsers();
 
   if (isAdmin) {
@@ -3006,6 +3026,9 @@ function disableForm() {
 
 // ── Menu ──────────────────────────────────────────────────────────────────
 async function loadMenu() {
+  menuData = null;
+  document.getElementById('menu-content').style.display = 'none';
+  document.getElementById('menu-error').style.display = 'none';
   try {
     const res = await fetch('/api/menu');
     const data = await res.json();
@@ -3018,7 +3041,7 @@ async function loadMenu() {
         <div style="text-align:center;padding:8px 0">
           <div style="font-size:32px;margin-bottom:8px">⏳</div>
           <div style="font-weight:700;font-size:15px;margin-bottom:6px">Menu ešte nie je pripravené</div>
-          <div style="font-size:13px;color:#856404">Reštaurácia Fantozzi zatiaľ nezverejnila dnešné menu.<br>Skús to znova o chvíľu — menu býva dostupné okolo 8:00.</div>
+          <div style="font-size:13px;color:#856404">${esc(data.menu?.restaurant?.name || restaurantContext?.restaurant?.name || 'Jedáleň')}: ${esc(data.menu?.error || 'Menu na dnešný dátum zatiaľ nie je dostupné. Skús to znova o chvíľu.')}</div>
           <button onclick="retryLoadMenu()" style="margin-top:14px;background:#f39c12;color:white;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer">🔄 Skúsiť znova</button>
         </div>`;
       // Skryj formular, nezobrazuj tlacidla
@@ -3052,6 +3075,7 @@ async function retryLoadMenu() {
 
 function renderMenu(menu) {
   const content = document.getElementById('menu-content');
+  if (menu.restaurant && restaurantContext) applyRestaurant({ ...restaurantContext, restaurant: menu.restaurant, key: menu.key });
   content.style.display = 'block';
   // Vzdy zobraz formular - pre neprihlasenych bude banner, pre prihlasenych tlacidla
   document.getElementById('order-form').style.display = 'block';
@@ -3090,19 +3114,21 @@ function renderMenu(menu) {
       </div>
     </div>`;
 
+  if (menu.warning) html += `<p class="alert alert-warning">${esc(menu.warning)}</p>`;
+  if (menu.pricingNote) html += `<p class="alert alert-info">${esc(menu.pricingNote)}</p>`;
   menu.sekcie.forEach(sekcia => {
     const isPolievka = sekcia.nazov.toLowerCase().includes('polievka');
     const isPizza    = sekcia.nazov.toLowerCase().includes('pizza');
     const isJedlo    = sekcia.nazov.toLowerCase().includes('hlavné');
     const isDezert   = sekcia.nazov.toLowerCase().includes('dezert');
-    const inputType  = isPolievka ? 'radio' : isJedlo ? 'radio' : isPizza ? 'radio' : 'checkbox';
+    const inputType  = (isPolievka || isJedlo || isPizza || menu.pricing) ? 'radio' : 'checkbox';
     const groupName  = isPolievka ? 'polievka' : isJedlo ? 'jedlo' : isPizza ? 'pizza' : 'dezert';
     const prefix     = isPolievka ? 'P' : isJedlo ? 'J' : isPizza ? 'PZ' : 'D';
 
     const isHotSekcia = isPizza || isJedlo;
 
-    html += `<div class="menu-section"><div class="menu-section-title">${tName(sekcia).toUpperCase()}`;
-    if (sekcia.cena) html += ` <span class="price-badge">${sekcia.cena}</span>`;
+    html += `<div class="menu-section"><div class="menu-section-title">${esc(tName(sekcia).toUpperCase())}`;
+    if (sekcia.cena) html += ` <span class="price-badge">${esc(sekcia.cena)}</span>`;
     html += `</div>`;
 
     sekcia.polozky.forEach(p => {
@@ -3111,7 +3137,7 @@ function renderMenu(menu) {
       const hasVariants = varianty.length >= 2;
       const value = `${prefix}${p.cislo} ${nazovClean}`;
       // Zobrazeny nazov moze byt prelozeny; hodnota objednavky (value) ostava v SK
-      const nazovDisplay = menuLang === 'sk' ? nazovClean : parseVarianty(tName(p)).nazovClean;
+      const nazovDisplay = esc(menuLang === 'sk' ? nazovClean : parseVarianty(tName(p)).nazovClean);
       const { hmotnostText, alergenyHtml } = parseHmotnost(p.hmotnost);
       const isHot = topJedlo && (topJedlo.startsWith(value) || topJedlo === value) && isHotSekcia;
 
@@ -3120,10 +3146,10 @@ function renderMenu(menu) {
           <div class="variant-options-label">${uiT('vyberteDruh')}</div>
           <div class="variant-radio-row">
             ${varianty.map(v => `
-              <label class="variant-radio-btn" id="variant_label_${id}_${v}" onclick="event.stopPropagation()">
-                <input type="radio" name="variant_${groupName}_${p.cislo}" value="${v}"
-                  onchange="onVariantChange(this,'${id}','${v}')" onclick="event.stopPropagation()">
-                ${v}
+              <label class="variant-radio-btn" onclick="event.stopPropagation()">
+                <input type="radio" name="variant_${groupName}_${p.cislo}" value="${esc(v)}"
+                  onchange="onVariantChange(this,'${id}')" onclick="event.stopPropagation()">
+                ${esc(v)}
               </label>`).join('')}
           </div>
         </div>` : '';
@@ -3131,14 +3157,15 @@ function renderMenu(menu) {
       html += `
         <label class="menu-item${isHot ? ' hot-dish' : ''}" id="label_${id}" onclick="handleMenuClick(event,'${id}','${groupName}')">
           ${isHot ? `<div class="hot-badge">🔥 TOP</div>` : ''}
-          <input type="${inputType}" name="${groupName}" id="${id}" value="${value}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
+          <input type="${inputType}" name="${groupName}" id="${id}" value="${esc(value)}" data-has-variants="${hasVariants}" onchange="onMenuChange(this,'${groupName}')" onclick="event.stopPropagation()">
           <span class="menu-item-num">${prefix}${p.cislo}</span>
           <span class="menu-item-text">
-            <span class="menu-item-name">${nazovDisplay}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">${uiT('vyber')}</span>` : ''}</span>
+            <span class="menu-item-name">${nazovDisplay}${typeof p.cena === 'number' ? ` <strong>${p.cena.toFixed(2)} €</strong>` : ''}${hasVariants ? ` <span style="font-size:11px;background:#e8eeff;color:#3a5bbd;border-radius:10px;padding:1px 7px;font-weight:700">${uiT('vyber')}</span>` : ''}</span>
             ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">${uiT('gyros')}</span>` : ''}
-            <span class="menu-item-weight">${hmotnostText}</span>
+            <span class="menu-item-weight">${esc(hmotnostText)}</span>
             ${alergenyHtml}
             ${variantRadios}
+            ${p.sideOptions?.length ? `<span style="display:block"><label for="side_${id}">Príloha v cene menu:</label><select id="side_${id}" onclick="event.stopPropagation()"><option value="">Vyber prílohu</option>${p.sideOptions.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select></span>` : ''}
             ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="${uiT('poznamka')}" maxlength="120"
               onclick="event.stopPropagation()" onfocus="event.stopPropagation()" onkeydown="event.stopPropagation()">` : ''}
           </span>
@@ -3147,6 +3174,7 @@ function renderMenu(menu) {
     html += `</div>`;
   });
 
+  if (menu.informational?.length) html += `<details><summary>Ďalšia ponuka a podmienky jedálne</summary>${menu.informational.map(i => `<p><strong>${esc(i.category)}</strong>: ${esc(i.text)}${typeof i.cena === 'number' ? ` — ${i.cena.toFixed(2)} €` : ''}</p>`).join('')}</details>`;
   html += `<details class="allergen-legend"><summary>${uiT('alergenyLegend')}</summary>
     <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:2px 16px">
       ${Object.entries(ALERGENY).map(([num, a]) =>
@@ -3256,6 +3284,8 @@ function updateLivePrice() {
 
   if (dezert) { celkom += cenaDezert; detail.push('Dezert: ' + cenaDezert.toFixed(2) + ' €'); }
 
+  const providerPrice = MenuPricing.calculate(polievka, jedlo, pizza, dezert, menuData);
+  if (providerPrice !== undefined) { celkom = providerPrice?.celkom || 0; detail.splice(0, detail.length, ...(providerPrice?.detail || [])); }
   if (celkom > 0 && calc) {
     const total = celkom * porcieCount;
     calc.style.display = 'block';
@@ -3295,11 +3325,14 @@ async function submitOrder() {
   // Validacia variant - ak ma polozka varianty, musi byt vybrata
   function getValueWithVariant(el, groupName) {
     if (!el) return null;
-    if (el.dataset.hasVariants !== 'true') return el.value;
+    const side = document.getElementById('side_' + el.id);
+    if (side && !side.value) return null;
+    const base = el.value + (side ? ' — príloha: ' + side.value : '');
+    if (el.dataset.hasVariants !== 'true') return base;
     const cislo = el.id.replace(groupName + '_', '');
     const variant = document.querySelector(`input[name="variant_${groupName}_${cislo}"]:checked`);
     if (!variant) return null; // chyba - varianta nevybrana
-    return el.value + ' — ' + variant.value;
+    return base + ' — ' + variant.value;
   }
 
   const jedloVal   = getValueWithVariant(jedloEl, 'jedlo');
@@ -3322,6 +3355,7 @@ async function submitOrder() {
   });
 
   const body = {
+    menuKey: menuData?.key,
     meno: currentUser,
     polievka: polievkaVal,
     jedlo:    jedloVal,
@@ -4494,6 +4528,7 @@ async function submitAdminEditOrder() {
   if (!jedlo && !pizza) { showToast('❌ Musí zostať hlavné jedlo alebo pizza', 'error'); return; }
   const body = {
     adminPass: adminPassword,
+    menuKey: menuData?.key,
     polievka: document.getElementById('ae-polievka').value || null,
     jedlo: jedlo || null,
     pizza: pizza || null,

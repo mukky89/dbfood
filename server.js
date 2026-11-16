@@ -4,7 +4,10 @@ const path = require('path');
 const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
-const { fetchMenu, setManualMenu, clearCache, debugFetch } = require('./scraper');
+const { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants } = require('./scraper');
+const { createRestaurantState } = require('./restaurant-state');
+const { parseLupo, parseNevadzka, selectDay } = require('./menu-parsers');
+const { validSelection } = require('./menu-selection');
 const { sendEmail, sendMail, formatEmail } = require('./mailer');
 const { generatePayBySquareQR, vypocitajCenu } = require('./paysquare');
 const { notifyNovaObjednavka, notifyUpravaObjednavky, notifyZrusenieObjednavky, notifyPripomienka, notifySuhrn, notifyTestPush } = require('./notifier');
@@ -29,7 +32,7 @@ function relabel(val, prefix) {
 // Poznamka do QR platby: vzdy meno + datum, bez diakritiky
 function qrSprava(meno) {
   const datum = new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' });
-  const text = meno && meno.trim() ? `${meno.trim()} ${datum}` : `Obed Fantozzi ${datum}`;
+  const text = meno && meno.trim() ? `${meno.trim()} ${datum}` : `Obed ${datum}`;
   return bezDiakritiky(text);
 }
 
@@ -48,7 +51,7 @@ app.use((req, res, next) => {
 
 app.use('/api/sylex', createSylexRouter({store:createMongoSylexStore(mongoose),contest:{endsAt:config.sylexContestEnd,prize:config.sylexContestPrize}}));
 app.use('/api/colony', createColonyRouter({ store: createMongoColonyStore(mongoose) }));
-app.use(express.json());
+app.use(express.json({ limit: '600kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── MongoDB schemas ──────────────────────────────────────────────────────────
@@ -98,6 +101,30 @@ const nastaveniaVzhladSchema = new mongoose.Schema({
   designVersion: { type: Number, default: 0 }
 });
 const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
+const RestaurantSettings = mongoose.model('RestaurantSettings', new mongoose.Schema({
+  key: { type: String, unique: true }, restaurantId: String, revision: Number
+}));
+const ManualRestaurantMenu = mongoose.model('ManualRestaurantMenu', new mongoose.Schema({
+  key: { type: String, unique: true }, menu: mongoose.Schema.Types.Mixed
+}));
+const restaurantState = createRestaurantState({ store: RestaurantSettings, loadOrders,
+  adminPassword: config.adminPassword, clearCache });
+configureRestaurants(restaurantState.context, ManualRestaurantMenu);
+app.use('/api', restaurantState.router);
+app.post('/api/admin/menu-import', async (req, res) => {
+  if (req.body.adminPass !== config.adminPassword) return res.status(401).json({ ok: false });
+  try {
+    await restaurantState.exclusive(async () => {
+      const { restaurant, date } = await restaurantState.context();
+      if (restaurant.id === 'fantozzi') return res.status(400).json({ ok: false, error: 'Pre Fantozzi použite ručné JSON menu' });
+      if (Object.keys(await loadOrders()).length) return res.status(409).json({ ok: false, error: 'Menu nemožno nahradiť po prvej objednávke' });
+      const menu = selectDay((restaurant.id === 'lupo' ? parseLupo : parseNevadzka)(String(req.body.html || '')), date);
+      if (!menu.sekcie.some(s => s.nazov === 'Hlavné jedlo' && s.polozky.length)) return res.status(400).json({ ok: false, error: 'Súbor neobsahuje dnešné menu vybranej jedálne' });
+      await setManualMenu(menu);
+      res.json({ ok: true, menu });
+    });
+  } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
+});
 
 // Feedback od používateľov (💬 plávajúce okno na stránke)
 const feedbackSchema = new mongoose.Schema({
@@ -314,7 +341,7 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // POST /api/orders
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', async (req, res) => restaurantState.exclusive(async () => {
   const blok = await isTodayBlocked();
   if (blok.blocked) return res.status(403).json({ ok: false, error: `Objednávanie je zablokované: ${blok.dovod}` });
   if (!isOrderingOpen()) return res.status(403).json({ ok: false, error: 'Objednavanie je uzavrete (po 10:00)' });
@@ -325,6 +352,14 @@ app.post('/api/orders', async (req, res) => {
   if (!jedlo && !pizza) return res.status(400).json({ ok: false, error: 'Musíš vybrať hlavné jedlo alebo pizzu' });
 
   try {
+    const context = await restaurantState.context();
+    if (req.body.menuKey !== context.key) return res.status(409).json({ ok: false, error: 'Jedáleň alebo dátum menu sa zmenili. Obnov stránku a vyber jedlo znova.' });
+    const currentMenu = await fetchMenu();
+    if (!currentMenu?.sekcie?.length) return res.status(409).json({ ok: false, error: 'Dnešné menu nie je dostupné' });
+    for (const [value, type, prefix] of [[polievka, 'polievka', 'P'], [jedlo, 'hlavné', 'J'], [pizza, 'pizza', 'PZ'], [dezert, 'dezert', 'D']]) {
+      if (!value) continue;
+      if (!validSelection(value, type, prefix, currentMenu)) return res.status(400).json({ ok: false, error: 'Jedlo alebo príloha nie sú v aktuálnom menu. Obnov stránku a vyber ich znova.' });
+    }
     const orders = await loadOrders();
     const history = await loadTodayHistory();
     const menoKey = meno.trim();
@@ -344,6 +379,9 @@ app.post('/api/orders', async (req, res) => {
     }
 
     orders[menoKey] = {
+      restaurantId: context.restaurant.id,
+      restaurantName: context.restaurant.name,
+      menuKey: context.key,
       meno: menoKey,
       polievka: polievka || null,
       jedlo: jedlo || null,
@@ -358,7 +396,7 @@ app.post('/api/orders', async (req, res) => {
     await saveOrders(orders, history);
     res.json({ ok: true, message: editMode ? 'Objednavka upravena' : 'Objednavka ulozena' });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
-});
+}));
 
 // DELETE /api/orders/:meno
 app.delete('/api/orders/:meno', async (req, res) => {
@@ -387,7 +425,7 @@ app.delete('/api/orders/:meno', async (req, res) => {
 });
 
 // PUT /api/admin/orders/:meno — admin uprava detailu objednavky (bez ohladu na uzavierku)
-app.put('/api/admin/orders/:meno', async (req, res) => {
+app.put('/api/admin/orders/:meno', async (req, res) => restaurantState.exclusive(async () => {
   const { adminPass } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
 
@@ -396,6 +434,8 @@ app.put('/api/admin/orders/:meno', async (req, res) => {
   if (!jedlo && !pizza) return res.status(400).json({ ok: false, error: 'Musí zostať hlavné jedlo alebo pizza' });
 
   try {
+    const context = await restaurantState.context();
+    if (req.body.menuKey !== context.key) return res.status(409).json({ ok: false, error: 'Menu sa zmenilo. Obnov stránku.' });
     const orders = await loadOrders();
     const history = await loadTodayHistory();
     if (!orders[meno]) return res.status(404).json({ ok: false, error: 'Objednavka nenajdena' });
@@ -421,7 +461,7 @@ app.put('/api/admin/orders/:meno', async (req, res) => {
     await saveOrders(orders, history);
     res.json({ ok: true, message: `Objednavka ${meno} upravena` });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
-});
+}));
 
 // ── Auth - OTP cez email ──────────────────────────────────────────────────────
 const otpStore = {};
@@ -436,7 +476,7 @@ async function sendOTPEmail(email, meno, otp) {
     <body style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px;color:#333">
       <div style="background:#2c3e50;color:white;padding:20px 24px;border-radius:8px 8px 0 0;text-align:center">
         <div style="font-size:32px">🍕</div>
-        <h2 style="margin:8px 0 0">Fantozzi Objednávky</h2>
+        <h2 style="margin:8px 0 0">Objednávky obedov</h2>
       </div>
       <div style="border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;padding:24px;text-align:center">
         <p style="font-size:15px">Ahoj <strong>${meno}</strong>! Tu je tvoj prihlasovací kód:</p>
@@ -447,7 +487,7 @@ async function sendOTPEmail(email, meno, otp) {
 
   const result = await sendMail({
     to: email,
-    subject: `${otp} — tvoj prihlasovací kód do Fantozzi`,
+    subject: `${otp} — tvoj prihlasovací kód do objednávok obedov`,
     text: `Tvoj prihlasovací kód: ${otp}\nKód je platný 10 minút.`,
     html
   });
@@ -654,8 +694,13 @@ app.post('/api/send-email', async (req, res) => {
 app.post('/api/manual-menu', async (req, res) => {
   const { adminPass, menu } = req.body;
   if (adminPass !== config.adminPassword) return res.status(401).json({ ok: false, error: 'Nespravne heslo' });
-  await setManualMenu(menu);
-  res.json({ ok: true, message: 'Manualne menu nastavene' });
+  try {
+    await restaurantState.exclusive(async () => {
+      if (Object.keys(await loadOrders()).length) return res.status(409).json({ ok: false, error: 'Menu nemožno nahradiť po prvej objednávke' });
+      await setManualMenu(menu);
+      res.json({ ok: true, message: 'Manualne menu nastavene' });
+    });
+  } catch (e) { res.status(400).json({ ok: false, error: e.message }); }
 });
 
 // POST /api/clear-orders
@@ -819,7 +864,7 @@ app.post('/api/send-qr-email', async (req, res) => {
         <!-- Hlavička -->
         <tr><td style="background:#16a34a;background:linear-gradient(135deg,#0f7a3d 0%,#16a34a 55%,#22c55e 100%);padding:30px 28px;text-align:center">
           <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.78)">QR platba za obed</div>
-          <div style="font-size:24px;font-weight:800;color:#fff;margin-top:6px">🍕 Fantozzi</div>
+          <div style="font-size:24px;font-weight:800;color:#fff;margin-top:6px">🍽️ ${menu?.restaurant?.name || 'Fantozzi'}</div>
           <div style="font-size:13px;color:rgba(255,255,255,.85);margin-top:4px">${datumStr}</div>
         </td></tr>
 
@@ -873,7 +918,7 @@ app.post('/api/send-qr-email', async (req, res) => {
 
     const result = await sendMail({
       to: email.trim(),
-      subject: `QR platba Fantozzi — ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`,
+      subject: `QR platba ${menu?.restaurant?.name || 'Fantozzi'} — ${new Date().toLocaleDateString('sk-SK', { timeZone: 'Europe/Bratislava' })}`,
       html,
       attachments: [{ filename: 'qr-platba.png', content: base64Data, encoding: 'base64', cid: 'qrcode' }]
     });

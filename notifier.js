@@ -134,7 +134,7 @@ async function notifySuhrn(orders, menu) {
 
   const notesMap = notesByItem(entries);
 
-  let msg = `Celkom objednavok ${entries.length}\n`;
+  let msg = `${menu?.restaurant?.name || 'Fantozzi'}\nCelkom objednavok ${entries.length}\n`;
   msg += `\nSuhrn\n-------------`;
   msg += formatSection('Polievka:', polievkaMap);
   msg += formatSection('\nJedlo:', jedlaMap, notesMap);
@@ -152,7 +152,7 @@ async function notifyPripomienka(orders, deadline) {
     : 'Este nikto neobjednal.';
   msg += `\n\nUzavierka objednavok: ${deadline}`;
   return sendPush({
-    title: 'Objednaj si obed! Fantozzi',
+    title: 'Objednaj si obed!',
     message: msg,
     priority: 'high',
     tags: 'fork_and_knife,bell'
