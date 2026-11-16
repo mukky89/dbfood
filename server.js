@@ -101,9 +101,9 @@ const nastaveniaVzhladSchema = new mongoose.Schema({
   designVersion: { type: Number, default: 0 }
 });
 const NastaveniaVzhlad = mongoose.model('NastaveniaVzhlad', nastaveniaVzhladSchema);
-const RestaurantSettings = mongoose.model('RestaurantSettings', new mongoose.Schema({
-  key: { type: String, unique: true }, restaurantId: String, revision: Number
-}));
+const RestaurantSettings = require('./restaurant-storage').createRestaurantSettingsStore(
+  mongoose.connection.collection('restaurantsettings'), NastaveniaVzhlad.collection
+);
 const ManualRestaurantMenu = mongoose.model('ManualRestaurantMenu', new mongoose.Schema({
   key: { type: String, unique: true }, menu: mongoose.Schema.Types.Mixed
 }));
