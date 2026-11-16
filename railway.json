@@ -4,6 +4,6 @@
     "buildCommand": "npm install"
   },
   "deploy": {
-    "startCommand": "node server.js"
+    "startCommand": "node scripts/archive-switch-restaurant.cjs && node server.js"
   }
 }
