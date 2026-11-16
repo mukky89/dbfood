@@ -1231,6 +1231,7 @@ setupCrons();
 const PORT = process.env.PORT || process.env.port || config.port || 8124;
 
 app.listen(PORT, '0.0.0.0', () => {
+  if (config.menuSourceDiagnostics) require('./menu-diagnostics').checkMenuSources().catch(error => console.error('[Menu diagnostika]', error.message));
   console.log('');
   console.log('  🍕 Fantozzi Objednavkovy System');
   console.log('  ================================');

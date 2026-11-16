@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.31.1] — 2026-11-16
+
+### Pridané
+- Voliteľná prevádzková diagnostika zdrojov LUPO a Nevädzky cez `MENU_SOURCE_DIAGNOSTICS=1`. Po štarte zapíše do logu HTTP stav, dostupné dátumy, počty jedál a ceny bez zmeny aktívnej jedálne, objednávok alebo cache. Predvolene je vypnutá.
+
 ## [1.31.0] — 2026-11-16
 
 ### Pridané
