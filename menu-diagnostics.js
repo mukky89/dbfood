@@ -11,6 +11,7 @@ async function checkMenuSources({ fetch = fetchHtml, log = console.log, now = ne
       const response = await fetch(getRestaurant(id).url);
       const days = (id === 'nevadzka' ? parseNevadzka : parseLupo)(response.data);
       result = { id, httpStatus: response.status, today: todaySK(now),
+        source: response.menuSource, attempts: response.sourceAttempts,
         todayFound: !!days[todaySK(now)]?.sekcie.some(s => s.nazov === 'Hlavné jedlo' && s.polozky.length),
         days: Object.fromEntries(Object.entries(days).map(([date, menu]) => [date, {
           sections: menu.sekcie.map(s => ({ name: s.nazov, count: s.polozky.length })),
@@ -18,7 +19,7 @@ async function checkMenuSources({ fetch = fetchHtml, log = console.log, now = ne
           mainPrices: menu.sekcie.find(s => s.nazov === 'Hlavné jedlo')?.polozky.map(p => p.cena)
         }])) };
     } catch (error) {
-      result = { id, httpStatus: error.response?.status || null, error: error.message };
+      result = { id, httpStatus: error.response?.status || null, error: error.message, attempts: error.sourceAttempts };
     }
     results.push(result);
     log('MENU_SOURCE_DIAGNOSTIC ' + JSON.stringify(result));

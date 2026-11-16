@@ -4,6 +4,8 @@ const config = require('./config');
 const { translateMenu } = require('./translator');
 const { parseLupo, parseNevadzka, selectDay, dateKey } = require('./menu-parsers');
 const { getRestaurant, todaySK } = require('./restaurants');
+const loadSource = require('./menu-source').createSourceLoader();
+const pendingMenus = new Map();
 let getContext = async () => ({ restaurant: getRestaurant('fantozzi'), date: todaySK(), key: `fantozzi:0:${todaySK()}` });
 let manualStore = null;
 function configureRestaurants(context, store) { getContext = context; manualStore = store; }
@@ -17,6 +19,13 @@ let cache = {
 
 async function fetchMenu() {
   const context = await getContext();
+  if (pendingMenus.has(context.key)) return pendingMenus.get(context.key);
+  const task = fetchMenuForContext(context).finally(() => pendingMenus.delete(context.key));
+  pendingMenus.set(context.key, task);
+  return task;
+}
+
+async function fetchMenuForContext(context) {
   const { restaurant, date, key } = context;
   const manual = manualStore && await manualStore.findOne({ key });
   if (manual?.menu) return { ...manual.menu, restaurant, date, key };
@@ -36,7 +45,7 @@ async function fetchMenu() {
     const menu = restaurant.id === 'lupo' ? selectDay(parseLupo(response.data), date)
       : restaurant.id === 'nevadzka' ? selectDay(parseNevadzka(response.data), date) : parseMenu($);
     if (restaurant.id === 'fantozzi' && dateKey(menu.datum) !== date) menu.sekcie = [];
-    Object.assign(menu, { restaurant, date, key });
+    Object.assign(menu, { restaurant, date, key, source: response.menuSource });
     if (!menu.sekcie?.length) return menu;
 
     // Preklad menu (EN/FR) — raz pri stiahnuti noveho menu, vysledok ide do cache.
@@ -67,7 +76,11 @@ async function fetchMenu() {
 
 // Stiahne HTML so sadou hlaviciek imitujucich realny prehliadac (Chrome),
 // aby sme znizili sancu na 403 z anti-bot WAF. Pri 403/429 skusi 1 retry.
-async function fetchHtml(url, attempt = 1) {
+function fetchHtml(url) {
+  return loadSource(url, target => fetchDirectHtml(target, ['lupo', 'nevadzka'].some(id => getRestaurant(id).url === target) ? 2 : 1));
+}
+
+async function fetchDirectHtml(url, attempt = 1) {
   const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -91,7 +104,7 @@ async function fetchHtml(url, attempt = 1) {
     if ((status === 403 || status === 429) && attempt < 2) {
       console.warn(`[Scraper] HTTP ${status} — skusam znova (pokus ${attempt + 1})...`);
       await new Promise(r => setTimeout(r, 1200));
-      return fetchHtml(url, attempt + 1);
+      return fetchDirectHtml(url, attempt + 1);
     }
     throw err;
   }
@@ -208,6 +221,8 @@ async function debugFetch() {
       url,
       availableDates: days ? Object.keys(days) : [dateKey(menu.datum)].filter(Boolean),
       httpStatus: response.status,
+      source: response.menuSource,
+      attempts: response.sourceAttempts,
       htmlLength: (response.data || '').length,
       sekcie: menu.sekcie.length,
       datum: menu.datum,
@@ -218,6 +233,7 @@ async function debugFetch() {
       ok: false,
       url,
       httpStatus: err.response?.status || null,
+      attempts: err.sourceAttempts,
       error: err.message
     };
   }

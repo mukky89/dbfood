@@ -8,6 +8,8 @@ module.exports = {
   adminPassword: process.env.ADMIN_PASSWORD || "admin123",
   restaurantUrl: process.env.RESTAURANT_URL || "https://www.fantozzi.sk/dennemenu",
   menuSourceDiagnostics: process.env.MENU_SOURCE_DIAGNOSTICS === '1',
+  menuReaderEnabled: process.env.MENU_READER_ENABLED !== '0',
+  menuReaderApiKey: process.env.MENU_READER_API_KEY || '',
   platbaIban: process.env.PLATBA_IBAN,
   platbaBic: process.env.PLATBA_BIC,
   platbaMeno: process.env.PLATBA_MENO,

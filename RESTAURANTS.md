@@ -1,6 +1,6 @@
 # Jedálne a overenie integrácie
 
-Verzia 1.31.0, overené 16. 11. 2026. Produkčná MongoDB, objednávky, e-maily ani push správy neboli použité na testovanie.
+Verzia 1.32.0, 16. 11. 2026. Testy objednávok používajú izolované úložiská. Overenie zdrojov na Railway iba načítava verejné menu a nemení produkčnú MongoDB, objednávky ani neposiela správy.
 
 ## Zdroje a výsledky
 
@@ -12,8 +12,16 @@ Verzia 1.31.0, overené 16. 11. 2026. Produkčná MongoDB, objednávky, e-maily 
 | 19. 11. 2026 | 2 / 9 / 2 | 1 / 4 |
 | 20. 11. 2026 | 2 / 10 / 1 | 1 / 4 |
 
-- LUPO: https://jedalenlupo.sk/ — HTTP 200, celé týždenné menu v HTML. Parser používa nadpisy s dátumom a zoznamy Elementor. Každá položka má vlastnú cenu; prílohy, šaláty a pochutiny sú oddelené od hlavných jedál. Pri názve „príloha“ sa vyberá konkrétna príloha zo zoznamu daného dňa.
-- Nevädzka: https://www.menucka.sk/denne-menu/bratislava/jedalen-nevaedzka — HTML v prehliadači obsahuje päť dní. Parser používa `.day-title`, riadky `.col-xs-10.col-sm-10`, rímske čísla I–IV a spoločný cenník. Minútky nemajú cenu a nie sú zaradené do platenej ponuky. Priamy Axios, natívny Node fetch aj PDF endpoint pri overení vracali HTTP 403 Cloudflare. Z toho nemožno vyvodiť, že Railway bude fungovať alebo nebude fungovať: overí to admin tlačidlom „Overiť automatické načítanie“ po nasadení.
+- LUPO: https://jedalenlupo.sk/ — celé týždenné menu je v HTML aj vo verejnom WordPress API `/wp-json/wp/v2/pages/14?_fields=content`. Primárny zdroj je API; zálohy sú priama stránka a Jina Reader s JSON textom z API. Parser používa nadpisy s dátumom a zoznamy Elementor. Každá položka má vlastnú cenu; prílohy, šaláty a pochutiny sú oddelené od hlavných jedál. Pri názve „príloha“ sa vyberá konkrétna príloha zo zoznamu daného dňa.
+- Nevädzka: https://www.menucka.sk/denne-menu/bratislava/jedalen-nevaedzka — obsahuje päť dní. Parser používa `.day-title`, riadky `.col-xs-10.col-sm-10`, rímske čísla I–IV a spoločný cenník. Minútky nemajú cenu a nie sú zaradené do platenej ponuky. Pri HTTP chybe alebo neplatnom obsahu priamej stránky aplikácia automaticky skúsi čerstvé HTML cez Jina Reader.
+
+## Automatické načítanie pri blokovaní
+
+Priamy prístup z Railway v pôvodnej verzii vracal HTTP 403 pre oba weby. `menu-source.js` používa viac zdrojov a overí, že odpoveď obsahuje datované hlavné jedlá. Stránka s antirobot výzvou sa odmietne aj pri HTTP 200. Reader sa žiada o HTML pre Nevädzku a o JSON text verejného WordPress API pre LUPO, s `X-No-Cache: true`. Nepoužíva sa generovanie jedál modelom ani OCR.
+
+Do Readeru sa odosielajú iba dve pevné verejné URL; žiadne používateľské údaje, admin heslá, objednávky, cookies ani platobné nastavenia. Voliteľný kľúč je v `MENU_READER_API_KEY`, nikdy v repozitári. Bez kľúča služba funguje s nižším limitom. `MENU_READER_ENABLED=0` externý záložný zdroj vypne. Dokumentácia služby: https://docs.jina.ai/api.md.
+
+Menu sa cachuje 30 minút pre konkrétnu jedáleň, revíziu a dátum. Súbežné požiadavky zdieľajú načítanie aj preklad. Po polnoci alebo zmene jedálne sa načíta nový dátum automaticky pri otvorení aplikácie. Výpadok všetkých zdrojov môže použiť označenú cache iba z rovnakého dňa a jedálne. Ručný HTML import zostáva núdzová možnosť.
 
 Parsery vyberajú dátum, nie iba názov dňa. Na víkend, nezverejnený budúci týždeň alebo pri stránke bez dátumov nevrátia predchádzajúce menu.
 
