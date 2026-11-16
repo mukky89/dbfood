@@ -64,6 +64,8 @@ function getCenaZMenu(menu, typ) {
 }
 
 function vypocitajCenu(polievka, jedlo, pizza, dezert, menu) {
+  const providerPrice = require('./public/menu-pricing').calculate(polievka, jedlo, pizza, dezert, menu);
+  if (providerPrice !== undefined) return providerPrice;
   let celkom = 0;
   const detail = [];
 

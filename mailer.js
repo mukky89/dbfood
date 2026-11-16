@@ -58,12 +58,13 @@ function createTransporter() {
 }
 
 function formatEmail(orders, menu) {
+  const restaurantName = menu?.restaurant?.name || 'Fantozzi';
   const dnes = menu ? menu.datum : new Date().toLocaleDateString('sk-SK');
   const zoznam = Object.values(orders);
 
   if (zoznam.length === 0) {
     return {
-      subject: `Objednavky Fantozzi - ${dnes}`,
+      subject: `Objednavky ${restaurantName} - ${dnes}`,
       text: `Dnes (${dnes}) nikto neobjednal.`,
       html: `<p>Dnes (${dnes}) nikto neobjednal.</p>`
     };
@@ -97,7 +98,7 @@ function formatEmail(orders, menu) {
   const pocty = [...sortByNum(mapPol), ...sortByNum(mapJedlo), ...sortByNum(mapPizza), ...sortByNum(mapDezert)];
 
   // Plain text verzia
-  let text = `OBJEDNAVKY FANTOZZI - ${dnes}\n`;
+  let text = `OBJEDNAVKY ${restaurantName.toUpperCase()} - ${dnes}\n`;
   text += `${'='.repeat(50)}\n\n`;
   text += `Celkovy pocet objednavok: ${zoznam.length}\n\n`;
   text += `ZOZNAM:\n`;
@@ -212,7 +213,7 @@ function formatEmail(orders, menu) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
             <td style="vertical-align:middle">
               <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.75)">Denný súhrn objednávok</div>
-              <div style="font-size:26px;font-weight:800;color:#ffffff;margin-top:6px">🍕 Fantozzi Objednávky</div>
+              <div style="font-size:26px;font-weight:800;color:#ffffff;margin-top:6px">🍽️ ${restaurantName} · Objednávky</div>
               <div style="font-size:14px;color:rgba(255,255,255,.85);margin-top:4px">${dnes}</div>
             </td>
             <td style="vertical-align:middle;text-align:right;white-space:nowrap">
@@ -252,7 +253,7 @@ function formatEmail(orders, menu) {
 
         <!-- Pätička -->
         <tr><td style="padding:18px 24px 28px;text-align:center">
-          <div style="font-size:12px;color:#aab2bd">Odoslané automaticky o 10:00 · <strong style="color:#8a93a0">Fantozzi Objednávkový Systém</strong></div>
+          <div style="font-size:12px;color:#aab2bd">${restaurantName} · Objednávky obedov</div>
         </td></tr>
 
       </table>
@@ -262,7 +263,7 @@ function formatEmail(orders, menu) {
 </html>`;
 
   return {
-    subject: `Objednavky Fantozzi - ${dnes} (${zoznam.length}x)`,
+    subject: `Objednavky ${restaurantName} - ${dnes} (${zoznam.length}x)`,
     text,
     html
   };
@@ -279,7 +280,7 @@ function parseRecipients(value) {
 // Odoslanie cez Brevo HTTP API (HTTPS/443) - funguje aj tam, kde je SMTP blokovany (napr. Railway).
 async function sendViaBrevoApi({ to, subject, html, text, attachments }) {
   const payload = {
-    sender: { name: 'Fantozzi Objednavky', email: config.emailSender },
+    sender: { name: 'Objednavky obedov', email: config.emailSender },
     to: to.map(email => ({ email })),
     subject
   };
@@ -330,7 +331,7 @@ async function sendMail({ to, subject, html, text, attachments }) {
   try {
     const transporter = createTransporter();
     const info = await transporter.sendMail({
-      from: `"Fantozzi Objednavky" <${config.emailSender}>`,
+      from: `"Objednavky obedov" <${config.emailSender}>`,
       to: recipients,
       subject,
       text,
