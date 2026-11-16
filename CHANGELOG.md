@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.32.3] — 2026-11-16
+
+### Opravené
+- Voliteľná údržba sa spúšťa v samostatnom Node procese, aby jej modely a odpojenie databázy neovplyvnili štart hlavného servera. Pri vypnutej údržbe sa jej proces ani modely vôbec nenačítajú.
+
 ## [1.32.2] — 2026-11-16
 
 ### Opravené
