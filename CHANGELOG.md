@@ -5,6 +5,16 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.32.0] — 2026-11-16
+
+### Pridané
+- Automatické záložné načítanie Nevädzky cez Jina Reader pri blokovaní priameho prístupu. Prenáša sa pôvodné HTML a používajú sa rovnaké parsery dátumov, jedál a cien.
+- LUPO sa načítava primárne z verejného WordPress API, potom z webovej stránky a pri nedostupnosti oboch zdrojov cez Reader z rovnakého verejného API.
+- Záložná služba dostáva iba verejné URL menu, bez používateľských údajov či prihlásení. Vyžaduje sa čerstvé načítanie; Reader možno vypnúť cez `MENU_READER_ENABLED=0`, prípadný vlastný kľúč nastaviť cez `MENU_READER_API_KEY`.
+
+### Opravené
+- HTTP 200 s antirobot stránkou alebo neplatným obsahom sa nepovažuje za menu. Súbežné načítania zdieľajú jednu požiadavku a preklady, aby sa nezahlcovali zdroje.
+
 ## [1.31.1] — 2026-11-16
 
 ### Pridané
