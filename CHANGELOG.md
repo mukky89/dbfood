@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.32.1] — 2026-11-16
+
+### Pridané
+- Jednorazová údržba na výslovne vyžiadanú archiváciu dnešných objednávok a zmenu jedálne po uzávierke. Pred zmenou sa uloží úplný snapshot objednávok, histórie a nastavenia do `RestaurantSwitchArchive`. Vyžaduje konkrétny dátum, identifikátor úlohy a očakávaný počet objednávok; opakované spustenie dokončenej úlohy nič nemení. Bez údržbových env premenných sa nespustí.
+
 ## [1.32.0] — 2026-11-16
 
 ### Pridané
