@@ -3393,7 +3393,7 @@ async function submitOrder() {
 
 function lockOrderForm(polievka, jedlo, pizza, dezert, poznamka, porcie) {
   // Uloz pre QR modal - funguje aj po refresh bez checked inputov
-  currentQROrder = { polievka: polievka||null, jedlo: jedlo||null, pizza: pizza||null, dezert: dezert||null, poznamka: poznamka||'' };
+  currentQROrder = { polievka: polievka||null, jedlo: jedlo||null, pizza: pizza||null, dezert: dezert||null, poznamka: poznamka||'', porcie: porcie || 1 };
 
   document.getElementById('order-form').style.display = 'none';
   document.getElementById('order-confirmed').style.display = 'block';
@@ -4750,7 +4750,7 @@ async function showQR() {
   const jedloEl    = document.querySelector('input[name="jedlo"]:checked');
   const pizzaEl    = document.querySelector('input[name="pizza"]:checked');
 
-  if (polievkaEl || jedloEl || pizzaEl) {
+  if ((polievkaEl || jedloEl || pizzaEl) && document.getElementById('order-confirmed').style.display !== 'block') {
     const dezertEl = document.querySelector('input[name="dezert"]:checked');
     const noteEmojis = { jedlo: '🍽️', pizza: '🍕' };
     const noteParts = [];
@@ -4764,7 +4764,8 @@ async function showQR() {
       jedlo: jedloEl?.value||null,
       pizza: pizzaEl?.value||null,
       dezert: dezertEl?.value||null,
-      poznamka: noteParts.join(' | ')
+      poznamka: noteParts.join(' | '),
+      porcie: porcieCount
     };
   } else if (!currentQROrder || (!currentQROrder.polievka && !currentQROrder.jedlo && !currentQROrder.pizza)) {
     showToast('Vyber jedlo pre QR platbu', 'error');
@@ -4782,7 +4783,7 @@ async function showQR() {
   if (emailInput) emailInput.value = currentEmail || getCookie('fantozzi_email') || '';
   try {
     const res = await fetch('/api/qr', { method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ meno: currentUser || '', polievka: currentQROrder.polievka, jedlo: currentQROrder.jedlo, pizza: currentQROrder.pizza, dezert: currentQROrder.dezert }) });
+      body: JSON.stringify({ meno: currentUser || '', ...currentQROrder }) });
     const data = await res.json();
     document.getElementById('qr-modal-loading').style.display = 'none';
     if (!data.ok) { document.getElementById('qr-modal-error').style.display = 'block'; return; }

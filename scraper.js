@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const config = require('./config');
 const { translateMenu } = require('./translator');
-const { parseLupo, parseNevadzka, selectDay, dateKey } = require('./menu-parsers');
+const { parseLupo, parseNevadzka, selectDay, dateKey, applyLupoCharges } = require('./menu-parsers');
 const { getRestaurant, todaySK } = require('./restaurants');
 const loadSource = require('./menu-source').createSourceLoader();
 const pendingMenus = new Map();
@@ -28,7 +28,10 @@ async function fetchMenu() {
 async function fetchMenuForContext(context) {
   const { restaurant, date, key } = context;
   const manual = manualStore && await manualStore.findOne({ key });
-  if (manual?.menu) return { ...manual.menu, restaurant, date, key };
+  if (manual?.menu) {
+    const menu = { ...manual.menu, restaurant, date, key };
+    return restaurant.id === 'lupo' ? applyLupoCharges(menu) : menu;
+  }
   // Ak mame platny cache, vratime ho
   if (cache.data?.key === key && cache.timestamp && (Date.now() - cache.timestamp) < cache.TTL) {
     console.log('[Scraper] Vraciame menu z cache');
@@ -191,6 +194,7 @@ async function setManualMenu(menu) {
     }
   }
   Object.assign(menu, { restaurant, date, key });
+  if (restaurant.id === 'lupo') applyLupoCharges(menu);
   if (manualStore) await manualStore.findOneAndUpdate({ key }, { $set: { menu } }, { upsert: true });
   try { await translateMenu(menu); } catch (e) { console.error('[Scraper] Preklad manualneho menu zlyhal:', e.message); }
   cache.data = menu;

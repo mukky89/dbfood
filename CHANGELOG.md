@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.32.4] — 2026-11-16
+
+### Opravené
+- LUPO: poplatok 0,50 € za prípravu a expedíciu sa započítava raz za každý objednaný obed do predbežnej ceny, QR platby a QR e-mailu. Bežné menu za 8,00 € má celkovú cenu 8,50 €. Polievka alebo dezert k menu poplatok nezdvojujú.
+- Poznámka pri menu už jasne uvádza zahrnutie poplatku. Rovnaké pravidlo platí aj pre staršie ručne vložené menu LUPO.
+- QR platba a QR e-mail zohľadňujú počet porcií vrátane poplatku; potvrdená objednávka zachová počet porcií aj po resete formulára.
+
 ## [1.32.3] — 2026-11-16
 
 ### Opravené

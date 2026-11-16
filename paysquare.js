@@ -63,8 +63,9 @@ function getCenaZMenu(menu, typ) {
   return sekcia?.cena ? parseCena(sekcia.cena) : null;
 }
 
-function vypocitajCenu(polievka, jedlo, pizza, dezert, menu) {
-  const providerPrice = require('./public/menu-pricing').calculate(polievka, jedlo, pizza, dezert, menu);
+function vypocitajCenu(polievka, jedlo, pizza, dezert, menu, porcie = 1) {
+  const { calculate, portions } = require('./public/menu-pricing');
+  const providerPrice = calculate(polievka, jedlo, pizza, dezert, menu, porcie);
   if (providerPrice !== undefined) return providerPrice;
   let celkom = 0;
   const detail = [];
@@ -105,7 +106,9 @@ function vypocitajCenu(polievka, jedlo, pizza, dezert, menu) {
   }
 
   if (celkom === 0) return null;
-  return { celkom: Math.round(celkom * 100) / 100, detail };
+  const count = portions(porcie);
+  if (count > 1) detail.push(`${count} porcie × ${celkom.toFixed(2)} €`);
+  return { celkom: Math.round(celkom * count * 100) / 100, detail };
 }
 
 module.exports = { generatePayBySquareQR, vypocitajCenu };
