@@ -7,6 +7,7 @@ module.exports = {
   emailPassword: process.env.EMAIL_PASSWORD,
   adminPassword: process.env.ADMIN_PASSWORD || "admin123",
   restaurantUrl: process.env.RESTAURANT_URL || "https://www.fantozzi.sk/dennemenu",
+  menuSourceDiagnostics: process.env.MENU_SOURCE_DIAGNOSTICS === '1',
   platbaIban: process.env.PLATBA_IBAN,
   platbaBic: process.env.PLATBA_BIC,
   platbaMeno: process.env.PLATBA_MENO,
