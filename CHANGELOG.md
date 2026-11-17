@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.33.1] — 2026-11-17
+
+### Opravené
+- AI pri odhade zohľadňuje zjednotenie všetkých uvedených alternatív príloh vrátane zátvoriek a pripomína typické zložky knedle, tarhone, kaše a tatárskej omáčky. Spresnenie nasleduje po živom overení; výsledok zostáva neovereným odhadom, nie potvrdením bezpečnosti jedla.
+
 ## [1.33.0] — 2026-11-17
 
 ### Pridané
