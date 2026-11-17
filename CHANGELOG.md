@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.33.2] — 2026-11-17
+
+### Zmenené
+- Odstránený žltý informačný blok a opakované vysvetlenia o AI pri jedlách. Doplnené alergény majú stručný nadpis „Možné alergény“; neurčený výsledok sa zobrazuje ako „Alergény neuvedené“.
+
 ## [1.33.1] — 2026-11-17
 
 ### Opravené
