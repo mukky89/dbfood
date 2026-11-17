@@ -58,3 +58,11 @@ node tests/preview-server.cjs
 ```
 
 Admin: http://127.0.0.1:8768/admin, heslo `preview-only`. Náhľad používa menu zachytené 16. 11. 2026. Nespája sa s MongoDB ani neposiela e-maily, push správy či platby. HTML fixtures sú očistené výrezy skutočných zdrojov; nie sú náhradou za test aktuálnej dostupnosti servera.
+
+## AI odhady chýbajúcich alergénov
+
+Nastav `OPENAI_API_KEY` iba v serverových Variables Railway služby dbfood. Predvolený model je `gpt-4.1-mini`; zmena cez `OPENAI_ALLERGEN_MODEL`. Vypnutie: `AI_ALLERGENS_ENABLED=0` alebo odstránenie kľúča. Kľúč sa neposiela do prehliadača ani neukladá do repozitára.
+
+Pri `/api/menu` sa odhadujú iba položky bez alergénov od zdroja. Ceny, platby, objednávanie a súhrnné e-maily OpenAI nevolajú. Posielajú sa iba názvy jedál, sekcií a príloh, bez používateľských dát. Responses API používa `store:false` a prísnu JSON schému. Odhady nie sú potvrdením receptúry ani bezpečnosti jedla a v UI sú odlíšené od údajov jedálne. Neurčitý názov môže zostať bez odhadu; chýbajúci či prázdny výsledok nikdy neznamená neprítomnosť alergénov.
+
+Pamäťová cache drží najviac 128 výsledkov podľa obsahu a modelu na 7 dní. Reštart služby ju vyprázdni. Súbežné požiadavky zdieľajú volanie; po chybe sa ďalšie volania pozastavia na 10 minút. Limit odpovede je 4 000 tokenov, timeout 12 sekúnd. Po chybe sa zobrazí pôvodné menu bez odhadu. Funkcia nevytvára žiadne kolekcie či dokumenty v MongoDB a nevyžaduje zväčšenie disku.

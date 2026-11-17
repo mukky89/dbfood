@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
+const enrichMenuAllergens = require('./ai-allergens').createAllergenEnricher();
 const { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants } = require('./scraper');
 const { createRestaurantState } = require('./restaurant-state');
 const { parseLupo, parseNevadzka, selectDay } = require('./menu-parsers');
@@ -290,7 +291,7 @@ app.get('/api/menu', async (req, res) => {
   try {
     const menu = await fetchMenu();
     if (!menu) return res.json({ ok: false, error: 'Menu sa nepodarilo nacitat', menu: null });
-    res.json({ ok: true, menu });
+    res.json({ ok: true, menu: await enrichMenuAllergens(menu) });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 

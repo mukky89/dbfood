@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.33.0] — 2026-11-17
+
+### Pridané
+- Voliteľné dopĺňanie chýbajúcich alergénov cez OpenAI. Údaje jedálne majú prednosť; AI návrhy sú oddelené a viditeľne označené ako neoverený odhad. Prázdny výsledok nie je tvrdenie „bez alergénov“.
+- Server posiela iba názvy jedál a príloh. Používa štruktúrovanú a validovanú odpoveď, timeout, zdieľanie súbežných volaní, obmedzenú pamäťovú cache a prestávku po výpadku. Nevytvára kolekcie ani zápisy do databázy. Ceny, QR a objednávanie ostávajú nezávislé od OpenAI.
+
 ## [1.32.4] — 2026-11-16
 
 ### Opravené
