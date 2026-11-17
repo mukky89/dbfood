@@ -177,6 +177,8 @@
 
     /* Allergens */
     .allergen-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .ai-allergen-note { display:block; font-size:12px; line-height:1.5; margin-top:5px; }
+    .ai-allergen-row .allergen-chip { border:1px dashed currentColor; }
     .allergen-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px 2px 4px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: help; transition: all .15s; border: 1px solid transparent; white-space: nowrap; }
     .allergen-chip:hover { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
     .allergen-chip .a-icon { font-size: 13px; line-height: 1; }
@@ -2593,6 +2595,9 @@ const UI_T = {
   poznamka:       { sk:'poznámka k tejto položke...',   en:'note for this item...',      fr:'note pour ce plat...' },
   gyros:          { sk:'⚠️ Pozor: môže obsahovať cibuľu', en:'⚠️ Warning: may contain onion', fr:'⚠️ Attention : peut contenir de l’oignon' },
   alergenyLegend: { sk:'ℹ️ Zoznam alergénov',           en:'ℹ️ Allergen list',           fr:'ℹ️ Liste des allergènes' },
+  aiAllergens: { sk:'Možné alergény — odhad AI (neoverené)', en:'Possible allergens — AI estimate (unverified)', fr:'Allergènes possibles — estimation IA (non vérifiée)' },
+  aiUnknown: { sk:'AI: alergény sa z názvu nedajú určiť.', en:'AI: allergens cannot be determined from the name.', fr:'IA : les allergènes ne peuvent pas être déterminés à partir du nom.' },
+  aiWarning: { sk:'AI odhady nenahrádzajú údaje jedálne. Nejde o úplný zoznam ani potvrdenie neprítomnosti alergénov. Pri alergii over zloženie a krížovú kontamináciu priamo v jedálni.', en:'AI estimates do not replace restaurant information. They are not a complete list or confirmation that allergens are absent. If you have an allergy, check ingredients and cross-contact with the restaurant.', fr:'Les estimations IA ne remplacent pas les informations du restaurant. Elles ne sont ni exhaustives ni une garantie d’absence d’allergènes. En cas d’allergie, vérifiez la composition et les contaminations croisées auprès du restaurant.' },
 };
 function uiT(key) { const e = UI_T[key]; if (!e) return ''; return e[menuLang] || e.sk; }
 
@@ -2614,6 +2619,16 @@ const FLAG_SVG = {
   fr: '<svg class="flag-ico" viewBox="0 0 3 2" preserveAspectRatio="none" aria-hidden="true">'
     + '<rect width="3" height="2" fill="#fff"/><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>'
 };
+
+function renderAiAllergens(item, sourceHtml) {
+  if (sourceHtml || !Array.isArray(item.aiAllergens)) return '';
+  const numbers = [...new Set(item.aiAllergens)].filter(n => Number.isInteger(n) && n >= 1 && n <= 14);
+  const chips = numbers.map(num => {
+    const a = ALERGENY[String(num)];
+    return `<span class="allergen-chip ${a.cls}" title="${esc(aFull(a))}">${a.icon} <span class="a-num">${num}</span> ${esc(aShort(a))}</span>`;
+  }).join('');
+  return `<span class="ai-allergen-note">${esc(uiT(chips ? 'aiAllergens' : 'aiUnknown'))}</span>${chips ? `<span class="allergen-row ai-allergen-row">${chips}</span>` : ''}`;
+}
 
 function parseHmotnost(raw) {
   if (!raw?.trim()) return { hmotnostText: '', alergenyHtml: '' };
@@ -3116,6 +3131,9 @@ function renderMenu(menu) {
 
   if (menu.warning) html += `<p class="alert alert-warning">${esc(menu.warning)}</p>`;
   if (menu.pricingNote) html += `<p class="alert alert-info">${esc(menu.pricingNote)}</p>`;
+  if (menu.sekcie.some(s => s.polozky.some(p => Array.isArray(p.aiAllergens)))) {
+    html += `<p class="alert alert-warning" role="note">${esc(uiT('aiAllergens'))}. ${esc(uiT('aiWarning'))}</p>`;
+  }
   menu.sekcie.forEach(sekcia => {
     const isPolievka = sekcia.nazov.toLowerCase().includes('polievka');
     const isPizza    = sekcia.nazov.toLowerCase().includes('pizza');
@@ -3164,6 +3182,7 @@ function renderMenu(menu) {
             ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">${uiT('gyros')}</span>` : ''}
             <span class="menu-item-weight">${esc(hmotnostText)}</span>
             ${alergenyHtml}
+            ${renderAiAllergens(p, alergenyHtml)}
             ${variantRadios}
             ${p.sideOptions?.length ? `<span style="display:block"><label for="side_${id}">Príloha v cene menu:</label><select id="side_${id}" onclick="event.stopPropagation()"><option value="">Vyber prílohu</option>${p.sideOptions.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select></span>` : ''}
             ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="${uiT('poznamka')}" maxlength="120"
