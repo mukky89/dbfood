@@ -66,10 +66,10 @@ test('výpadok nezablokuje menu, opakovania majú cooldown aj pri zmene menu a l
 
 test('UI oddeľuje AI od údajov jedálne a prázdny odhad netvrdí neprítomnosť alergénov',()=>{
   const html=fs.readFileSync(require.resolve('../public/index.html'),'utf8');
-  const context={ALERGENY:{7:{cls:'a-mlieko',icon:'milk'}},esc:s=>s,aFull:()=> 'Mlieko',aShort:()=> 'Mlieko',uiT:key=>({aiAllergens:'odhad AI (neoverené)',aiUnknown:'alergény sa nedajú určiť'})[key]};
+  const context={ALERGENY:{7:{cls:'a-mlieko',icon:'milk'}},esc:s=>s,aFull:()=> 'Mlieko',aShort:()=> 'Mlieko',uiT:key=>({aiAllergens:'Možné alergény',aiUnknown:'Alergény neuvedené'})[key]};
   vm.createContext(context);vm.runInContext(html.slice(html.indexOf('function renderAiAllergens('),html.indexOf('function parseHmotnost(')),context);
   assert.equal(context.renderAiAllergens({aiAllergens:[7]},'source'), '');
-  assert.match(context.renderAiAllergens({aiAllergens:[7]},''),/odhad AI \(neoverené\)/);
+  assert.match(context.renderAiAllergens({aiAllergens:[7]},''),/Možné alergény/);
   assert.match(context.renderAiAllergens({aiAllergens:[7]},''),/Mlieko/);
-  assert.match(context.renderAiAllergens({aiAllergens:[]},''),/nedajú určiť/);
+  assert.match(context.renderAiAllergens({aiAllergens:[]},''),/Alergény neuvedené/);
 });

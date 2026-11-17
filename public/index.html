@@ -2595,9 +2595,8 @@ const UI_T = {
   poznamka:       { sk:'poznámka k tejto položke...',   en:'note for this item...',      fr:'note pour ce plat...' },
   gyros:          { sk:'⚠️ Pozor: môže obsahovať cibuľu', en:'⚠️ Warning: may contain onion', fr:'⚠️ Attention : peut contenir de l’oignon' },
   alergenyLegend: { sk:'ℹ️ Zoznam alergénov',           en:'ℹ️ Allergen list',           fr:'ℹ️ Liste des allergènes' },
-  aiAllergens: { sk:'Možné alergény — odhad AI (neoverené)', en:'Possible allergens — AI estimate (unverified)', fr:'Allergènes possibles — estimation IA (non vérifiée)' },
-  aiUnknown: { sk:'AI: alergény sa z názvu nedajú určiť.', en:'AI: allergens cannot be determined from the name.', fr:'IA : les allergènes ne peuvent pas être déterminés à partir du nom.' },
-  aiWarning: { sk:'AI odhady nenahrádzajú údaje jedálne. Nejde o úplný zoznam ani potvrdenie neprítomnosti alergénov. Pri alergii over zloženie a krížovú kontamináciu priamo v jedálni.', en:'AI estimates do not replace restaurant information. They are not a complete list or confirmation that allergens are absent. If you have an allergy, check ingredients and cross-contact with the restaurant.', fr:'Les estimations IA ne remplacent pas les informations du restaurant. Elles ne sont ni exhaustives ni une garantie d’absence d’allergènes. En cas d’allergie, vérifiez la composition et les contaminations croisées auprès du restaurant.' },
+  aiAllergens: { sk:'Možné alergény', en:'Possible allergens', fr:'Allergènes possibles' },
+  aiUnknown: { sk:'Alergény neuvedené', en:'Allergens not specified', fr:'Allergènes non précisés' },
 };
 function uiT(key) { const e = UI_T[key]; if (!e) return ''; return e[menuLang] || e.sk; }
 
@@ -3131,9 +3130,6 @@ function renderMenu(menu) {
 
   if (menu.warning) html += `<p class="alert alert-warning">${esc(menu.warning)}</p>`;
   if (menu.pricingNote) html += `<p class="alert alert-info">${esc(menu.pricingNote)}</p>`;
-  if (menu.sekcie.some(s => s.polozky.some(p => Array.isArray(p.aiAllergens)))) {
-    html += `<p class="alert alert-warning" role="note">${esc(uiT('aiAllergens'))}. ${esc(uiT('aiWarning'))}</p>`;
-  }
   menu.sekcie.forEach(sekcia => {
     const isPolievka = sekcia.nazov.toLowerCase().includes('polievka');
     const isPizza    = sekcia.nazov.toLowerCase().includes('pizza');
