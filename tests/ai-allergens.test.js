@@ -7,10 +7,10 @@ const settings = () => ({ openaiApiKey:'test-key', openaiAllergenModel:'gpt-4.1-
 const menu = () => ({ restaurant:{id:'lupo'}, date:'2026-11-17', pricing:{soupIncluded:true}, sekcie:[{nazov:'Hlavné jedlo',polozky:[
   {cislo:1,nazov:'Vyprážaný syr, príloha',hmotnost:'120g',cena:8,sideOptions:['Ryža','Hranolky']},
   {cislo:2,nazov:'Buchty',hmotnost:'240g (1,3,7)',cena:8},
-  {cislo:3,nazov:'Prekvapenie šéfkuchára',hmotnost:'120g',cena:8}
+  {cislo:3,nazov:'Palacinka',hmotnost:'120g',cena:8}
 ]}] });
 function reply(items) { return {data:{status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({items})}]}]}}; }
-const good = [{id:'0:0',allergens:[7,3,1,7]},{id:'0:2',allergens:[]}];
+const good = [{id:'0:0',allergens:[7,3,1,7]},{id:'0:2',allergens:[1]}];
 
 test('OpenAI dostane iba verejné názvy bez objednávok; zdrojové alergény a ceny ostávajú zachované', async () => {
   let calls=0;
@@ -26,7 +26,7 @@ test('OpenAI dostane iba verejné názvy bez objednávok; zdrojové alergény a 
   assert.equal(original.sekcie[0].polozky[0].aiAllergens,undefined);
   assert.deepEqual(result.sekcie[0].polozky[0].aiAllergens,[1,3,7]);
   assert.deepEqual(result.sekcie[0].polozky[1],original.sekcie[0].polozky[1]);
-  assert.deepEqual(result.sekcie[0].polozky[2].aiAllergens,[]);
+  assert.deepEqual(result.sekcie[0].polozky[2].aiAllergens,[1]);
   assert.deepEqual(result.pricing,original.pricing);assert.equal(result.sekcie[0].polozky[0].cena,8);
   result.sekcie[0].polozky[0].aiAllergens.push(14);
   assert.deepEqual((await enrich(menu())).sekcie[0].polozky[0].aiAllergens,[1,3,7]);assert.equal(calls,1);
@@ -64,12 +64,52 @@ test('výpadok nezablokuje menu, opakovania majú cooldown aj pri zmene menu a l
   time+=600001;await enrich(other);assert.equal(calls,2);assert.ok(!logs.join('').includes('test-key'));
 });
 
+test('prázdne odhady prejdú druhou kontrolou a hotové odhady ani údaje jedálne sa nemenia',async()=>{
+  let calls=0;
+  const enrich=createAllergenEnricher({settings,post:async(_,body,opts)=>{
+    calls++;
+    if(calls===1)return reply([{id:'0:0',allergens:[]},{id:'0:2',allergens:[1,3,7]}]);
+    assert.deepEqual(JSON.parse(body.input).map(i=>i.id),['0:0']);
+    assert.match(body.instructions,/Druhá kontrola/);assert.equal(opts.timeout,8000);
+    return reply([{id:'0:0',allergens:[7,1]}]);
+  }});
+  const result=await enrich(menu());
+  assert.deepEqual(result.sekcie[0].polozky[0].aiAllergens,[1,7]);
+  assert.deepEqual(result.sekcie[0].polozky[2].aiAllergens,[1,3,7]);
+  assert.equal(result.sekcie[0].polozky[1].hmotnost,'240g (1,3,7)');
+  await enrich(menu());assert.equal(calls,2);
+});
+
+test('neurčený odhad sa po hodine automaticky preverí; otvorenia v rámci hodiny nevolajú API',async()=>{
+  let time=1000,calls=0;
+  const enrich=createAllergenEnricher({settings,now:()=>time,post:async(_,body)=>{
+    calls++;return reply(JSON.parse(body.input).map(i=>({id:i.id,allergens:[]})));
+  }});
+  const result=await enrich(menu());assert.deepEqual(result.sekcie[0].polozky[0].aiAllergens,[]);
+  assert.equal(calls,2);await enrich(menu());assert.equal(calls,2);
+  time+=3600001;await enrich(menu());assert.equal(calls,4);
+});
+
+test('chyba alebo neplatné ID druhej kontroly nezahodí prvé odhady a nevloží vymyslené alergény',async()=>{
+  for(const fail of [async()=>{throw Error('test-key');},async()=>reply([{id:'0:1',allergens:[14]}])]){
+    let calls=0;const logs=[];
+    const enrich=createAllergenEnricher({settings,log:v=>logs.push(v),post:async()=>{
+      if(++calls===1)return reply([{id:'0:0',allergens:[7]},{id:'0:2',allergens:[]}]);
+      return fail();
+    }});
+    const result=await enrich(menu());
+    assert.deepEqual(result.sekcie[0].polozky[0].aiAllergens,[7]);
+    assert.deepEqual(result.sekcie[0].polozky[2].aiAllergens,[]);
+    await enrich(menu());assert.equal(calls,2);assert.ok(!logs.join('').includes('test-key'));
+  }
+});
+
 test('UI oddeľuje AI od údajov jedálne a prázdny odhad netvrdí neprítomnosť alergénov',()=>{
   const html=fs.readFileSync(require.resolve('../public/index.html'),'utf8');
-  const context={ALERGENY:{7:{cls:'a-mlieko',icon:'milk'}},esc:s=>s,aFull:()=> 'Mlieko',aShort:()=> 'Mlieko',uiT:key=>({aiAllergens:'Možné alergény',aiUnknown:'Alergény neuvedené'})[key]};
+  const context={ALERGENY:{7:{cls:'a-mlieko',icon:'milk'}},esc:s=>s,aFull:()=> 'Mlieko',aShort:()=> 'Mlieko',uiT:key=>({aiAllergens:'Možné alergény',aiUnknown:'Alergény treba overiť v jedálni'})[key]};
   vm.createContext(context);vm.runInContext(html.slice(html.indexOf('function renderAiAllergens('),html.indexOf('function parseHmotnost(')),context);
   assert.equal(context.renderAiAllergens({aiAllergens:[7]},'source'), '');
   assert.match(context.renderAiAllergens({aiAllergens:[7]},''),/Možné alergény/);
   assert.match(context.renderAiAllergens({aiAllergens:[7]},''),/Mlieko/);
-  assert.match(context.renderAiAllergens({aiAllergens:[]},''),/Alergény neuvedené/);
+  assert.match(context.renderAiAllergens({aiAllergens:[]},''),/Alergény treba overiť v jedálni/);
 });

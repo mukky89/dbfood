@@ -3,7 +3,7 @@ const { createHash } = require('node:crypto');
 const config = require('./config');
 
 // AI iba dopĺňa chýbajúce údaje. Prázdny odhad nikdy neznamená „bez alergénov“.
-const PROMPT_VERSION = 2;
+const PROMPT_VERSION = 3;
 const INSTRUCTIONS = `Odhadni možné alergény jedál podľa názvu a príloh. Je to neoverený odhad, nie potvrdenie zloženia ani bezpečnosti jedla.
 Čísla: 1 obilniny s lepkom, 2 kôrovce, 3 vajcia, 4 ryby, 5 arašidy, 6 sója, 7 mlieko, 8 škrupinové plody, 9 zeler, 10 horčica, 11 sezam, 12 siričitany, 13 vlčí bôb, 14 mäkkýše.
 Vráť pre každé id možné alergény z pomenovaných surovín a bežnej receptúry. Pole name je názov jedla; sides sú všetky voliteľné prílohy. Výsledok je zjednotenie možných alergénov hlavného jedla a VŠETKÝCH príloh a alternatív v názve, aj v zátvorkách. Výber zemiakov nevylučuje alergény alternatívy s knedľou.
@@ -17,6 +17,22 @@ const SCHEMA = {
     properties: { id: { type: 'string' }, allergens: { type: 'array', items: { type: 'integer', enum: Array.from({ length: 14 }, (_, i) => i + 1) } } }
   } } }
 };
+const RECHECK = `Druhá kontrola položiek s prázdnym prvým odhadom. Pre každé jedlo samostatne zváž bežnú slovenskú receptúru: marinádu, omáčku, základ, zahustenie a prílohu. Pri marinovanom mäse zváž zloženie marinády (napríklad horčica či sójová omáčka); pri restovanom mäse a vnútornostiach základ, podlievanie a možné zahustenie. Tieto prísady nie sú automaticky prítomné: zahrň iba alergény, ktoré sú odôvodnené typickou receptúrou konkrétneho jedla. Nevytváraj rovnaký plošný zoznam pre všetky jedlá. Ak nie je možné navrhnúť odôvodnený alergén, ponechaj prázdny zoznam. Nikdy netvrď, že jedlo je bezpečné alebo bez alergénov.`;
+
+function readEstimates(data, items) {
+  if (data?.status !== 'completed') throw new Error('incomplete');
+  const content = (data.output || []).filter(o => o.type === 'message').flatMap(o => o.content || []);
+  if (content.some(c => c.type === 'refusal')) throw new Error('refusal');
+  const result = JSON.parse(content.filter(c => c.type === 'output_text').map(c => c.text).join(''));
+  const ids = new Set(items.map(i => i.id)), seen = new Set();
+  if (!Array.isArray(result.items) || result.items.length !== items.length) throw new Error('invalid');
+  for (const value of result.items) {
+    if (!ids.has(value.id) || seen.has(value.id) || !Array.isArray(value.allergens)
+      || value.allergens.some(n => !Number.isInteger(n) || n < 1 || n > 14)) throw new Error('invalid');
+    seen.add(value.id);
+  }
+  return result.items.map(v => ({ id: v.id, allergens: [...new Set(v.allergens)].sort((a, b) => a - b) }));
+}
 
 function hasSourceAllergens(item) {
   // Rovnaký formát (1,3,7), ktorý používajú parsery a existujúci renderer.
@@ -34,27 +50,29 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     while (cache.size >= 128) cache.delete(cache.keys().next().value);
     cache.set(key, { values, expires: now() + ttl });
   }
+  async function request(items, options, recheck = false) {
+    const response = await post('https://api.openai.com/v1/responses', {
+      model: options.openaiAllergenModel, store: false, max_output_tokens: 4000,
+      instructions: INSTRUCTIONS + (recheck ? '\n' + RECHECK : ''), input: JSON.stringify(items),
+      text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema: SCHEMA } }
+    }, { timeout: recheck ? 8000 : 12000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
+    return readEstimates(response.data, items);
+  }
   async function estimate(items, key, options) {
     try {
-      const response = await post('https://api.openai.com/v1/responses', {
-        model: options.openaiAllergenModel, store: false, max_output_tokens: 4000,
-        instructions: INSTRUCTIONS, input: JSON.stringify(items),
-        text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema: SCHEMA } }
-      }, { timeout: 12000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
-      const data = response.data;
-      if (data?.status !== 'completed') throw new Error('incomplete');
-      const content = (data.output || []).filter(o => o.type === 'message').flatMap(o => o.content || []);
-      if (content.some(c => c.type === 'refusal')) throw new Error('refusal');
-      const result = JSON.parse(content.filter(c => c.type === 'output_text').map(c => c.text).join(''));
-      const ids = new Set(items.map(i => i.id)), seen = new Set();
-      if (!Array.isArray(result.items) || result.items.length !== items.length) throw new Error('invalid');
-      for (const value of result.items) {
-        if (!ids.has(value.id) || seen.has(value.id) || !Array.isArray(value.allergens)
-          || value.allergens.some(n => !Number.isInteger(n) || n < 1 || n > 14)) throw new Error('invalid');
-        seen.add(value.id);
+      const values = await request(items, options);
+      const emptyIds = new Set(values.filter(v => !v.allergens.length).map(v => v.id));
+      if (emptyIds.size) {
+        try {
+          const reviewed = await request(items.filter(i => emptyIds.has(i.id)), options, true);
+          for (const value of reviewed) values.find(v => v.id === value.id).allergens = value.allergens;
+        } catch {
+          // Výpadok druhej kontroly nesmie zahodiť úspešné prvé odhady.
+          log('[AI alergény] Druhá kontrola nedostupná; neurčené položky sa obnovia do hodiny.');
+        }
       }
-      const values = result.items.map(v => ({ id: v.id, allergens: [...new Set(v.allergens)].sort((a, b) => a - b) }));
-      save(key, values, 7 * 86400000);
+      // Neurčené výsledky znovu overiť pri načítaní po hodine, nie až o týždeň.
+      save(key, values, values.some(v => !v.allergens.length) ? 3600000 : 7 * 86400000);
       return values;
     } catch (error) {
       // Nelogovať axios chybu ani celé telo: obsahujú Authorization a API kľúč.
