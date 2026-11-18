@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.33.4] — 2026-11-18
+
+### Opravené
+- Druhá kontrola alergénov generuje bežné varianty receptúry s konkrétnou možnou prísadou, nie iba alergény výslovne napísané v názve. Napríklad pri pečeni na cibuľke posudzuje aj variant šťavy zahustenej múkou. Server odvodí zjednotenie možných alergénov iba z validovaných variantov v odpovedi OpenAI.
+- Dôvod odhadu je dostupný v nápovede ikoniek ako hypotetický variant. Údaje jedálne sa nemenia a čísla sa nedopĺňajú napevno podľa označenia jedla.
+
 ## [1.33.3] — 2026-11-18
 
 ### Opravené
