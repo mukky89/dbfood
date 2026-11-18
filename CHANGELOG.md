@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.33.3] — 2026-11-18
+
+### Opravené
+- Prázdny odhad alergénov automaticky prejde druhou kontrolou receptúry, marinády, základu a príloh. Ak zostane neurčený, cache sa obnoví pri načítaní po hodine namiesto siedmich dní. Druhá kontrola má vlastnú validáciu a timeout; jej výpadok nezahodí platné prvé odhady.
+- Neurčený výsledok uvádza „Alergény treba overiť v jedálni“, aby sa nezamieňal s vypnutým generovaním či potvrdením neprítomnosti alergénov. Údaje jedálne sa zachovávajú.
+
 ## [1.33.2] — 2026-11-17
 
 ### Zmenené
