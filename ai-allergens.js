@@ -4,7 +4,7 @@ const config = require('./config');
 const { todaySK } = require('./restaurants');
 
 // AI iba dopĺňa chýbajúce údaje. Prázdny odhad nikdy neznamená „bez alergénov“.
-const PROMPT_VERSION = 5;
+const PROMPT_VERSION = 6;
 const INSTRUCTIONS = `Odhadni možné alergény jedál podľa názvu a príloh. Je to neoverený odhad, nie potvrdenie zloženia ani bezpečnosti jedla.
 Čísla: 1 obilniny s lepkom, 2 kôrovce, 3 vajcia, 4 ryby, 5 arašidy, 6 sója, 7 mlieko, 8 škrupinové plody, 9 zeler, 10 horčica, 11 sezam, 12 siričitany, 13 vlčí bôb, 14 mäkkýše.
 Vráť pre každé id možné alergény z pomenovaných surovín a bežnej receptúry. Pole name je názov jedla; sides sú všetky voliteľné prílohy. Výsledok je zjednotenie možných alergénov hlavného jedla a VŠETKÝCH príloh a alternatív v názve, aj v zátvorkách. Výber zemiakov nevylučuje alergény alternatívy s knedľou.
@@ -27,7 +27,7 @@ const RECIPE_SCHEMA = {
     type:'object',additionalProperties:false,required:['id','variants'],
     properties:{id:{type:'string'},variants:{type:'array',maxItems:3,items:{
       type:'object',additionalProperties:false,required:['basis','allergens'],
-      properties:{basis:{type:'string'},allergens:SCHEMA.properties.items.items.properties.allergens}
+      properties:{basis:{type:'string',minLength:1,maxLength:240},allergens:{...SCHEMA.properties.items.items.properties.allergens,minItems:1,maxItems:14}}
     }}}
   }}}
 };
@@ -84,10 +84,14 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     cache.set(key, { values, expires: now() + ttl });
   }
   async function request(items, options, recheck = false) {
+    const schema = structuredClone(RECIPE_SCHEMA);
+    schema.properties.items.minItems = items.length;
+    schema.properties.items.maxItems = items.length;
+    schema.properties.items.items.properties.id.enum = items.map(i=>i.id);
     const response = await post('https://api.openai.com/v1/responses', {
       model: options.openaiAllergenModel, store: false, max_output_tokens: Math.max(4000, items.length * 400),
       instructions: INSTRUCTIONS + '\n' + RECIPE_INSTRUCTIONS + (recheck ? '\nDruhá kontrola: znova posúď bežné varianty receptúry pri neurčených položkách.' : ''), input: JSON.stringify(items),
-      text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema: RECIPE_SCHEMA } }
+      text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema } }
     }, { timeout: recheck ? 8000 : 20000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
     return readRecipeEstimates(response.data, items);
   }
@@ -115,9 +119,13 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     } catch (error) {
       // Nelogovať axios chybu ani celé telo: obsahujú Authorization a API kľúč.
       const status = error.response?.status;
-      log(`[AI alergény] Odhad nedostupný${Number.isInteger(status) ? ` (HTTP ${status})` : ''}. Menu zostáva dostupné.`);
-      retryAfter = now() + 10 * 60000;
-      save(key, null, 10 * 60000);
+      const reason = ['invalid','incomplete','refusal'].includes(error.message) ? error.message
+        : error instanceof SyntaxError ? 'invalid-json' : error.code === 'ECONNABORTED' ? 'timeout' : 'request';
+      log(`[AI alergény] Odhad nedostupný (${reason}${Number.isInteger(status) ? `, HTTP ${status}` : ''}). Menu zostáva dostupné.`);
+      // Chyba obsahu jednej odpovede nesmie zablokovať ostatné jedálne a dni.
+      const globalFailure = [401,403,429].includes(status);
+      if (globalFailure) retryAfter = now() + 10 * 60000;
+      save(key, null, globalFailure ? 10 * 60000 : 60000);
       return null;
     }
   }
