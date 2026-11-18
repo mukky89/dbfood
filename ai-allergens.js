@@ -1,9 +1,10 @@
 const axios = require('axios');
 const { createHash } = require('node:crypto');
 const config = require('./config');
+const { todaySK } = require('./restaurants');
 
 // AI iba dopĺňa chýbajúce údaje. Prázdny odhad nikdy neznamená „bez alergénov“.
-const PROMPT_VERSION = 4;
+const PROMPT_VERSION = 5;
 const INSTRUCTIONS = `Odhadni možné alergény jedál podľa názvu a príloh. Je to neoverený odhad, nie potvrdenie zloženia ani bezpečnosti jedla.
 Čísla: 1 obilniny s lepkom, 2 kôrovce, 3 vajcia, 4 ryby, 5 arašidy, 6 sója, 7 mlieko, 8 škrupinové plody, 9 zeler, 10 horčica, 11 sezam, 12 siričitany, 13 vlčí bôb, 14 mäkkýše.
 Vráť pre každé id možné alergény z pomenovaných surovín a bežnej receptúry. Pole name je názov jedla; sides sú všetky voliteľné prílohy. Výsledok je zjednotenie možných alergénov hlavného jedla a VŠETKÝCH príloh a alternatív v názve, aj v zátvorkách. Výber zemiakov nevylučuje alergény alternatívy s knedľou.
@@ -17,9 +18,9 @@ const SCHEMA = {
     properties: { id: { type: 'string' }, allergens: { type: 'array', items: { type: 'integer', enum: Array.from({ length: 14 }, (_, i) => i + 1) } } }
   } } }
 };
-const RECHECK = `Druhá kontrola položiek s prázdnym prvým odhadom. Nevykonávaj len extrakciu prísad výslovne napísaných v názve. Rozober bežné slovenské varianty prípravy konkrétneho jedla vrátane základu, marinády, omáčky, podlievania, zahustenia a prílohy.
+const RECIPE_INSTRUCTIONS = `Kontrola receptúry každej položky, bez ohľadu na jedáleň, dátum alebo číslo jedla. Nevykonávaj len extrakciu prísad výslovne napísaných v názve. Rozober bežné slovenské varianty prípravy konkrétneho jedla vrátane základu, marinády, omáčky, podlievania, zahustenia a prílohy. declared sú alergény uvedené jedálňou: neodstraňuj ich a nezabudni posúdiť aj ďalšie možné alergény, ktoré zdroj vynechal. Napríklad maslo pomenované v názve posudzuj ako možné mlieko (7), aj keď zdroj uviedol iba 1 a 3.
 Pre každý odôvodnený variant vráť krátke slovenské basis, ktoré pomenuje možnú prísadu a jej použitie, a príslušné čísla alergénov. Basis musí opisovať hypotetický variant, nie potvrdenú receptúru jedálne. Napríklad kuracia pečeň na cibuľke sa môže pripraviť so šťavou zahustenou pšeničnou múkou: basis='Možný variant: pšeničná múka na zahustenie šťavy', allergens=[1]. To je platný možný alergén aj keď existuje aj nezahustený variant. Ak je bežná verzia s maslom, uveď ju samostatne s alergénom 7. Pri marinovanom mäse analogicky posúď konkrétne bežné marinády. Neuvádzaj plošne všetky dochucovadlá ani krížovú kontamináciu.
-Použi najviac 3 odôvodnené varianty s alergénmi na jedlo. Prázdne variants ponechaj iba pri názve, pri ktorom sa nedá identifikovať žiadna bežná receptúra ani príloha. Nikdy netvrď, že jedlo je bezpečné alebo bez alergénov. V tejto druhej kontrole namiesto poľa allergens na položke použi pole variants podľa dodanej schémy.`;
+Použi najviac 3 odôvodnené varianty s alergénmi na jedlo. Prázdne variants ponechaj iba pri názve, pri ktorom sa nedá identifikovať žiadna bežná receptúra ani príloha. Nikdy netvrď, že jedlo je bezpečné alebo bez alergénov. Použi pole variants podľa dodanej schémy.`;
 const RECIPE_SCHEMA = {
   type:'object', additionalProperties:false, required:['items'],
   properties:{items:{type:'array',items:{
@@ -65,17 +66,18 @@ function readRecipeEstimates(data, items) {
   return validated.map(v=>({...v,basis:rows.find(row=>row.id===v.id).variants.map(row=>row.basis.trim())}));
 }
 
-function hasSourceAllergens(item) {
+function sourceAllergens(item) {
   // Rovnaký formát (1,3,7), ktorý používajú parsery a existujúci renderer.
   const text = `${item.hmotnost || ''} ${item.nazov || ''}`;
-  return /\(\s*\d{1,2}(?:\s*,\s*\d{1,2})*\s*\)/.test(text)
-    || /(?:alergény|alergeny)\s*:?\s*\d/i.test(text);
+  const groups = [...text.matchAll(/\(\s*(\d{1,2}(?:\s*,\s*\d{1,2})*)\s*\)|(?:alergény|alergeny)\s*:?\s*(\d{1,2}(?:\s*,\s*\d{1,2})*)/gi)];
+  return [...new Set(groups.flatMap(m => (m[1] || m[2]).split(',').map(Number)).filter(n => Number.isInteger(n) && n >= 1 && n <= 14))].sort((a,b)=>a-b);
 }
+const hasSourceAllergens = item => sourceAllergens(item).length > 0;
 
 function createAllergenEnricher({ settings = () => config, post = axios.post, now = Date.now, log = console.warn } = {}) {
   // Iba pamäť: žiadna nová kolekcia, zápisy do MongoDB ani navýšenie disku.
   const cache = new Map(), pending = new Map();
-  let retryAfter = 0;
+  let retryAfter = 0, queue = Promise.resolve();
   function save(key, values, ttl) {
     cache.delete(key);
     while (cache.size >= 128) cache.delete(cache.keys().next().value);
@@ -83,20 +85,25 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
   }
   async function request(items, options, recheck = false) {
     const response = await post('https://api.openai.com/v1/responses', {
-      model: options.openaiAllergenModel, store: false, max_output_tokens: 4000,
-      instructions: INSTRUCTIONS + (recheck ? '\n' + RECHECK : ''), input: JSON.stringify(items),
-      text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema: recheck ? RECIPE_SCHEMA : SCHEMA } }
-    }, { timeout: recheck ? 8000 : 12000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
-    return (recheck ? readRecipeEstimates : readEstimates)(response.data, items);
+      model: options.openaiAllergenModel, store: false, max_output_tokens: Math.max(4000, items.length * 400),
+      instructions: INSTRUCTIONS + '\n' + RECIPE_INSTRUCTIONS + (recheck ? '\nDruhá kontrola: znova posúď bežné varianty receptúry pri neurčených položkách.' : ''), input: JSON.stringify(items),
+      text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema: RECIPE_SCHEMA } }
+    }, { timeout: recheck ? 8000 : 20000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
+    return readRecipeEstimates(response.data, items);
   }
   async function estimate(items, key, options) {
     try {
-      const values = await request(items, options);
+      const values = [];
+      // Veľké menu sa nesmie preskočiť; každá dávka má najviac 20 položiek.
+      for (let i=0; i<items.length; i+=20) values.push(...await request(items.slice(i,i+20), options));
       const emptyIds = new Set(values.filter(v => !v.allergens.length).map(v => v.id));
       if (emptyIds.size) {
         try {
-          const reviewed = await request(items.filter(i => emptyIds.has(i.id)), options, true);
-          for (const value of reviewed) Object.assign(values.find(v => v.id === value.id), value);
+          const emptyItems=items.filter(i => emptyIds.has(i.id));
+          for(let i=0;i<emptyItems.length;i+=20) {
+            const reviewed = await request(emptyItems.slice(i,i+20), options, true);
+            for (const value of reviewed) Object.assign(values.find(v => v.id === value.id), value);
+          }
         } catch {
           // Výpadok druhej kontroly nesmie zahodiť úspešné prvé odhady.
           log('[AI alergény] Druhá kontrola nedostupná; neurčené položky sa obnovia do hodiny.');
@@ -119,22 +126,23 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     if (!menu?.sekcie?.length || !options.openaiApiKey || options.aiAllergensEnabled === false) return menu;
     const candidates = [];
     menu.sekcie.forEach((section, s) => (section.polozky || []).forEach((item, p) => {
-      if (!hasSourceAllergens(item) && typeof item.nazov === 'string' && item.nazov.trim()) {
+      if (typeof item.nazov === 'string' && item.nazov.trim()) {
         candidates.push({ id: `${s}:${p}`, section: String(section.nazov).slice(0, 80),
-          name: item.nazov.slice(0, 300), sides: (item.sideOptions || []).map(v => String(v).slice(0, 80)).slice(0, 12) });
+          name: item.nazov.slice(0, 300), sides: (item.sideOptions || []).map(v => String(v).slice(0, 80)).slice(0, 12), declared: sourceAllergens(item) });
       }
     }));
-    if (!candidates.length || candidates.length > 80) return menu;
-    const key = createHash('sha256').update(JSON.stringify([PROMPT_VERSION, options.openaiAllergenModel, candidates])).digest('hex');
+    if (!candidates.length) return menu;
+    const day = menu.date || menu.datum || todaySK(new Date(now()));
+    const key = createHash('sha256').update(JSON.stringify([PROMPT_VERSION, options.openaiAllergenModel, menu.restaurant?.id || '', day, candidates])).digest('hex');
     const cached = cache.get(key);
     let values = cached?.expires > now() ? cached.values : undefined;
     if (values === undefined) {
       if (pending.has(key)) values = await pending.get(key);
       else if (now() < retryAfter) return menu;
       else {
-        // Najviac jedno volanie naraz, aj keď sa súčasne obnovujú rôzne menu.
-        if (pending.size) return menu;
-        const task = estimate(candidates, key, options).finally(() => pending.delete(key));
+        // Iná jedáleň alebo nový deň počká vo fronte; odhad sa nepreskočí.
+        const task = queue.then(() => now() < retryAfter ? null : estimate(candidates, key, options)).finally(() => pending.delete(key));
+        queue = task.catch(() => null);
         pending.set(key, task); values = await task;
       }
     }
@@ -142,11 +150,18 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     const copy = structuredClone(menu);
     for (const value of values) {
       const [s, p] = value.id.split(':').map(Number);
-      copy.sekcie[s].polozky[p].aiAllergens = [...value.allergens];
-      if (value.basis?.length) copy.sekcie[s].polozky[p].aiAllergenBasis = [...value.basis];
+      const item=copy.sekcie[s].polozky[p], declared=sourceAllergens(item);
+      const extra=value.allergens.filter(n=>!declared.includes(n));
+      delete item.aiAllergens;
+      delete item.aiAllergenBasis;
+      // Zdrojové čísla nemeníme ani neduplikujeme v odhadoch.
+      if (extra.length || !declared.length) {
+        item.aiAllergens = extra;
+        if (value.basis?.length) item.aiAllergenBasis = [...value.basis];
+      }
     }
     return copy;
   };
 }
 
-module.exports = { createAllergenEnricher, hasSourceAllergens };
+module.exports = { createAllergenEnricher, hasSourceAllergens, sourceAllergens };

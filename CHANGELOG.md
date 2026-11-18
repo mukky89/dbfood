@@ -5,6 +5,13 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.34.0] — 2026-11-18
+
+### Zmenené
+- Odhad podľa bežných variantov receptúry prechádza automaticky každou položkou vo všetkých jedálňach, vrátane položiek s čiastočne uvedenými alergénmi. Zdrojové údaje zostávajú zachované; ďalšie možné alergény sú zobrazené oddelene bez duplicít.
+- Cache sa oddeľuje podľa jedálne a dňa. Nový deň, nová jedáleň alebo zmenené menu spustí nový odhad. Ranná úloha o 7:00 pripraví alergény aktívnej jedálne; pri otvorení alebo prepnutí menu sa spracovanie vykoná aj mimo tohto času.
+- Veľké menu sa spracuje v dávkach po 20 položiek. Súbežné rôzne menu počkajú vo fronte namiesto preskočenia generovania. Bez nových zápisov do databázy.
+
 ## [1.33.4] — 2026-11-18
 
 ### Opravené
