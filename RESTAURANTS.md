@@ -61,6 +61,8 @@ Admin: http://127.0.0.1:8768/admin, heslo `preview-only`. Náhľad používa men
 
 ## Automatické odhady alergénov vo všetkých jedálňach
 
+Produkčné overenie bez zásahu do objednávania: `/menu-check.html`. Vyžaduje existujúce admin heslo v POST tele, známe ID jedálne a dátum najviac 7 dní od dneška. Náhľad používa rovnaké automatické zdroje/parsery a OpenAI ako bežná stránka, no nečíta ručné menu, nemení aktívnu jedáleň ani jej cache a nepristupuje k objednávkam. Nezverejnený budúci deň označí ako nedostupný; staré jedlá nikdy nedatuje do budúcnosti. Dokončenie odhadu pre všetky položky potvrdzuje `allergenReview.processed`. Výsledky sa neukladajú do MongoDB.
+
 Každá položka prechádza odhadom bežných variantov receptúry s pomenovaním hypotetickej prísady a jej alergénov. Server zjednotí iba validované čísla z týchto variantov; dôvody ukáže v nápovede ikoniek. Nejde o tvrdenie, že jedáleň danú prísadu naozaj použila. Čísla alergénov nie sú uložené napevno podľa názvu či čísla jedla. Platí pre Fantozzi, LUPO aj Nevädzku, pre polievky, hlavné jedlá, pizzu a dezerty vrátane príloh. Zdrojové údaje sa nemenia; dodatočné možné alergény sa zobrazia samostatne bez duplicít.
 
 Nastav `OPENAI_API_KEY` iba v serverových Variables Railway služby dbfood. Predvolený model je `gpt-4.1-mini`; zmena cez `OPENAI_ALLERGEN_MODEL`. Vypnutie: `AI_ALLERGENS_ENABLED=0` alebo odstránenie kľúča. Kľúč sa neposiela do prehliadača ani neukladá do repozitára.

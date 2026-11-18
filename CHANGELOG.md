@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.34.1] — 2026-11-18
+
+### Pridané
+- Izolovaný administrátorský náhľad automatického menu a alergénov pre vybranú jedáleň a dátum. Používa rovnaké produkčné zdroje, parsery a odhad receptúr, ale nemení aktívnu jedáleň, objednávky, čas servera ani cache ostrého menu. Heslo sa posiela iba v tele POST požiadavky, náhľad odmieta neznáme jedálne a neplatné dátumy.
+- Náhľad zreteľne rozlišuje dokončené generovanie a nedostupné menu pre budúci deň. Staré menu sa nepreznačuje novým dátumom.
+
 ## [1.34.0] — 2026-11-18
 
 ### Zmenené

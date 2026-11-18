@@ -39,16 +39,7 @@ async function fetchMenuForContext(context) {
   }
 
   try {
-    const url = restaurant.id === 'fantozzi' ? config.restaurantUrl : restaurant.url;
-    console.log('[Scraper] Stahujem menu z', url);
-
-    const response = await fetchHtml(url);
-
-    const $ = cheerio.load(response.data);
-    const menu = restaurant.id === 'lupo' ? selectDay(parseLupo(response.data), date)
-      : restaurant.id === 'nevadzka' ? selectDay(parseNevadzka(response.data), date) : parseMenu($);
-    if (restaurant.id === 'fantozzi' && dateKey(menu.datum) !== date) menu.sekcie = [];
-    Object.assign(menu, { restaurant, date, key, source: response.menuSource });
+    const { menu } = await fetchAutomaticMenu(context);
     if (!menu.sekcie?.length) return menu;
 
     // Preklad menu (EN/FR) — raz pri stiahnuti noveho menu, vysledok ide do cache.
@@ -75,6 +66,20 @@ async function fetchMenuForContext(context) {
     }
     return { restaurant, date, key, sekcie: [], unavailable: true, error: status === 403 || status === 429 ? 'Zdroj blokuje automatické načítanie. Administrátor môže vložiť menu ručne.' : 'Menu sa nepodarilo načítať.' };
   }
+}
+
+// Rovnaké automatické zdroje a parsery ako ostré menu, ale bez čítania/zápisu DB,
+// prekladov a bez zmeny kontextu či cache aktívneho menu.
+async function fetchAutomaticMenu({ restaurant, date, key }) {
+  const url = restaurant.id === 'fantozzi' ? config.restaurantUrl : restaurant.url;
+  const response = await fetchHtml(url);
+  const days = restaurant.id === 'lupo' ? parseLupo(response.data)
+    : restaurant.id === 'nevadzka' ? parseNevadzka(response.data) : null;
+  const menu = days ? selectDay(days, date) : parseMenu(cheerio.load(response.data));
+  const availableDates = days ? Object.keys(days) : [dateKey(menu.datum)].filter(Boolean);
+  if (!availableDates.includes(date)) { menu.sekcie = []; menu.unavailable = true; }
+  Object.assign(menu, { restaurant, date, key, source: response.menuSource });
+  return { menu, availableDates };
 }
 
 // Stiahne HTML so sadou hlaviciek imitujucich realny prehliadac (Chrome),
@@ -243,4 +248,4 @@ async function debugFetch() {
   }
 }
 
-module.exports = { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants, fetchHtml, parseMenu };
+module.exports = { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants, fetchHtml, parseMenu, fetchAutomaticMenu };
