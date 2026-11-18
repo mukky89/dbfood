@@ -148,6 +148,8 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     }
     if (!values) return menu;
     const copy = structuredClone(menu);
+    copy.allergenReview = { restaurantId: menu.restaurant?.id || '', date: day, processed: values.length,
+      unresolved: values.filter(v => !v.allergens.length).length };
     for (const value of values) {
       const [s, p] = value.id.split(':').map(Number);
       const item=copy.sekcie[s].polozky[p], declared=sourceAllergens(item);

@@ -5,7 +5,7 @@ const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
 const enrichMenuAllergens = require('./ai-allergens').createAllergenEnricher();
-const { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants } = require('./scraper');
+const { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants, fetchAutomaticMenu } = require('./scraper');
 const { createRestaurantState } = require('./restaurant-state');
 const { parseLupo, parseNevadzka, selectDay } = require('./menu-parsers');
 const { validSelection } = require('./menu-selection');
@@ -287,6 +287,7 @@ app.get('/api/status', async (req, res) => {
 });
 
 // GET /api/menu
+app.use('/api', require('./menu-check').createMenuCheckRouter({ adminPassword:config.adminPassword, fetchAutomaticMenu, enrichMenuAllergens }));
 app.get('/api/menu', async (req, res) => {
   try {
     const menu = await fetchMenu();
