@@ -2620,7 +2620,7 @@ const FLAG_SVG = {
 };
 
 function renderAiAllergens(item, sourceHtml) {
-  if (sourceHtml || !Array.isArray(item.aiAllergens)) return '';
+  if (!Array.isArray(item.aiAllergens) || (sourceHtml && !item.aiAllergens.length)) return '';
   const numbers = [...new Set(item.aiAllergens)].filter(n => Number.isInteger(n) && n >= 1 && n <= 14);
   const chips = numbers.map(num => {
     const a = ALERGENY[String(num)];

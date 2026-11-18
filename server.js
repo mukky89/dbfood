@@ -1200,6 +1200,12 @@ async function runDeadlineActions() {
 
 let cronTasks = [];
 
+async function prepareDailyAllergens() {
+  if (!config.openaiApiKey || !config.aiAllergensEnabled) return;
+  try { await enrichMenuAllergens(await fetchMenu()); }
+  catch { console.warn('[Menu] Ranná príprava alergénov neuspela; ďalší pokus pri načítaní menu.'); }
+}
+
 function setupCrons() {
   cronTasks.forEach(t => { try { t.stop(); } catch(e) {} });
   cronTasks = [];
@@ -1218,8 +1224,9 @@ function setupCrons() {
     console.log('[Cron] 00:00 - Cache vymazana');
   }, cronOpts));
 
-  cronTasks.push(cron.schedule('0 7 * * 1-5', () => {
+  cronTasks.push(cron.schedule('0 7 * * *', async () => {
     clearCache();
+    await prepareDailyAllergens();
     console.log('[Cron] 07:00 - Cache vymazana');
   }, cronOpts));
 
