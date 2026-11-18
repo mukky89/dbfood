@@ -4,7 +4,8 @@ const config = require('./config');
 const { todaySK } = require('./restaurants');
 
 // AI iba dopĺňa chýbajúce údaje. Prázdny odhad nikdy neznamená „bez alergénov“.
-const PROMPT_VERSION = 6;
+const PROMPT_VERSION = 7;
+const BATCH_SIZE = 5;
 const INSTRUCTIONS = `Odhadni možné alergény jedál podľa názvu a príloh. Je to neoverený odhad, nie potvrdenie zloženia ani bezpečnosti jedla.
 Čísla: 1 obilniny s lepkom, 2 kôrovce, 3 vajcia, 4 ryby, 5 arašidy, 6 sója, 7 mlieko, 8 škrupinové plody, 9 zeler, 10 horčica, 11 sezam, 12 siričitany, 13 vlčí bôb, 14 mäkkýše.
 Vráť pre každé id možné alergény z pomenovaných surovín a bežnej receptúry. Pole name je názov jedla; sides sú všetky voliteľné prílohy. Výsledok je zjednotenie možných alergénov hlavného jedla a VŠETKÝCH príloh a alternatív v názve, aj v zátvorkách. Výber zemiakov nevylučuje alergény alternatívy s knedľou.
@@ -89,7 +90,7 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
     schema.properties.items.maxItems = items.length;
     schema.properties.items.items.properties.id.enum = items.map(i=>i.id);
     const response = await post('https://api.openai.com/v1/responses', {
-      model: options.openaiAllergenModel, store: false, max_output_tokens: Math.max(4000, items.length * 400),
+      model: options.openaiAllergenModel, store: false, max_output_tokens: 4000,
       instructions: INSTRUCTIONS + '\n' + RECIPE_INSTRUCTIONS + (recheck ? '\nDruhá kontrola: znova posúď bežné varianty receptúry pri neurčených položkách.' : ''), input: JSON.stringify(items),
       text: { format: { type: 'json_schema', name: 'menu_allergens', strict: true, schema } }
     }, { timeout: recheck ? 8000 : 20000, headers: { Authorization: `Bearer ${options.openaiApiKey}`, 'Content-Type': 'application/json' } });
@@ -98,14 +99,14 @@ function createAllergenEnricher({ settings = () => config, post = axios.post, no
   async function estimate(items, key, options) {
     try {
       const values = [];
-      // Veľké menu sa nesmie preskočiť; každá dávka má najviac 20 položiek.
-      for (let i=0; i<items.length; i+=20) values.push(...await request(items.slice(i,i+20), options));
+      // Krátke dávky receptúr, aby veľká odpoveď neprekročila timeout.
+      for (let i=0; i<items.length; i+=BATCH_SIZE) values.push(...await request(items.slice(i,i+BATCH_SIZE), options));
       const emptyIds = new Set(values.filter(v => !v.allergens.length).map(v => v.id));
       if (emptyIds.size) {
         try {
           const emptyItems=items.filter(i => emptyIds.has(i.id));
-          for(let i=0;i<emptyItems.length;i+=20) {
-            const reviewed = await request(emptyItems.slice(i,i+20), options, true);
+          for(let i=0;i<emptyItems.length;i+=BATCH_SIZE) {
+            const reviewed = await request(emptyItems.slice(i,i+BATCH_SIZE), options, true);
             for (const value of reviewed) Object.assign(values.find(v => v.id === value.id), value);
           }
         } catch {

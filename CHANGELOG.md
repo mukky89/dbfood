@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.34.3] — 2026-11-18
+
+### Opravené
+- Živé overenie Fantozzi odhalilo timeout pri generovaní variantov pre celé menu naraz. Receptúry sa teraz spracúvajú v krátkych dávkach po najviac 5 položiek s limitom 4 000 tokenov, pri zachovaní úplnej kontroly všetkých položiek a zdieľania súbežných požiadaviek.
+
 ## [1.34.2] — 2026-11-18
 
 ### Opravené
