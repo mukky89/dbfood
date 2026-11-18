@@ -2624,7 +2624,8 @@ function renderAiAllergens(item, sourceHtml) {
   const numbers = [...new Set(item.aiAllergens)].filter(n => Number.isInteger(n) && n >= 1 && n <= 14);
   const chips = numbers.map(num => {
     const a = ALERGENY[String(num)];
-    return `<span class="allergen-chip ${a.cls}" title="${esc(aFull(a))}">${a.icon} <span class="a-num">${num}</span> ${esc(aShort(a))}</span>`;
+    const basis = Array.isArray(item.aiAllergenBasis) ? item.aiAllergenBasis.filter(v => typeof v === 'string').join('; ') : '';
+    return `<span class="allergen-chip ${a.cls}" title="${esc(aFull(a) + (basis ? ' · ' + basis : ''))}">${a.icon} <span class="a-num">${num}</span> ${esc(aShort(a))}</span>`;
   }).join('');
   return `<span class="ai-allergen-note">${esc(uiT(chips ? 'aiAllergens' : 'aiUnknown'))}</span>${chips ? `<span class="allergen-row ai-allergen-row">${chips}</span>` : ''}`;
 }
