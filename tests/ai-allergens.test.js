@@ -109,6 +109,27 @@ test('ranná úloha predpripraví menu o 7:00 v Bratislave',async()=>{
   await callback();assert.equal(cleared,1);assert.equal(prepared,1);
 });
 
+test('chyba odpovede jednej jedálne nepozastaví ďalšiu jedáleň ani nový deň',async()=>{
+  let calls=0;const enrich=createAllergenEnricher({settings,log:()=>{},post:async(...args)=>{
+    if(++calls===1)return reply([variant('wrong')]);return regularPost(...args);
+  }});
+  const input=menu();assert.equal(await enrich(input),input);
+  const other=menu();other.restaurant.id='fantozzi';assert.ok((await enrich(other)).allergenReview);
+  const tomorrow=menu();tomorrow.date='2026-11-19';assert.ok((await enrich(tomorrow)).allergenReview);
+  await enrich(input);assert.equal(calls,3);
+});
+
+test('schéma požiadavky vynucuje platné ID, počet položiek a neprázdny odôvodnený variant',async()=>{
+  const enrich=createAllergenEnricher({settings,post:async(url,body)=>{
+    const schema=body.text.format.schema,rows=JSON.parse(body.input);
+    assert.deepEqual(schema.properties.items.items.properties.id.enum,rows.map(r=>r.id));
+    assert.equal(schema.properties.items.minItems,rows.length);assert.equal(schema.properties.items.maxItems,rows.length);
+    const props=schema.properties.items.items.properties.variants.items.properties;
+    assert.equal(props.basis.maxLength,240);assert.equal(props.allergens.minItems,1);
+    return regularPost(url,body);
+  }});assert.ok((await enrich(menu())).allergenReview);
+});
+
 test('celý týždeň skutočných LUPO a Nevädzka fixtures: žiadna položka sa nevynechá',async()=>{
   const {parseLupo,parseNevadzka}=require('../menu-parsers');let requests=0,total=0;
   const enrich=createAllergenEnricher({settings,post:async(...args)=>{requests++;total+=JSON.parse(args[1].input).length;return regularPost(...args);}});

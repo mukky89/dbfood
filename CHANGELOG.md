@@ -5,6 +5,12 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.34.2] — 2026-11-18
+
+### Opravené
+- Počas produkčného overenia LUPO a Fantozzi sa ukázalo, že chyba jedného odhadu pozastavila aj ostatné jedálne. Neplatná/neúplná odpoveď či timeout teraz blokujú iba príslušné menu na minútu; spoločná prestávka zostáva pre chybnú autorizáciu alebo HTTP 429.
+- Schéma OpenAI už vynucuje povolené ID, presný počet položiek, stručný dôvod a aspoň jeden platný alergén pre neprázdny variant, zhodne so serverovou validáciou. Bezpečná diagnostika rozlišuje príčinu bez logovania odpovede či API kľúča.
+
 ## [1.34.1] — 2026-11-18
 
 ### Pridané
