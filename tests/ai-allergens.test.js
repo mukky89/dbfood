@@ -51,10 +51,10 @@ test('bez kľúča a pri vypnutí API nevoláme; zdrojové alergény už položk
   await createAllergenEnricher({settings,post:async(...args)=>{calls++;return regularPost(...args);}})(input);assert.equal(calls,1);
 });
 
-test('veľké menu sa spracuje celé v dávkach po najviac 20 položiek',async()=>{
+test('veľké menu sa spracuje celé v krátkych dávkach po najviac 5 položiek',async()=>{
   const input=menu();input.sekcie[0].polozky=Array.from({length:85},(_,i)=>({cislo:i+1,nazov:'Jedlo '+i}));const sizes=[];
   const result=await createAllergenEnricher({settings,post:async(...args)=>{sizes.push(JSON.parse(args[1].input).length);return regularPost(...args);}})(input);
-  assert.deepEqual(sizes,[20,20,20,20,5]);assert.equal(result.sekcie[0].polozky.filter(p=>p.aiAllergens.length).length,85);
+  assert.deepEqual(sizes,Array(17).fill(5));assert.equal(result.sekcie[0].polozky.filter(p=>p.aiAllergens.length).length,85);
 });
 
 test('všetky sekcie všetkých troch jedální sa spracujú každý nový deň',async()=>{
@@ -144,5 +144,5 @@ test('celý týždeň skutočných LUPO a Nevädzka fixtures: žiadna položka s
       assert.equal(result.sekcie.flatMap(s=>s.polozky).length,input.sekcie.flatMap(s=>s.polozky).length);
     }
   }
-  assert.equal(requests,10);assert.equal(total,expected);
+  assert.equal(requests,20);assert.equal(total,expected);
 });
