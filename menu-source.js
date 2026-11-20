@@ -1,7 +1,9 @@
 const axios = require('axios');
 const config = require('./config');
+const cheerio = require('cheerio');
+const { parseMenu } = require('./fantozzi-parser');
 const { getRestaurant } = require('./restaurants');
-const { parseLupo, parseNevadzka } = require('./menu-parsers');
+const { parseLupo, parseNevadzka, dateKey } = require('./menu-parsers');
 
 const LUPO_API = 'https://jedalenlupo.sk/wp-json/wp/v2/pages/14?_fields=content';
 const READER = 'https://r.jina.ai/';
@@ -9,8 +11,8 @@ const READER = 'https://r.jina.ai/';
 function createSourceLoader({ get = (...args) => axios.get(...args), readerEnabled = () => config.menuReaderEnabled, readerKey = () => config.menuReaderApiKey } = {}) {
   const pending = new Map();
   function load(url, direct) {
-    // Externá služba dostáva iba tieto dve verejné URL; žiadne klientské URL ani prihlasovacie údaje.
-    const id = ['lupo', 'nevadzka'].find(id => getRestaurant(id).url === url);
+    // Externá služba dostáva iba pevné verejné URL jedální, nikdy klientské URL či tajomstvá.
+    const id = ['fantozzi', 'lupo', 'nevadzka'].find(id => getRestaurant(id).url === url);
     if (!id) return direct(url);
     if (pending.has(id)) return pending.get(id);
     const task = retrieve(id, url, direct).finally(() => pending.delete(id));
@@ -19,7 +21,10 @@ function createSourceLoader({ get = (...args) => axios.get(...args), readerEnabl
   }
   async function retrieve(id, url, direct) {
     const attempts = [];
-    const parser = id === 'lupo' ? parseLupo : parseNevadzka;
+    const parser = id === 'lupo' ? parseLupo : id === 'nevadzka' ? parseNevadzka : html => {
+      const menu = parseMenu(cheerio.load(html));
+      return dateKey(menu.datum) ? { [dateKey(menu.datum)]: menu } : {};
+    };
     const request = target => get(target, { timeout: 12000, maxRedirects: 5, maxContentLength: 2 * 1024 * 1024 });
     const candidates = id === 'lupo'
       ? [{ name: 'wordpress', request: () => request(LUPO_API), json: true }, { name: 'direct', request: () => direct(url) }]

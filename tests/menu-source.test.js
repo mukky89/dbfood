@@ -51,12 +51,30 @@ test('súbežné požiadavky na rovnaký zdroj zdieľajú jedno sťahovanie', as
   const a=load(getRestaurant('lupo').url,forbidden),b=load(getRestaurant('lupo').url,forbidden);release();
   assert.equal((await a).data,(await b).data);assert.equal(calls,1);
 });
-test('Fantozzi a iné URL sa neposielajú Readeru; záložnú službu možno vypnúť', async () => {
+test('záložnú službu možno vypnúť; ľubovoľné URL sa neposielajú Readeru', async () => {
   let calls=0;
   const load=createSourceLoader({readerEnabled:()=>false,get:async()=>{calls++;return forbidden();}});
-  const response=await load('https://www.fantozzi.sk/dennemenu',async()=>({status:200,data:'pôvodné menu'}));
-  assert.equal(response.data,'pôvodné menu');assert.equal(calls,0);
+  const response=await load('https://www.fantozzi.sk/dennemenu',async()=>({status:200,data:fixture('fantozzi')}));
+  assert.equal(response.data,fixture('fantozzi'));assert.equal(calls,0);
+  assert.equal((await load('https://example.test/menu',async()=>({data:'other'}))).data,'other');
+  await assert.rejects(load(getRestaurant('fantozzi').url,forbidden));assert.equal(calls,0);
   await assert.rejects(load(getRestaurant('nevadzka').url,forbidden));assert.equal(calls,0);
+});
+
+test('Fantozzi: timeout priamej stránky použije HTML tej istej pevnej URL cez Reader',async()=>{
+  let calls=0;
+  const load=createSourceLoader({readerEnabled:()=>true,readerKey:()=>'',get:async(url,options)=>{
+    calls++;assert.equal(url,READER+getRestaurant('fantozzi').url);assert.equal(options.headers['X-Return-Format'],'html');assert.equal(options.headers['X-No-Cache'],'true');
+    return {status:200,data:fixture('fantozzi')};
+  }});
+  const result=await load(getRestaurant('fantozzi').url,async()=>{throw Object.assign(Error('timeout'),{code:'ECONNABORTED'});});
+  assert.equal(result.menuSource.transport,'reader');assert.equal(calls,1);assert.equal(result.data,fixture('fantozzi'));
+});
+
+test('Fantozzi: úspešný priamy zdroj nepotrebuje Reader; antirobot HTML sa odmietne',async()=>{
+  const load=createSourceLoader({readerEnabled:()=>true,readerKey:()=>'',get:async()=>({status:200,data:'<h1>Just a moment</h1>'})});
+  assert.equal((await load(getRestaurant('fantozzi').url,async()=>({status:200,data:fixture('fantozzi')}))).menuSource.transport,'direct');
+  await assert.rejects(load(getRestaurant('fantozzi').url,async()=>({status:200,data:'<h1>Challenge</h1>'})),/nie sú dostupné/);
 });
 test('zdroj so starým týždňom nikdy neposkytne dnešnú ponuku cez selectDay', async () => {
   const load=createSourceLoader({readerEnabled:()=>true,readerKey:()=>'',get:async()=>({status:200,data:fixture('nevadzka').replaceAll('2026','2025')})});

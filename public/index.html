@@ -177,8 +177,6 @@
 
     /* Allergens */
     .allergen-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
-    .ai-allergen-note { display:block; font-size:12px; line-height:1.5; margin-top:5px; }
-    .ai-allergen-row .allergen-chip { border:1px dashed currentColor; }
     .allergen-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px 2px 4px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: help; transition: all .15s; border: 1px solid transparent; white-space: nowrap; }
     .allergen-chip:hover { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
     .allergen-chip .a-icon { font-size: 13px; line-height: 1; }
@@ -2512,6 +2510,7 @@
   </div>
 </div>
 
+<script src="/source-allergens.js"></script>
 <script src="/menu-pricing.js"></script>
 <script src="/restaurant-ui.js"></script>
 <script>
@@ -2603,8 +2602,6 @@ const UI_T = {
   poznamka:       { sk:'poznámka k tejto položke...',   en:'note for this item...',      fr:'note pour ce plat...' },
   gyros:          { sk:'⚠️ Pozor: môže obsahovať cibuľu', en:'⚠️ Warning: may contain onion', fr:'⚠️ Attention : peut contenir de l’oignon' },
   alergenyLegend: { sk:'ℹ️ Zoznam alergénov',           en:'ℹ️ Allergen list',           fr:'ℹ️ Liste des allergènes' },
-  aiAllergens: { sk:'Možné alergény', en:'Possible allergens', fr:'Allergènes possibles' },
-  aiUnknown: { sk:'Alergény treba overiť v jedálni', en:'Check allergens with the restaurant', fr:'Vérifiez les allergènes auprès du restaurant' },
 };
 function uiT(key) { const e = UI_T[key]; if (!e) return ''; return e[menuLang] || e.sk; }
 
@@ -2627,30 +2624,13 @@ const FLAG_SVG = {
     + '<rect width="3" height="2" fill="#fff"/><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>'
 };
 
-function renderAiAllergens(item, sourceHtml) {
-  if (!Array.isArray(item.aiAllergens) || (sourceHtml && !item.aiAllergens.length)) return '';
-  const numbers = [...new Set(item.aiAllergens)].filter(n => Number.isInteger(n) && n >= 1 && n <= 14);
+function parseHmotnost(raw) {
+  const { hmotnostText, numbers } = SourceAllergens.parse(raw);
   const chips = numbers.map(num => {
     const a = ALERGENY[String(num)];
-    const basis = Array.isArray(item.aiAllergenBasis) ? item.aiAllergenBasis.filter(v => typeof v === 'string').join('; ') : '';
-    return `<span class="allergen-chip ${a.cls}" title="${esc(aFull(a) + (basis ? ' · ' + basis : ''))}">${a.icon} <span class="a-num">${num}</span> ${esc(aShort(a))}</span>`;
+    return a ? '<span class="allergen-chip '+a.cls+'" title="'+esc(aFull(a))+'">'+a.icon+' <span class="a-num">'+num+'</span> '+esc(aShort(a))+'</span>' : '';
   }).join('');
-  return `<span class="ai-allergen-note">${esc(uiT(chips ? 'aiAllergens' : 'aiUnknown'))}</span>${chips ? `<span class="allergen-row ai-allergen-row">${chips}</span>` : ''}`;
-}
-
-function parseHmotnost(raw) {
-  if (!raw?.trim()) return { hmotnostText: '', alergenyHtml: '' };
-  const cleaned = raw.trim();
-  const match = cleaned.match(/\(([0-9,\s]+)\)/);
-  if (!match) return { hmotnostText: cleaned, alergenyHtml: '' };
-  const hmotnostText = cleaned.substring(0, match.index).trim().replace(/,$/, '').trim();
-  const nums = match[1].split(',').map(s => s.trim()).filter(Boolean);
-  const chips = nums.map(num => {
-    const a = ALERGENY[num];
-    if (!a) return `<span class="allergen-chip" style="background:#eee;color:#666">${num}</span>`;
-    return `<span class="allergen-chip ${a.cls}" title="${aFull(a)}">${a.icon} <span class="a-num">${num}</span> ${aShort(a)}</span>`;
-  }).join('');
-  return { hmotnostText, alergenyHtml: chips ? `<span class="allergen-row">${chips}</span>` : '' };
+  return { hmotnostText, alergenyHtml: chips ? '<span class="allergen-row">'+chips+'</span>' : '' };
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
@@ -3187,7 +3167,6 @@ function renderMenu(menu) {
             ${/gyros/i.test(nazovClean) ? `<span class="gyros-warn">${uiT('gyros')}</span>` : ''}
             <span class="menu-item-weight">${esc(hmotnostText)}</span>
             ${alergenyHtml}
-            ${renderAiAllergens(p, alergenyHtml)}
             ${variantRadios}
             ${p.sideOptions?.length ? `<span style="display:block"><label for="side_${id}">Príloha v cene menu:</label><select id="side_${id}" onclick="event.stopPropagation()"><option value="">Vyber prílohu</option>${p.sideOptions.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select></span>` : ''}
             ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="${uiT('poznamka')}" maxlength="120"

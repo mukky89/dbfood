@@ -5,6 +5,16 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.36.0] — 2026-11-20
+
+### Odstránené
+- AI odhady alergénov, volania OpenAI a ich konfigurácia. Aplikácia zobrazuje iba alergény uvedené jedálňou; odhady sa nezobrazujú ani pri staršom ručne vloženom menu.
+
+### Opravené
+- Pri opakovanom timeoute priameho spojenia s Fantozzi sa automaticky stiahne HTML tej istej pevnej stránky cez záložný Reader. Zachované overenie dátumu a pôvodný parser, bez generovania alebo ručného importu jedál.
+- Alergény zo zdroja sa správne zobrazujú aj pri zápise `(1.3.7)` či `(1.7)` namiesto čiarok. Čísla sa iba prečítajú a upraví sa ich zobrazenie, žiadne alergény sa nedopĺňajú odhadom.
+- Ranné načítanie aj administrátorský náhľad pracujú výhradne so zdrojovým menu.
+
 ## [1.35.0] — 2026-11-20
 
 ### Pridané
