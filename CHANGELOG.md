@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.37.0] — 2026-11-20
+
+- Filipov oznam má károvaný okraj. Po odrolovaní sa zobrazí zatvárateľné okno s kontaktom.
+
 ## [1.36.1] — 2026-11-20
 
 - Oznam od Filipa pri otvorení zvýrazní animovaný výkričník a zlatá vlna. Kontaktné tlačidlo reaguje na kurzor a klávesnicu. Animácie rešpektujú nastavenie obmedzeného pohybu.

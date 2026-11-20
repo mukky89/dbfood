@@ -80,3 +80,38 @@
     .filip-contact:hover span { transform: translate(3px,-3px); }
   }
 }
+
+.filip-notice{
+ background:radial-gradient(ellipse at top right,#39624a 0,transparent 55%),#183e32;
+ border:1px solid #315641;border-left:6px solid #f3bd53;
+ box-shadow:0 12px 32px #17362a26;
+}
+.filip-notice h2{color:#fffaec;font-size:clamp(25px,3vw,38px)}
+.filip-notice p,.filip-person,.filip-person strong{color:#e3eade}
+.filip-eyebrow{color:#ffd175}
+.filip-notice-icon,.filip-contact,.filip-contact:hover{background:#ffcc69;color:#233d30!important}
+.filip-contact:hover{background:#ffda91}
+.filip-float{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));right:16px;z-index:80;max-width:calc(100vw - 32px);display:grid;grid-template-columns:1fr auto;gap:5px 12px;background:#183e32;border:1px solid #42614d;border-top:4px solid #ffcc69;border-radius:14px;padding:14px 16px;color:#fff8e7;box-shadow:0 9px 28px #183e3245;font:600 14px/1.5 system-ui}
+.filip-float[hidden]{display:none}
+.filip-float strong{font:700 19px/1.25 Georgia,serif}
+.filip-float a{justify-self:start;color:#ffd175;text-underline-offset:4px}
+.filip-float a:hover{color:white}
+.filip-float button{grid-column:2;grid-row:1 / span 2;align-self:start;width:32px;height:32px;border:1px solid #73917c;background:transparent;color:white;border-radius:50%;cursor:pointer;font-size:19px}
+.filip-float button:hover{background:#39624a}
+.filip-notice, .filip-float {
+  --cherry: #922f3c;
+  --cloth: repeating-linear-gradient(90deg, transparent 0 8px, #992f4055 8px 16px),
+           repeating-linear-gradient(0deg, #f7dfc7 0 8px, #daa09c 8px 16px);
+}
+.filip-notice {border-left-color:var(--cherry);padding-right:clamp(35px,5vw,68px)}
+.filip-notice::after {
+  content:"";position:absolute;inset:0 0 0 auto;width:clamp(16px,3vw,38px);
+  background:var(--cloth);border-left:3px solid #f6ce94;pointer-events:none;
+}
+.filip-notice-icon {background:var(--cherry);color:#fff6dd!important;box-shadow:0 0 0 2px #efbd83}
+.filip-notice-icon::after {border-color:#ffc8b1}
+.filip-float {border-top:0;padding-top:22px;overflow:hidden}
+.filip-float::before {content:"";position:absolute;inset:0 0 auto;height:8px;background:var(--cloth)}
+.filip-float button {background:#792c37;border-color:#d89a95}
+.filip-float button:hover {background:#993d49}
+#floating-order-bar.visible ~ .filip-float { bottom: calc(var(--order-bar-height) + 12px); }
