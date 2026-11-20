@@ -19,7 +19,7 @@ Verzia 1.32.4, 16. 11. 2026. Testy objednávok používajú izolované úložisk
 
 Priamy prístup z Railway v pôvodnej verzii vracal HTTP 403 pre oba weby. `menu-source.js` používa viac zdrojov a overí, že odpoveď obsahuje datované hlavné jedlá. Stránka s antirobot výzvou sa odmietne aj pri HTTP 200. Reader sa žiada o HTML pre Nevädzku a o JSON text verejného WordPress API pre LUPO, s `X-No-Cache: true`. Nepoužíva sa generovanie jedál modelom ani OCR.
 
-Do Readeru sa odosielajú iba dve pevné verejné URL; žiadne používateľské údaje, admin heslá, objednávky, cookies ani platobné nastavenia. Voliteľný kľúč je v `MENU_READER_API_KEY`, nikdy v repozitári. Bez kľúča služba funguje s nižším limitom. `MENU_READER_ENABLED=0` externý záložný zdroj vypne. Dokumentácia služby: https://docs.jina.ai/api.md.
+Do Readeru sa odosielajú iba pevné verejné URL registrovaných jedální; žiadne používateľské údaje, admin heslá, objednávky, cookies ani platobné nastavenia. Voliteľný kľúč je v `MENU_READER_API_KEY`, nikdy v repozitári. Bez kľúča služba funguje s nižším limitom. `MENU_READER_ENABLED=0` externý záložný zdroj vypne. Dokumentácia služby: https://docs.jina.ai/api.md.
 
 Menu sa cachuje 30 minút pre konkrétnu jedáleň, revíziu a dátum. Súbežné požiadavky zdieľajú načítanie aj preklad. Po polnoci alebo zmene jedálne sa načíta nový dátum automaticky pri otvorení aplikácie. Výpadok všetkých zdrojov môže použiť označenú cache iba z rovnakého dňa a jedálne. Ručný HTML import zostáva núdzová možnosť.
 
@@ -59,16 +59,12 @@ node tests/preview-server.cjs
 
 Admin: http://127.0.0.1:8768/admin, heslo `preview-only`. Náhľad používa menu zachytené 16. 11. 2026. Nespája sa s MongoDB ani neposiela e-maily, push správy či platby. HTML fixtures sú očistené výrezy skutočných zdrojov; nie sú náhradou za test aktuálnej dostupnosti servera.
 
-## Automatické odhady alergénov vo všetkých jedálňach
+## Alergény iba zo zdroja
 
-Produkčné overenie bez zásahu do objednávania: `/menu-check.html`. Vyžaduje existujúce admin heslo v POST tele, známe ID jedálne a dátum najviac 7 dní od dneška. Náhľad používa rovnaké automatické zdroje/parsery a OpenAI ako bežná stránka, no nečíta ručné menu, nemení aktívnu jedáleň ani jej cache a nepristupuje k objednávkam. Nezverejnený budúci deň označí ako nedostupný; staré jedlá nikdy nedatuje do budúcnosti. Dokončenie odhadu pre všetky položky potvrdzuje `allergenReview.processed`. Výsledky sa neukladajú do MongoDB.
+AI odhady alergénov a volania OpenAI sú odstránené. Aplikácia číta iba čísla uvedené pri jedle v HTML jedálne. Zápis s bodkami `(1.3.7)` sa zobrazí rovnako ako `(1,3,7)`; žiadne čísla sa nedopĺňajú podľa názvu alebo receptúry. Ak zdroj alergény neuvádza, aplikácia ich nevymýšľa. Staré polia AI z ručného menu sa odstránia z odpovede API.
 
-Každá položka prechádza odhadom bežných variantov receptúry s pomenovaním hypotetickej prísady a jej alergénov. Server zjednotí iba validované čísla z týchto variantov; dôvody ukáže v nápovede ikoniek. Nejde o tvrdenie, že jedáleň danú prísadu naozaj použila. Čísla alergénov nie sú uložené napevno podľa názvu či čísla jedla. Platí pre Fantozzi, LUPO aj Nevädzku, pre polievky, hlavné jedlá, pizzu a dezerty vrátane príloh. Zdrojové údaje sa nemenia; dodatočné možné alergény sa zobrazia samostatne bez duplicít.
+Fantozzi sa načítava z pevnej URL `https://www.fantozzi.sk/dennemenu`. Pri chybe, timeoute alebo neplatnom HTML sa automaticky použije Reader s HTML tej istej stránky a `X-No-Cache: true`. Priamy pokus má timeout 5 sekúnd. Rovnaký parser prečíta jedlá, ceny aj pôvodné alergény a overí dátum; iný deň sa nevydáva za dnešný. Preklady EN/FR ostávajú nezávislou funkciou, nemenia alergény.
 
-Nastav `OPENAI_API_KEY` iba v serverových Variables Railway služby dbfood. Predvolený model je `gpt-4.1-mini`; zmena cez `OPENAI_ALLERGEN_MODEL`. Vypnutie: `AI_ALLERGENS_ENABLED=0` alebo odstránenie kľúča. Kľúč sa neposiela do prehliadača ani neukladá do repozitára.
+Denná úloha o 7:00 Europe/Bratislava načíta aktívne menu bez potreby AI kľúča. `/api/menu` nevolá OpenAI. API položky obsahujú `allergens` odvodené výhradne zo zdrojového poľa `hmotnost`; pôvodný text sa zachováva.
 
-Pri `/api/menu` sa spracujú všetky položky vrátane tých s alergénmi od zdroja. Denne o 7:00 Europe/Bratislava sa predpripraví aktívna jedáleň; načítanie či prepnutie menu funguje aj mimo tohto času. Cache je oddelená podľa jedálne a dátumu, takže nový deň alebo nová jedáleň spustí nový odhad aj pri rovnakých názvoch. Veľké menu sa rozdelí na krátke dávky po najviac 5 položiek; odlišné súbežné menu počká vo fronte namiesto preskočenia.
-
-Ceny, platby, objednávanie a súhrnné e-maily OpenAI nevolajú. Posielajú sa iba názvy jedál, sekcií, príloh a verejne uvedené čísla alergénov, bez používateľských dát. Responses API používa `store:false` a prísnu JSON schému. Odhady nie sú potvrdením receptúry ani bezpečnosti jedla a v UI sú odlíšené od údajov jedálne. Neurčitý názov môže zostať bez odhadu; chýbajúci či prázdny výsledok nikdy neznamená neprítomnosť alergénov.
-
-Pamäťová cache drží najviac 128 výsledkov podľa dňa, jedálne, obsahu, modelu a verzie promptu na 7 dní. Prázdne odhady automaticky prejdú jednou druhou kontrolou receptúry (timeout 8 sekúnd); ak zostanú neurčené, cache sa obnoví pri načítaní po hodine. Reštart služby ju vyprázdni. Súbežné požiadavky zdieľajú volanie. HTTP 401/403/429 pozastaví ďalšie volania na 10 minút; neplatná odpoveď či timeout sa cachuje iba pre konkrétne menu na minútu a neblokuje ostatné jedálne. Limit odpovede je 4 000 tokenov na dávku, timeout prvého volania 20 sekúnd. Po chybe prvého volania sa zobrazí pôvodné menu bez odhadu; chyba druhej kontroly zachová prvé odhady. Funkcia nevytvára žiadne kolekcie či dokumenty v MongoDB a nevyžaduje zväčšenie disku.
+Produkčný náhľad `/menu-check.html` používa existujúce admin heslo v POST tele a pevné registrované jedálne. Nemení aktívny výber, objednávky ani čas servera a vracia iba zdrojové alergény. Nezverejnené budúce menu nepreznačuje na dnešné. Žiadne nové zápisy do MongoDB ani zväčšenie disku.

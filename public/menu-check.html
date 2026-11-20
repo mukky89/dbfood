@@ -4,7 +4,7 @@
 <main><h1>Overenie automatického menu a alergénov</h1>
 <p class="notice">Izolovaný administrátorský náhľad na produkcii. Nemení aktívnu jedáleň, objednávky ani dátum servera. Zobrazuje iba menu skutočne zverejnené pre vybraný deň.</p>
 <form id="check-form"><label>Heslo administrátora<input id="password" type="password" autocomplete="current-password" required></label><label>Jedáleň<select id="restaurant"><option value="lupo">Jedáleň LUPO</option><option value="fantozzi">Fantozzi</option><option value="nevadzka">Jedáleň Nevädzka</option></select></label><label>Dátum<input id="date" type="date" required></label><button id="check">Overiť menu</button></form>
-<p id="status" role="status"></p><div id="result"></div><small>Možné alergény sú odhady podľa receptúry, nie potvrdené zloženie jedálne.</small></main>
+<p id="status" role="status"></p><div id="result"></div><small>Zobrazujú sa iba alergény uvedené priamo v menu jedálne.</small></main>
 <script>
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 $('date').value=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Bratislava',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -13,10 +13,10 @@ $('check-form').addEventListener('submit',async event=>{
   try {
     const response=await fetch('/api/admin/menu-check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminPass:$('password').value,restaurantId:$('restaurant').value,date:$('date').value})});
     const data=await response.json();if(!data.ok)throw Error(data.error||'Nesprávne heslo alebo nedostupná kontrola.');
-    const m=data.menu,review=m.allergenReview;
+    const m=data.menu;
     if(!data.available){$('status').textContent='Menu pre '+m.date+' ešte nie je zverejnené. Dostupné dátumy: '+data.availableDates.join(', ');return;}
-    $('status').textContent=data.reviewComplete?'Automatická kontrola dokončená: '+review.processed+' položiek. Neurčené: '+review.unresolved+'.':'Menu sa načítalo, automatická kontrola alergénov sa nedokončila.';
-    $('result').innerHTML='<table><caption>'+esc(m.restaurant.name)+' · '+esc(m.date)+'</caption><thead><tr><th>Jedlo</th><th>Údaje jedálne</th><th>Možné ďalšie alergény</th></tr></thead><tbody>'+m.sekcie.flatMap(s=>s.polozky.map(p=>'<tr><td>'+esc(p.nazov)+'<small>'+esc(s.nazov)+'</small></td><td>'+esc(p.hmotnost||'Neuvedené')+'</td><td>'+esc(p.aiAllergens?.join(', ')||(p.aiAllergens?'Treba overiť v jedálni':'Bez ďalšieho odhadu'))+'<small>'+esc(p.aiAllergenBasis?.join('; ')||'')+'</small></td></tr>')).join('')+'</tbody></table>';
+    $('status').textContent='Menu načítané zo zdroja: '+data.sourceItems+' položiek, z toho '+data.itemsWithAllergens+' s uvedenými alergénmi.';
+    $('result').innerHTML='<table><caption>'+esc(m.restaurant.name)+' · '+esc(m.date)+'</caption><thead><tr><th>Jedlo</th><th>Údaje jedálne</th><th>Alergény zo zdroja</th></tr></thead><tbody>'+m.sekcie.flatMap(s=>s.polozky.map(p=>'<tr><td>'+esc(p.nazov)+'<small>'+esc(s.nazov)+'</small></td><td>'+esc(p.hmotnost||'Neuvedené')+'</td><td>'+esc(p.allergens?.join(', ')||'Zdroj alergény neuvádza')+'</td></tr>')).join('')+'</tbody></table>';
   }catch(error){$('status').textContent=error.message;}finally{$('check').disabled=false;}
 });
 </script></html>

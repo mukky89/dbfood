@@ -1,7 +1,8 @@
 const express = require('express');
 const { getRestaurant, todaySK } = require('./restaurants');
+const { sourceOnlyMenu } = require('./source-only-menu');
 
-function createMenuCheckRouter({ adminPassword, fetchAutomaticMenu, enrichMenuAllergens, now = () => new Date() }) {
+function createMenuCheckRouter({ adminPassword, fetchAutomaticMenu, now = () => new Date() }) {
   const router = express.Router();
   // Náhľad nemení výber jedálne, objednávky ani dátum servera. Heslo nie je v URL.
   router.post('/admin/menu-check', async (req, res) => {
@@ -19,10 +20,11 @@ function createMenuCheckRouter({ adminPassword, fetchAutomaticMenu, enrichMenuAl
       const context = { restaurant, date, key:`${restaurant.id}:check:${date}` };
       const loaded = await fetchAutomaticMenu(context);
       const count = loaded.menu.sekcie.reduce((n,s)=>n+s.polozky.length,0);
-      const menu = count ? await enrichMenuAllergens(loaded.menu) : loaded.menu;
+      const menu = sourceOnlyMenu(loaded.menu);
       res.json({ ok:true,readOnly:true,available:count>0,availableDates:loaded.availableDates,
         sourceDate:loaded.availableDates.includes(date)?date:null,menu,
-        reviewComplete:count>0 && menu.allergenReview?.processed===count });
+        sourceVerified:count>0, sourceItems:count,
+        itemsWithAllergens:menu.sekcie.flatMap(s=>s.polozky).filter(p=>p.allergens.length).length });
     } catch { res.status(502).json({ ok:false,error:'Automatický zdroj alebo kontrola menu nie je dostupná.' }); }
   });
   return router;

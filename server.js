@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const cron = require('node-cron');
 const config = require('./config');
-const enrichMenuAllergens = require('./ai-allergens').createAllergenEnricher();
+const { sourceOnlyMenu } = require('./source-only-menu');
 const { fetchMenu, setManualMenu, clearCache, debugFetch, configureRestaurants, fetchAutomaticMenu } = require('./scraper');
 const { createRestaurantState } = require('./restaurant-state');
 const { parseLupo, parseNevadzka, selectDay } = require('./menu-parsers');
@@ -287,12 +287,12 @@ app.get('/api/status', async (req, res) => {
 });
 
 // GET /api/menu
-app.use('/api', require('./menu-check').createMenuCheckRouter({ adminPassword:config.adminPassword, fetchAutomaticMenu, enrichMenuAllergens }));
+app.use('/api', require('./menu-check').createMenuCheckRouter({ adminPassword:config.adminPassword, fetchAutomaticMenu }));
 app.get('/api/menu', async (req, res) => {
   try {
     const menu = await fetchMenu();
     if (!menu) return res.json({ ok: false, error: 'Menu sa nepodarilo nacitat', menu: null });
-    res.json({ ok: true, menu: await enrichMenuAllergens(menu) });
+    res.json({ ok: true, menu: sourceOnlyMenu(menu) });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
 });
 
@@ -1201,10 +1201,9 @@ async function runDeadlineActions() {
 
 let cronTasks = [];
 
-async function prepareDailyAllergens() {
-  if (!config.openaiApiKey || !config.aiAllergensEnabled) return;
-  try { await enrichMenuAllergens(await fetchMenu()); }
-  catch { console.warn('[Menu] Ranná príprava alergénov neuspela; ďalší pokus pri načítaní menu.'); }
+async function prepareDailyMenu() {
+  try { await fetchMenu(); }
+  catch { console.warn('[Menu] Ranné načítanie neuspelo; ďalší pokus pri otvorení menu.'); }
 }
 
 function setupCrons() {
@@ -1227,7 +1226,7 @@ function setupCrons() {
 
   cronTasks.push(cron.schedule('0 7 * * *', async () => {
     clearCache();
-    await prepareDailyAllergens();
+    await prepareDailyMenu();
     console.log('[Cron] 07:00 - Cache vymazana');
   }, cronOpts));
 
