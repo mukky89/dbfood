@@ -41,13 +41,16 @@ test('notes are attached to the correct dish, with every author and separate piz
   const notes = $('.summary-note-row');
   assert.equal(notes.length, 2);
   assert.match($(notes[0]).text(), /Poznámky k J2/);
-  assert.match($(notes[0]).text(), /Anna: Bez cibule/);
-  assert.match($(notes[0]).text(), /Boris: Omáčku zvlášť \| prosím dobre prepiecť/);
+  assert.equal($(notes[0]).find('.summary-note-person').eq(0).clone().children().remove().end().text(), 'Anna');
+  assert.equal($(notes[0]).find('.summary-note-text').eq(0).text(), 'Bez cibule');
+  assert.equal($(notes[0]).find('.summary-note-person').eq(1).clone().children().remove().end().text(), 'Boris');
+  assert.equal($(notes[0]).find('.summary-note-text').eq(1).text(), 'Omáčku zvlášť | prosím dobre prepiecť');
   assert.doesNotMatch($(notes[0]).text(), /Bez syra|Cyril/);
-  assert.match($(notes[1]).text(), /Poznámky k PZ7/);
-  assert.match($(notes[1]).text(), /Anna: Bez syra/);
+  assert.match($(notes[1]).text(), /Poznámka k PZ7/);
+  assert.equal($(notes[1]).find('.summary-note-person').clone().children().remove().end().text(), 'Anna');
+  assert.equal($(notes[1]).find('.summary-note-text').text(), 'Bez syra');
   assert.equal($(notes[0]).prev().find('.summary-count').text(), '3×');
-  assert.equal($('.summary-note-flag').length, 2);
+  assert.equal($('.summary-note-title i').length, 2);
 });
 test('untagged and unmatched legacy notes remain visible without guessing their dish', () => {
   const $ = render([
@@ -57,8 +60,10 @@ test('untagged and unmatched legacy notes remain visible without guessing their 
   assert.equal($('.summary-note-row').length, 0);
   const text = $('.summary-general-notes').text();
   assert.match(text, /Objednávka: P1, J5/);
-  assert.match(text, /Dana: Zabaliť zvlášť/);
-  assert.match(text, /Eva: 🍕 Chýbajúca pizza/);
+  assert.equal($('.summary-general-notes .summary-note-text').eq(0).text(), 'Zabaliť zvlášť');
+  assert.equal($('.summary-general-notes .summary-note-person').eq(0).clone().children().remove().end().text(), 'Dana');
+  assert.equal($('.summary-general-notes .summary-note-text').eq(1).text(), '🍕 Chýbajúca pizza');
+  assert.equal($('.summary-general-notes .summary-note-person').eq(1).clone().children().remove().end().text(), 'Eva');
 });
 test('names, dish names and note text are escaped before rendering', () => {
   const $ = render([{ meno: '<img src=x onerror=alert(1)>', jedlo: 'J1 <script>bad()</script>', poznamka: '🍽️ <svg onload=alert(1)> & "extra"' }]);
