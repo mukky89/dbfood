@@ -5,6 +5,14 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.35.0] — 2026-11-20
+
+### Pridané
+- Schválený oznam od Filipa nad obsahom hlavnej stránky: výkričník, nadpis „Pomôžeš s objednávaním obedov?“, celý používateľom schválený text bez úprav a kontakt na Filipa Švolíka cez existujúci Discord odkaz.
+
+### Zmenené
+- Schválený vzhľad poznámok v súhrne: jemnejšie zvýraznenie, jedno upozornenie v nadpise poznámky, oddelené meno s iniciálami a samostatný text požiadavky. Kódy jedál a počty porcií sú zarovnané navrch riadka. Zachované priradenie poznámok k jedlám, poradie, počty aj bezpečné zobrazenie používateľského textu.
+
 ## [1.34.3] — 2026-11-18
 
 ### Opravené

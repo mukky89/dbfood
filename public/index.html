@@ -1566,6 +1566,7 @@
   <link rel="stylesheet" href="/christmas-countdown.css">
   <link rel="stylesheet" href="/chinchilla-runner.css">
   <link rel="stylesheet" href="/christmas-theme.css">
+  <link rel="stylesheet" href="/order-notice.css">
 </head>
 <body>
 
@@ -1892,6 +1893,13 @@
 
   <!-- Hlavna stranka -->
   <div id="order-section">
+    <aside class="filip-notice" aria-labelledby="filip-notice-title" role="note">
+  <div class="filip-notice-icon" aria-hidden="true">!</div><div>
+  <div class="filip-eyebrow">Oznam od Filipa</div>
+  <h2 id="filip-notice-title">Pomôžeš s objednávaním obedov?</h2>
+  <p class="filip-exact-message">Ahojte, keďže objednávanie inde nemalo veľký úspech, zostávame asi u Fantozziho. Je tu ale niekto, kto by sa toho chcel ujať? už je nás celkom dosť a ako ja trávim dosť času na linke, je pre mňa trochu hustle behať hore dole objednávať, riešiť, keď už niečo nie je, chodiť to prevziať a vyplatiť. Ideálne niekto, kto je väčšinou doobeda v kancli alebo vie odbehnúť. Diki, Filip.</p>
+  <div class="filip-actions"><a class="filip-contact" href="https://discord.com/users/1359038724956098771" target="_blank" rel="noopener noreferrer">Ozvať sa Filipovi <span aria-hidden="true">↗</span></a><span class="filip-person"><strong>Filip Švolík</strong> · Discord @mimosvk</span></div>
+  </div></aside>
     <section class="oblatky-promo" aria-labelledby="oblatky-title">
       <div class="oblatky-promo-content">
         <h2 id="oblatky-title">Kúsok domova na sviatočný stôl</h2>
@@ -3934,20 +3942,20 @@ function renderSummary(entries) {
   });
 
   function noteBox(notes, title) {
-    return `<div class="summary-note"><strong class="summary-note-title">⚠ ${esc(title)}</strong><ul>${notes.map(n =>
-      `<li>${n.context ? `<span class="summary-note-context">Objednávka: ${esc(n.context)}</span>` : ''}<span class="summary-note-person">${esc(n.name)}:</span> ${esc(n.text)}</li>`
-    ).join('')}</ul></div>`;
+    const displayTitle = notes.length === 1 ? title.replace('Poznámky k', 'Poznámka k') : title;
+    return `<div class="summary-note"><strong class="summary-note-title"><i aria-hidden="true">!</i>${esc(displayTitle)}</strong><ul>${notes.map(n => {
+      const initials = String(n.name).split(/\s+/).filter(Boolean).map(s => Array.from(s)[0]).slice(0, 2).join('');
+      return `<li>${n.context ? `<span class="summary-note-context">Objednávka: ${esc(n.context)}</span>` : ''}<span class="summary-note-person"><span class="summary-note-avatar" aria-hidden="true">${esc(initials)}</span>${esc(n.name)}</span><span class="summary-note-text">${esc(n.text)}</span></li>`;
+    }).join('')}</ul></div>`;
   }
-
   function buildRows(map, color, prefix) {
     return [...map.entries()].sort(([a], [b]) =>
       (numOf(a) - numOf(b)) || skrat(a).localeCompare(skrat(b), 'sk', { numeric: true })
     ).map(([k, item]) => {
       const isTop = topJedlo && k === topJedlo;
       const code = codeOf(k, prefix);
-      const warning = item.notes.length ? '<span class="summary-note-flag" aria-label="Jedlo má poznámku">⚠</span>' : '';
       const notes = item.notes.length ? `<tr class="summary-note-row"><td colspan="2">${noteBox(item.notes, 'Poznámky k ' + code)}</td></tr>` : '';
-      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${code}</span><span>${isTop?'🔥 ':''}<strong>${esc(skrat(k))}</strong>${warning}</span></span></td><td><span class="summary-count" style="background:${color}">${item.count}×</span></td></tr>${notes}`;
+      return `<tr${isTop?' class="hot-row"':''}><td><span class="summary-item-name"><span class="summary-num" style="background:${color}">${code}</span><span>${isTop?'🔥 ':''}<strong>${esc(skrat(k))}</strong></span></span></td><td><span class="summary-count" style="background:${color}">${item.count}×</span></td></tr>${notes}`;
     }).join('');
   }
 

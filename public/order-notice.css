@@ -1,0 +1,21 @@
+.filip-notice{display:grid;grid-template-columns:46px minmax(0,1fr);gap:18px;margin:0 0 22px;padding:23px 27px;background:linear-gradient(110deg,#fff5dc,#fffaf0 65%,#fffdf7);border:1px solid #e5c996;border-left:5px solid #b57922;border-radius:15px;box-shadow:0 5px 18px #4d3b1510;color:#283e34}
+.filip-notice-icon{display:grid;place-items:center;width:44px;height:44px;background:#b57922;border-radius:50%;font:800 27px/1 system-ui;color:#fff9e9;margin-top:5px}
+.filip-eyebrow{font:750 10px/1.4 system-ui;letter-spacing:1.4px;text-transform:uppercase;color:#8b621f;margin-bottom:6px}
+.filip-notice h2{font:700 25px/1.22 Georgia,serif;color:#263f33;margin:0 0 9px}
+.filip-notice p{font:14px/1.65 'Segoe UI',sans-serif;color:#536052;max-width:790px;margin:0}
+.filip-actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:16px}
+.filip-contact{display:inline-flex;align-items:center;gap:12px;padding:10px 17px;border-radius:8px;background:#294a3b;color:#fff7e6!important;text-decoration:none;font:650 13px/1.4 system-ui;box-shadow:0 2px 3px #294a3b18}
+.filip-contact:hover{background:#1b382a}.filip-contact span{font-size:18px;line-height:1}
+.filip-person{font:12px/1.5 system-ui;color:#6b715e}.filip-person strong{color:#435443;font-weight:650}
+.summary-table .summary-item-name{align-items:flex-start;gap:11px;font:14px/1.55 'Segoe UI',sans-serif}.summary-item-name strong{font-weight:650}
+.summary-table .summary-num{margin-top:2px;min-width:34px;height:23px;border-radius:7px;font-size:10px;letter-spacing:.2px}
+.summary-table td{vertical-align:top;padding-top:14px;padding-bottom:14px}.summary-table td:last-child{padding-top:14px;width:48px}.summary-count{height:24px;min-width:35px;font-size:11px;border-radius:8px}
+.summary-table .summary-note-row td{padding:0 2px 18px;text-align:left}
+.summary-note{margin:0 3px 0 0;padding:13px 14px 15px;background:#fff8e9;border:1px solid #ead7ae;border-left:3px solid #c78f34;border-radius:10px;box-shadow:0 2px 4px #5b422308}
+.summary-note-title{display:flex;align-items:center;gap:7px;margin:0 0 11px;font:750 9px/1.4 system-ui;letter-spacing:1px;text-transform:uppercase;color:#926422}
+.summary-note-title i{font:800 11px/1 system-ui;font-style:normal;background:#f2dfb7;color:#865715;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;letter-spacing:0}
+.summary-note li{font:13px/1.6 'Segoe UI',sans-serif;white-space:normal}.summary-note-person{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:650;color:#59634f;margin:0 0 6px}
+.summary-note-avatar{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#e8e5d6;color:#5d634b;font:700 9px/1 system-ui}
+.summary-note-text{white-space:pre-wrap;display:block;margin-left:32px;color:#2f4538;line-height:1.65;font-size:13px}.summary-note li+li{padding-top:10px;margin-top:10px}
+.summary-total-row td{font-size:13px;padding-top:16px!important}.summary-total-row .summary-count{border-radius:8px}
+@media(max-width:600px){.filip-notice{grid-template-columns:34px 1fr;padding:18px 16px;gap:12px;border-radius:12px}.filip-notice-icon{width:32px;height:32px;font-size:22px;margin-top:4px}.filip-notice h2{font-size:22px}.filip-notice p{font-size:13px}.filip-actions{align-items:flex-start;gap:10px}.filip-person{display:block;width:100%}.filip-contact{font-size:12px}.filip-eyebrow{font-size:9px}}
