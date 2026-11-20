@@ -6208,5 +6208,33 @@ function updateFloatingBar() {
   </div>
 </div>
 <script src="/chinchilla-runner.js"></script>
+<aside class="filip-float" aria-label="Oznam od Filipa" hidden><strong>Pomôžeš s obedmi?</strong><a target="_blank" rel="noopener noreferrer">Ozvať sa Filipovi ↗</a><button type="button" aria-label="Zavrieť plávajúci oznam">×</button></aside>
+<script>
+(() => {
+  const panel = document.querySelector('.filip-float');
+  const notice = document.querySelector('.filip-notice');
+  const orderBar = document.getElementById('floating-order-bar');
+  panel.querySelector('a').href = notice.querySelector('.filip-contact').href;
+  const resize = new ResizeObserver(() => {
+    panel.style.setProperty('--order-bar-height', orderBar.offsetHeight + 'px');
+  });
+  resize.observe(orderBar);
+  function updateFloatingNotice() {
+    panel.hidden = !notice.getClientRects().length || notice.getBoundingClientRect().bottom > 0;
+  }
+  window.addEventListener('scroll', updateFloatingNotice, { passive: true });
+  window.addEventListener('resize', updateFloatingNotice);
+  const observer = new IntersectionObserver(updateFloatingNotice);
+  observer.observe(notice);
+  updateFloatingNotice();
+  panel.querySelector('button').addEventListener('click', () => {
+    panel.hidden = true;
+    window.removeEventListener('scroll', updateFloatingNotice);
+    window.removeEventListener('resize', updateFloatingNotice);
+    observer.disconnect();
+    resize.disconnect();
+  });
+})();
+</script>
 </body>
 </html>
