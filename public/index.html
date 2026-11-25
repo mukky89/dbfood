@@ -215,6 +215,9 @@
     .dish-orderers { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 7px; }
     .dish-orderers:empty { display: none; }
     .dish-person { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; }
+    button.andrej-avatar { padding: 0; border: 0; cursor: pointer; font-family: inherit; }
+    .andrej-avatar:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+    .andrej-treat { position: fixed; z-index: 99999; pointer-events: none; font-size: 23px; }
     .dish-person .order-avatar { width: 22px; height: 22px; font-size: 10px; }
     .order-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .order-name { font-weight: 600; font-size: 14px; }
@@ -3863,10 +3866,45 @@ function relabel(val, prefix) {
   return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
 }
 
+const andrejEggs = [
+  { icon: '🥦', message: '🥦 Andrej našiel v polievke celý brokolicový les!' },
+  { icon: '🛸', message: '🛸 Hlásenie z kuchyne: nad Andrejovým tanierom pristál lietajúci tanier.' },
+  { icon: '🥇', message: '🥇 Zlatú lyžicu za dnešnú expedíciu po menu získava Andrej!' }
+];
+let nextAndrejEgg = 0;
+
+function revealAndrejEgg(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  const egg = andrejEggs[nextAndrejEgg];
+  nextAndrejEgg = (nextAndrejEgg + 1) % andrejEggs.length;
+  showToast(egg.message, 'success');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  for (const offset of [-42, 0, 42]) {
+    const treat = document.createElement('span');
+    treat.className = 'andrej-treat';
+    treat.setAttribute('aria-hidden', 'true');
+    treat.textContent = egg.icon;
+    treat.style.left = rect.left + rect.width / 2 + 'px';
+    treat.style.top = rect.top + 'px';
+    document.body.append(treat);
+    const flight = treat.animate([
+      { transform: 'translate(-50%, 0) scale(.6)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${offset}px), -64px) scale(1.15)`, opacity: 0 }
+    ], { duration: 850, easing: 'ease-out' });
+    flight.onfinish = () => treat.remove();
+  }
+}
+
 function orderAvatar(name) {
   const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c'];
   const initials = name.trim().split(/\s+/).map(word => word[0]).join('').toUpperCase().slice(0, 2);
   const color = colors[name.charCodeAt(0) % colors.length];
+  if (name.trim().replace(/\s+/g, ' ').toLowerCase() === 'andrej mikovec') {
+    return `<button type="button" class="order-avatar andrej-avatar" style="background:${color}" aria-label="Andrej Mikovec – obedové prekvapenie" onclick="revealAndrejEgg(event)">${esc(initials)}</button>`;
+  }
   return `<span class="order-avatar" style="background:${color}" aria-hidden="true">${esc(initials)}</span>`;
 }
 
