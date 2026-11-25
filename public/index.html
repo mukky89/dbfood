@@ -212,6 +212,10 @@
     /* Orders list */
     .order-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg); align-items: flex-start; }
     .order-item:last-child { border-bottom: none; }
+    .dish-orderers { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 7px; }
+    .dish-orderers:empty { display: none; }
+    .dish-person { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; }
+    .dish-person .order-avatar { width: 22px; height: 22px; font-size: 10px; }
     .order-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: white; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .order-name { font-weight: 600; font-size: 14px; }
     .order-detail { font-size: 13px; color: var(--muted); margin-top: 2px; }
@@ -2570,6 +2574,7 @@ let isAdmin = window.location.pathname === '/admin';
 let orderingOpen = true;
 let knownUsers = {};
 let topJedlo = null;
+let todayMenuOrders = [];
 let availableDates = [];
 let currentDateIndex = 0;
 let config_deadline = '10:00';
@@ -3171,6 +3176,7 @@ function renderMenu(menu) {
             ${p.sideOptions?.length ? `<span style="display:block"><label for="side_${id}">Príloha v cene menu:</label><select id="side_${id}" onclick="event.stopPropagation()"><option value="">Vyber prílohu</option>${p.sideOptions.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')}</select></span>` : ''}
             ${(isJedlo || isPizza) ? `<input type="text" class="item-note-input" id="note_${id}" placeholder="${uiT('poznamka')}" maxlength="120"
               onclick="event.stopPropagation()" onfocus="event.stopPropagation()" onkeydown="event.stopPropagation()">` : ''}
+            <span class="dish-orderers" data-group="${groupName}" data-dish="${esc(value)}"></span>
           </span>
         </label>`;
     });
@@ -3186,6 +3192,7 @@ function renderMenu(menu) {
     </div></details>`;
 
   content.innerHTML = html;
+  renderDishOrderers();
 }
 
 function onVariantChange(radio, itemId, value) {
@@ -3465,7 +3472,14 @@ async function loadOrders() {
     });
     const sorted = Object.entries(jedlaMap).sort((a,b) => b[1]-a[1]);
     const newTop = sorted.length > 0 && sorted[0][1] >= 2 ? sorted[0][0] : null;
-    if (newTop !== topJedlo) { topJedlo = newTop; if (menuData) renderMenu(menuData); }
+    todayMenuOrders = Object.values(data.orders);
+    if (newTop !== topJedlo && menuData) {
+      topJedlo = newTop;
+      renderMenu(menuData);
+    } else {
+      topJedlo = newTop;
+      renderDishOrderers();
+    }
 
     // Renderuj objednavky len ked sme na dnesnom dni
     if (currentDateIndex === 0) {
@@ -3849,6 +3863,28 @@ function relabel(val, prefix) {
   return `${prefix}${m[1]} ${val.slice(m[0].length)}`;
 }
 
+function orderAvatar(name) {
+  const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c'];
+  const initials = name.trim().split(/\s+/).map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  const color = colors[name.charCodeAt(0) % colors.length];
+  return `<span class="order-avatar" style="background:${color}" aria-hidden="true">${esc(initials)}</span>`;
+}
+
+function renderDishOrderers() {
+  const prefixes = { polievka: 'P', jedlo: 'J', pizza: 'PZ', dezert: 'D' };
+  document.querySelectorAll('.dish-orderers').forEach(row => {
+    const { group, dish } = row.dataset;
+    const people = todayMenuOrders.filter(order => {
+      if (order.menuKey && menuData?.key && order.menuKey !== menuData.key) return false;
+      const selection = relabel(order[group], prefixes[group]);
+      return selection === dish || selection?.startsWith(dish + ' — ');
+    });
+    row.innerHTML = people.map(order =>
+      `<span class="dish-person">${orderAvatar(order.meno)}<span>${esc(order.meno)}</span></span>`
+    ).join('');
+  });
+}
+
 function renderOrders(orders, count) {
   const list = document.getElementById('orders-list');
   const countEl = document.getElementById('order-count');
@@ -3856,14 +3892,11 @@ function renderOrders(orders, count) {
   if (countEl) countEl.textContent = entries.length ? `${entries.length} ľudí` : '';
   renderSummary(entries);
   if (!entries.length) { list.innerHTML = '<div class="empty-state">Zatiaľ nikto</div>'; return; }
-  const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#f39c12','#1abc9c'];
   list.innerHTML = entries.map(o => {
-    const initials = o.meno.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const color = colors[o.meno.charCodeAt(0) % colors.length];
     const isMine = o.meno === currentUser;
     const editBadge = o.editCount > 0 ? `<span style="font-size:10px;background:#fff3cd;color:#856404;border-radius:4px;padding:1px 5px;margin-left:4px">upravené ${o.editCount}x</span>` : '';
     return `<div class="order-item" style="${isMine ? 'background:#fff5f5;border-radius:8px;padding:10px;margin:-4px;' : ''}">
-      <div class="order-avatar" style="background:${color}">${initials}</div>
+      ${orderAvatar(o.meno)}
       <div style="flex:1;min-width:0">
         <div class="order-name">${o.meno} ${isMine ? '<span style="font-size:11px;color:var(--accent)">(ty)</span>' : ''}${editBadge}</div>
         <div class="order-detail">

@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.38.0] — 2026-11-25
+
+- Pod každou položkou denného menu sa zobrazujú iniciály a mená ľudí, ktorí si ju objednali.
+
 ## [1.37.0] — 2026-11-20
 
 - Filipov oznam má károvaný okraj. Po odrolovaní sa zobrazí zatvárateľné okno s kontaktom.
