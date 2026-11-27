@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.46.0] — 2026-11-28
+
+- Pri každej z troch mincí Švolino v bubline zahlási inú poznámku. Posledná zostane v záverečnom obrázku.
+
 ## [1.45.0] — 2026-11-28
 
 - Švolinovu cestu na vrátnicu a platenie za obedy sprevádza kreslená scénka s možnosťou opakovaného prehratia.

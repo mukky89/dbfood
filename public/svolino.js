@@ -5,9 +5,18 @@
   if (!ctx) return;
   const film = canvas.closest('.runner-film');
   const replay = document.getElementById('runner-replay');
+  const speech = document.getElementById('runner-speech');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const ink = '#44332b', red = '#963c31', cream = '#fff3db', gold = '#ecc06d';
-  const end = 4.95;
+  const lines = [
+    'Jedna minca. To prežijem.',
+    'Druhá? To aj lyžicu kupujem?',
+    'Tretia?! Tak tú lyžicu si beriem domov!',
+  ];
+  const paymentStart = 2.75;
+  const secondsPerLine = 2.3;
+  const end = paymentStart + secondsPerLine * lines.length;
+  let shownLine = -1;
   let frame = 0;
   let started = false;
 
@@ -104,11 +113,19 @@
     const x = 48 + 223 * walk;
     const stride = Math.sin(8 * Math.PI * walk);
     const collect = phase(time, 2, 2.65);
-    const pay = phase(time, 2.75, 4.65);
+    const elapsed = time - paymentStart;
+    const line = elapsed < 0 ? -1 : Math.min(lines.length - 1, Math.floor(elapsed / secondsPerLine));
+    if (line !== shownLine) {
+      speech.textContent = lines[line] || '';
+      speech.hidden = line < 0;
+      shownLine = line;
+    }
+    // Každá minca preletí rýchlo, no hláška zostane, kým príde ďalšia.
+    const coin = line < 0 ? 0 : phase(elapsed - line * secondsPerLine, 0, .65);
+    const pay = line < 0 ? 0 : (line + coin) / lines.length;
     drawRunner(x, stride, Math.abs(stride)*2.5, pay, pay, collect);
     drawLunch(339 - 38 * collect, 105 + 34 * collect - Math.sin(collect * Math.PI) * 5);
-    if (pay > 0 && pay < 1) {
-      const coin = (pay * 3) % 1;
+    if (line >= 0 && coin < 1) {
       const cx = 293 + 96 * coin, cy = 121 - 11 * coin - 27 * Math.sin(Math.PI * coin);
       ellipse(cx, cy, 6.3, 6.3, ink);
       ellipse(cx, cy, 5, 5, gold);

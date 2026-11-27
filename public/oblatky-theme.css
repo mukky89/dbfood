@@ -65,6 +65,19 @@ footer a { padding: .65rem 0; }
 .runner-verdict strong { font: 600 .86rem/1.45 'Segoe UI', sans-serif; }
 .runner-receipt:has(.runner-film:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: clamp(1rem, 3vw, 3rem); }
 .runner-film { text-align: right; }
+.runner-frame { position: relative; container-type: inline-size; }
+.runner-speech {
+  position: absolute; right: 49%; top: 9%; width: max-content; max-width: 48%;
+  padding: .45em .7em; border: 2px solid #44332b; border-radius: 1em;
+  background: #fff9ed; color: #35241e; text-align: left; text-wrap: pretty;
+  font: 600 clamp(.85rem, 3.7cqw, 1.35rem)/1.16 Georgia, serif;
+}
+.runner-speech::after {
+  content: ''; position: absolute; right: -.48em; bottom: .4em;
+  width: .7em; height: .55em; background: inherit;
+  border-right: 2px solid #44332b; border-bottom: 2px solid #44332b;
+  transform: skewX(38deg) rotate(-12deg);
+}
 .runner-film canvas { display: block; width: 100%; height: auto; background: #f4e6cf; border-radius: 4px; }
 #runner-replay { color: var(--red); font: 600 .85rem 'Segoe UI', sans-serif; border: 0; background: transparent; padding: .4rem .15rem; min-height: 44px; cursor: pointer; }
 #runner-replay span { margin-left: .3rem; }
