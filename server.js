@@ -53,6 +53,7 @@ app.use((req, res, next) => {
 app.use('/api/sylex', createSylexRouter({store:createMongoSylexStore(mongoose),contest:{endsAt:config.sylexContestEnd,prize:config.sylexContestPrize}}));
 app.use('/api/colony', createColonyRouter({ store: createMongoColonyStore(mongoose) }));
 app.use(express.json({ limit: '600kb' }));
+require('./wafer-closure').registerWaferClosure(app, getVzhlad, () => config.orderDeadline);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── MongoDB schemas ──────────────────────────────────────────────────────────
@@ -195,32 +196,13 @@ async function getPlatba() {
 function clearPlatbaCache() { _platbaCache = null; }
 
 // ── Nastavenia vzhladu ─────────────────────────────────────────────────────
-const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas'];
-let _vzhladCache = null;
+const PLATNE_TEMY = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas', 'oblatky'];
 async function getVzhlad() {
-  if (_vzhladCache) return _vzhladCache;
-  try {
-    const doc = await NastaveniaVzhlad.findOne({});
-    // Jednorazovo nasad RC Expedition ako novy globalny dizajn. Dalsie volby
-    // administratora sa zachovaju vdaka designVersion.
-    let tema;
-    if (!doc || (doc.designVersion || 0) < 2) {
-      tema = 'rc';
-      await NastaveniaVzhlad.findOneAndUpdate(
-        {}, { $set: { tema, futuristicky: false, designVersion: 2 } }, { upsert: true }
-      );
-    } else {
-      tema = (doc.tema && PLATNE_TEMY.includes(doc.tema))
-        ? doc.tema
-        : (doc.futuristicky ? 'futuristic' : 'rc');
-    }
-    _vzhladCache = { tema };
-  } catch(e) {
-    _vzhladCache = { tema: 'rc' };
-  }
-  return _vzhladCache;
+  const doc = await NastaveniaVzhlad.findOne({});
+  // Vydanie 1.40 ukončuje obedy. Novšia voľba administrátora má prednosť.
+  if (!doc || (doc.designVersion || 0) < 3) return { tema: 'oblatky' };
+  return { tema: PLATNE_TEMY.includes(doc.tema) ? doc.tema : 'oblatky' };
 }
-function clearVzhladCache() { _vzhladCache = null; }
 
 async function loadOrders() {
   const dnes = new Date().toDateString();
@@ -750,7 +732,9 @@ app.get('/api/changelog', (req, res) => {
 
 // GET /api/design — aktualny vzhlad (verejne, pre prepnutie temy)
 app.get('/api/design', async (req, res) => {
-  const vzhlad = await getVzhlad();
+  let vzhlad;
+  try { vzhlad = await getVzhlad(); }
+  catch { return res.status(503).json({ ok: false, error: 'Vzhľad sa nepodarilo načítať.' }); }
   // 'futuristic' boolean ostava pre spatnu kompatibilitu klientov
   res.json({ ok: true, theme: vzhlad.tema, futuristic: vzhlad.tema === 'futuristic' });
 });
@@ -764,9 +748,8 @@ app.post('/api/admin/design', async (req, res) => {
   if (!PLATNE_TEMY.includes(tema)) return res.status(400).json({ ok: false, error: 'Neznáma téma' });
   try {
     await NastaveniaVzhlad.findOneAndUpdate(
-      {}, { $set: { tema, futuristicky: tema === 'futuristic', designVersion: 2 } }, { upsert: true, new: true }
+      {}, { $set: { tema, futuristicky: tema === 'futuristic', designVersion: 3 } }, { upsert: true, new: true }
     );
-    clearVzhladCache();
     const vzhlad = await getVzhlad();
     res.json({ ok: true, theme: vzhlad.tema, futuristic: vzhlad.tema === 'futuristic' });
   } catch(e) { res.status(500).json({ ok: false, error: e.message }); }
@@ -1202,7 +1185,7 @@ async function runDeadlineActions() {
 let cronTasks = [];
 
 async function prepareDailyMenu() {
-  try { await fetchMenu(); }
+  try { if ((await getVzhlad()).tema !== 'oblatky') await fetchMenu(); }
   catch { console.warn('[Menu] Ranné načítanie neuspelo; ďalší pokus pri otvorení menu.'); }
 }
 

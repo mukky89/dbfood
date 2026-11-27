@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.40.0] — 2026-11-27
+
+- Objednávanie obedov sa skončilo. Úvodná pohľadnica vedie na výber oblátok od Yvonky. Správca môže objednávanie obedov obnoviť výberom inej témy.
+
 ## [1.39.0] — 2026-11-25
 
 - Andrejova profilová ikonka ukrýva tri obedové prekvapenia.

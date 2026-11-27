@@ -8,8 +8,8 @@ const html = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8
 
 // Execute the production appearance functions/routes with only Mongo replaced.
 // This avoids booting cron, notification/email jobs or connecting to production.
-function appearance(saved = 'rc') {
-  let doc = { tema: saved, designVersion: 2, futuristicky: false }, writes = 0;
+function appearance(saved = 'rc', designVersion = 3) {
+  let doc = { tema: saved, designVersion, futuristicky: false }, writes = 0;
   const routes = {}, db = {
     findOne: async () => ({ ...doc }),
     findOneAndUpdate: async (_, update) => { writes++; doc = { ...doc, ...update.$set }; return doc; }
@@ -43,9 +43,8 @@ test('anthill can be saved by an admin and restored without changing other setti
   const api = appearance('blocks');
   assert.equal((await api.request('POST', { adminPass: 'wrong', theme: 'anthill' })).status, 401);
   assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'anthill' })).data.theme, 'anthill');
-  vm.runInContext('clearVzhladCache()', api.sandbox);
   assert.equal((await api.request('GET')).data.theme, 'anthill');
-  assert.equal(api.doc().designVersion, 2);
+  assert.equal(api.doc().designVersion, 3);
   assert.match(html, /data-theme="anthill" onclick="saveDesignConfig\('anthill'\)"/);
   assert.match(html, /classList.toggle\('theme-anthill',\s+theme === 'anthill'\)/);
   assert.ok(html.indexOf('/anthill-engine.js') < html.indexOf('/anthill-theme.js'));
@@ -55,8 +54,7 @@ test('admin can persist blocks, reload settings and return to another theme', as
   assert.equal((await api.request('GET')).data.theme, 'rc');
   const saved = await api.request('POST', { adminPass: 'test-only', theme: 'blocks' });
   assert.equal(saved.status, 200); assert.equal(saved.data.theme, 'blocks');
-  assert.equal(api.doc().tema, 'blocks'); assert.equal(api.doc().designVersion, 2);
-  vm.runInContext('clearVzhladCache()', api.sandbox);
+  assert.equal(api.doc().tema, 'blocks'); assert.equal(api.doc().designVersion, 3);
   assert.equal((await api.request('GET')).data.theme, 'blocks');
   await api.request('POST', { adminPass: 'test-only', theme: 'classic' });
   assert.equal((await api.request('GET')).data.theme, 'classic');
@@ -103,8 +101,17 @@ test('Christmas is optional, persists and leaves the existing choice intact', as
   assert.equal((await api.request('GET')).data.theme, 'sylex');
   assert.equal(api.writes(), 0);
   assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'christmas' })).data.theme, 'christmas');
-  vm.runInContext('clearVzhladCache()', api.sandbox);
   assert.equal((await api.request('GET')).data.theme, 'christmas');
-  assert.equal(api.doc().designVersion, 2);
+  assert.equal(api.doc().designVersion, 3);
   assert.equal((await api.request('POST', { adminPass: 'test-only', theme: 'sylex' })).data.theme, 'sylex');
+});
+
+test('staršie nastavenia ukončia obedy a správca môže obedy znovu otvoriť', async () => {
+  const api = appearance('christmas', 2);
+  assert.equal((await api.request('GET')).data.theme, 'oblatky');
+  assert.equal(api.writes(), 0);
+  await api.request('POST', { adminPass: 'test-only', theme: 'classic' });
+  assert.equal((await api.request('GET')).data.theme, 'classic');
+  await api.request('POST', { adminPass: 'test-only', theme: 'oblatky' });
+  assert.equal((await api.request('GET')).data.theme, 'oblatky');
 });

@@ -7,7 +7,7 @@
   <script>
     // Prepnutie temy co najskor (z cache), potom potvrdenie zo servera
     (function(){
-      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas'];
+      var TEMY = ['futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas', 'oblatky'];
       function apply(t) {
         TEMY.forEach(function(x){ document.documentElement.classList.toggle('theme-' + x, t === x); });
       }
@@ -2346,6 +2346,7 @@
           <strong>ℹ️ Výber témy</strong> je <strong>globálny</strong> — prejaví sa všetkým návštevníkom stránky. Zmena sa aplikuje okamžite.
         </div>
         <div id="vzhlad-options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+          <button type="button" class="theme-option" data-theme="oblatky" onclick="saveDesignConfig('oblatky')" aria-pressed="false"><span class="t-check">✓</span><span class="t-name">Oblátky od Yvonky</span><span class="t-desc">Rozlúčková pohľadnica. Ukončí príjem obedových objednávok a otvorí ponuku oblátok.</span></button>
           <button type="button" class="theme-option christmas-theme-option" data-theme="christmas" onclick="saveDesignConfig('christmas')" aria-pressed="false"><span class="t-check">✓</span><span class="t-name">Vianoce u Yvonky</span><span class="t-desc">Sviatočný stôl, domáce trubičky a čaro Vianoc. Krémová, ihličnanová zelená a bordová.</span><span class="theme-dots"><span style="background:#213e33"></span><span style="background:#f5efe3"></span><span style="background:#82323b"></span></span></button>
           <div class="theme-option" data-theme="classic" onclick="saveDesignConfig('classic')">
             <span class="t-check">✅</span>
@@ -4244,8 +4245,9 @@ async function deleteFeedback(id) {
 }
 
 // ── Vzhľad / témy ───────────────────────────────────────────────────────────
-const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas'];
+const APP_THEMES = ['classic', 'futuristic', 'trattoria', 'starwars', 'fifa', 'chinchilla', 'odysea', 'spiderman', 'rc', 'blocks', 'anthill', 'sylex', 'christmas', 'oblatky'];
 const THEME_LABELS = {
+  oblatky: { name: 'Oblátky od Yvonky', toast: 'Objednávanie obedov je ukončené', state: 'Aktívne sú iba objednávky oblátok.' },
   christmas: { name: 'Vianoce u Yvonky', toast: 'Vianočný vzhľad je zapnutý', state: 'Aktívna téma: Vianoce u Yvonky.' },
   sylex: { name: 'Sylex Tower Defence', toast: 'Sylex je pripravený na obranu', state: 'Aktívna téma: Sylex Tower Defence. Hru otvoríš tlačidlom Brániť Sylex.' },
   classic:    { name: '🏛️ Klasický',        toast: '🎨 Klasický dizajn obnovený',   state: 'Aktívna téma: Klasický dizajn.' },
