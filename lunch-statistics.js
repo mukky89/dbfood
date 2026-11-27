@@ -68,6 +68,9 @@ async function summarizeLunches(days, menus = new Map()) {
     months.set(month, entry);
   }
   return { ...stats, months: [...months.values()].sort((a, b) => a.month.localeCompare(b.month)),
+    people: ranked(quantities).map(({ name, value }) => ({
+      name: publicName(name), portions: value, cents: spending.get(keyOf(name))?.value ?? null,
+    })),
     topDishes: ranked(dishes).slice(0, 5), favourite: leaders(dishes), buyer: leaders(quantities, publicName),
     regular: leaders(purchases, publicName), spender: leaders(spending, publicName) };
 }

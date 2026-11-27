@@ -24,6 +24,12 @@ test('finálne objednávky, porcie a ceny sa rátajú samostatne, bez zrušenýc
   assert.deepEqual(stats.favourite, { names: ['Rezeň'], count: 1, value: 3 });
   assert.deepEqual(stats.buyer.names, ['Jana M.', 'Tomáš V.']);
   assert.deepEqual(stats.spender, { names: ['Jana M.'], count: 1, value: 1300 });
+  assert.deepEqual(stats.people, [
+    { name: 'Jana M.', portions: 2, cents: 1300 },
+    { name: 'Tomáš V.', portions: 2, cents: 650 },
+  ]);
+  const unpriced = await summarizeLunches([{ orders: { a: { ...a, restaurantId: 'lupo' } } }]);
+  assert.equal(unpriced.people[0].cents, null);
   assert.deepEqual(stats.regular, { names: ['Tomáš V.'], count: 1, value: 2 });
   assert.equal((await summarizeLunches([])).spender, null);
 });

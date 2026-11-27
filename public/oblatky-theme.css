@@ -80,6 +80,19 @@ footer a { padding: .65rem 0; }
 .dish-track { grid-column: 1 / -1; height: .42rem; background: #e3d5bd; border-radius: 3px; }
 .dish-bar { height: 100%; background: #a36546; transform-origin: left; border-radius: inherit; }
 .dish-row:first-child .dish-bar { background: var(--red); }
+.people-header { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem 2rem; flex-wrap: wrap; }
+.people-chart .chart-switch button { min-height: 42px; }
+#people-list { list-style: none; margin: 1.25rem 0 0; padding: 0; font-variant-numeric: tabular-nums; }
+.person-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) auto; align-items: baseline; gap: .25rem 1rem; padding: .5rem 0; }
+.person-place { grid-row: span 2; color: #725747; font: italic 1.45rem/1.3 Georgia, serif; text-align: right; }
+.person-name { font: 600 1.06rem/1.3 Georgia, serif; overflow-wrap: anywhere; }
+.person-value { color: var(--red); text-align: right; font-size: .95rem; }
+.person-row .dish-track { grid-column: 2 / -1; }
+.person-row:first-child .dish-bar { background: var(--red); }
+.people-expand { margin: .8rem 0 0; padding: .55rem .85rem; min-height: 44px; border: 1px solid var(--rule); border-radius: 4px; color: var(--ink); background: transparent; cursor: pointer; font: inherit; font-size: .85rem; }
+.people-expand:hover { background: #ebdfc9; }
+.people-expand:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.people-chart [hidden] { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   .in-view .month-bar { animation: grow-month 720ms cubic-bezier(.2,.75,.25,1) var(--delay) backwards; }
   .in-view .dish-bar { animation: grow-dish 680ms cubic-bezier(.2,.75,.25,1) var(--delay) backwards; }

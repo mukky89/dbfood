@@ -50,6 +50,18 @@
               <ol id="dish-bars"></ol>
             </section>
           </div>
+          <section class="lunch-chart people-chart" id="rebricek" hidden aria-labelledby="people-title">
+            <div class="people-header">
+              <h3 id="people-title">Rebríček stravníkov</h3>
+              <div class="chart-switch" role="group" aria-label="Zoradiť stravníkov podľa">
+                <button type="button" data-sort="portions" aria-controls="people-list" aria-pressed="true">Počet obedov</button>
+                <button type="button" data-sort="cents" aria-controls="people-list" aria-pressed="false">Odhadovaná útrata</button>
+              </div>
+            </div>
+            <ol id="people-list" aria-label="Poradie podľa počtu porcií"></ol>
+            <p class="chart-unit" id="people-empty" hidden>Pre túto metriku zatiaľ chýbajú údaje.</p>
+            <button class="people-expand" id="people-expand" type="button" aria-controls="people-list" aria-expanded="false" hidden>Zobraziť celý rebríček</button>
+          </section>
           <dl class="records">
             <div><dt>Najobjednávanejší obed</dt><dd id="stat-favourite"></dd></div>
             <div><dt>Najviac kúpených porcií</dt><dd id="stat-buyer"></dd></div>
