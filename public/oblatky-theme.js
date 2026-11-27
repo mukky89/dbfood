@@ -159,6 +159,8 @@ async function loadLunchStatistics() {
       return;
     }
     document.getElementById('stat-orders').textContent = statNumber.format(data.orders);
+    document.getElementById('runner-trips').textContent = statNumber.format(data.days);
+    document.getElementById('runner-payments').textContent = statNumber.format(data.days);
     document.getElementById('stat-portions').textContent = statNumber.format(data.portions);
     document.getElementById('stat-cents').textContent = data.pricedOrders ? euro(data.cents) : 'Bez údajov';
     document.getElementById('stat-average').textContent = data.pricedPortions ? euro(data.cents / data.pricedPortions) : 'Bez údajov';

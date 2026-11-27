@@ -55,6 +55,14 @@ footer a { padding: .65rem 0; }
 .records { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 1.8rem 0; }
 .records dd { font: 600 1.15rem/1.45 Georgia, serif; margin: .25rem 0 0; overflow-wrap: anywhere; }
 .statistics .price-note { font-size: .82rem; color: #655147; }
+.runner-receipt { margin-block: 1.5rem .3rem; padding: clamp(1rem, 3vw, 2.1rem); background: #fff9ed; border-block: 1px dashed var(--rule); }
+.runner-receipt h3 { margin: 0; font: 500 clamp(1.55rem, 2.4vw, 2.15rem)/1.15 Georgia, serif; }
+.runner-counts { display: flex; flex-wrap: wrap; gap: 1rem clamp(2rem, 5vw, 5rem); margin: 1.15rem 0 .8rem; }
+.runner-counts dt { font-size: .94rem; }
+.statistics .runner-basis { color: #655147; font-size: .84rem; }
+.runner-counts dd { margin: .15rem 0 0; color: var(--red); font: 500 2.5rem/1.1 Georgia, serif; }
+.statistics .runner-verdict { margin: .9rem 0 0; font: italic 1.1rem/1.45 Georgia, serif; }
+.runner-verdict strong { font: 600 .86rem/1.45 'Segoe UI', sans-serif; }
 .lunch-charts { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); }
 .lunch-chart { min-width: 0; padding: 1.8rem 0 1.65rem; border-bottom: 1px solid var(--rule); }
 .lunch-chart h3 { margin: 0 0 .65rem; font: 500 clamp(1.55rem, 2.4vw, 2.15rem)/1.15 Georgia, serif; color: var(--ink); }
