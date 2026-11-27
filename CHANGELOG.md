@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.45.0] — 2026-11-28
+
+- Švolinovu cestu na vrátnicu a platenie za obedy sprevádza kreslená scénka s možnosťou opakovaného prehratia.
+
 ## [1.44.0] — 2026-11-28
 
 - Švolinova obedová služba počíta jednu cestu na vrátnicu a jednu spoločnú platbu za každý deň s objednávkami.

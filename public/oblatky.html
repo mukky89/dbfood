@@ -7,6 +7,7 @@
   <title>DBFood · Oblátky od Yvonky</title>
   <link rel="stylesheet" href="./oblatky-theme.css">
   <script src="./oblatky-theme.js" defer></script>
+  <script src="./svolino.js" defer></script>
 </head>
 <body>
   <div class="sheet">
@@ -36,6 +37,7 @@
             <div><dt>Priemer za porciu*</dt><dd id="stat-average"></dd></div>
           </dl>
           <section class="runner-receipt" id="svolino" aria-labelledby="runner-title">
+            <div class="runner-story">
             <h3 id="runner-title">Švolinova obedová služba</h3>
             <dl class="runner-counts">
               <div><dt>Cesty na vrátnicu</dt><dd id="runner-trips"></dd></div>
@@ -43,6 +45,11 @@
             </dl>
             <p class="runner-basis">Každý deň s objednávkami išiel Švolino na vrátnicu, prevzal obedy pre celú partiu a zaplatil.</p>
             <p class="runner-verdict"><strong>Švolinova nálada (s nadsádzkou)</strong><br>Polievka horúca, úsmev vlažný. Pri slovách „obedy sú na vrátnici“ si už povzdychla aj jeho peňaženka.</p>
+            </div>
+            <div class="runner-film" hidden>
+              <canvas id="runner-scene" width="960" height="420" role="img" aria-label="Kreslený Švolino kráča na vrátnicu, preberá obedy a pri každej ďalšej minci sa o čosi viac zamračí."></canvas>
+              <button type="button" id="runner-replay" hidden>Prehrať znova <span aria-hidden="true">↻</span></button>
+            </div>
           </section>
           <div class="lunch-charts">
             <section class="lunch-chart" id="monthly-chart" hidden aria-labelledby="month-title">

@@ -63,6 +63,15 @@ footer a { padding: .65rem 0; }
 .runner-counts dd { margin: .15rem 0 0; color: var(--red); font: 500 2.5rem/1.1 Georgia, serif; }
 .statistics .runner-verdict { margin: .9rem 0 0; font: italic 1.1rem/1.45 Georgia, serif; }
 .runner-verdict strong { font: 600 .86rem/1.45 'Segoe UI', sans-serif; }
+.runner-receipt:has(.runner-film:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: clamp(1rem, 3vw, 3rem); }
+.runner-film { text-align: right; }
+.runner-film canvas { display: block; width: 100%; height: auto; background: #f4e6cf; border-radius: 4px; }
+#runner-replay { color: var(--red); font: 600 .85rem 'Segoe UI', sans-serif; border: 0; background: transparent; padding: .4rem .15rem; min-height: 44px; cursor: pointer; }
+#runner-replay span { margin-left: .3rem; }
+#runner-replay:hover { text-decoration: underline; }
+#runner-replay:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { #runner-replay { display: none; } }
+@media (max-width: 840px) { .runner-receipt:has(.runner-film:not([hidden])) { grid-template-columns: minmax(0, 1fr); } }
 .lunch-charts { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); }
 .lunch-chart { min-width: 0; padding: 1.8rem 0 1.65rem; border-bottom: 1px solid var(--rule); }
 .lunch-chart h3 { margin: 0 0 .65rem; font: 500 clamp(1.55rem, 2.4vw, 2.15rem)/1.15 Georgia, serif; color: var(--ink); }
