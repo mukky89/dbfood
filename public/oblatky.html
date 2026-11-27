@@ -19,11 +19,31 @@
         <h1 id="title">Ďakujeme za<br><em>spoločné</em><br>obedy.</h1>
         <p>Objednávanie obedov sa skončilo. Na stole ešte zostali domáce oblátky od Yvonky.</p>
         <a class="order" href="https://oblatky.mmucka.xyz/#ponuka">Objednať oblátky <span aria-hidden="true">↗</span></a>
+        <a class="stats-link" href="#statistika">Štatistika obedov</a>
       </section>
       <figure>
         <div class="print"><img src="./assets/oblatky/trubicky.webp" alt="Zlatisté oblátkové trubičky na sviatočnom stole" width="1500" height="1000"></div>
         <figcaption>Oblátky od Yvonky</figcaption>
       </figure>
+      <section id="statistika" aria-labelledby="stats-title" class="statistics">
+        <h2 id="stats-title">Obedy v číslach</h2>
+        <p id="stats-status" role="status">Načítavam históriu objednávok…</p>
+        <div id="stats-results" hidden>
+          <dl class="totals">
+            <div><dt>Objednávky</dt><dd id="stat-orders"></dd></div>
+            <div><dt>Porcie</dt><dd id="stat-portions"></dd></div>
+            <div><dt>Hodnota objednávok*</dt><dd id="stat-cents"></dd></div>
+            <div><dt>Priemer za porciu*</dt><dd id="stat-average"></dd></div>
+          </dl>
+          <dl class="records">
+            <div><dt>Najobjednávanejší obed</dt><dd id="stat-favourite"></dd></div>
+            <div><dt>Najviac kúpených porcií</dt><dd id="stat-buyer"></dd></div>
+            <div><dt>Najviac objednávok</dt><dd id="stat-regular"></dd></div>
+            <div><dt>Najvyššia hodnota objednávok*</dt><dd id="stat-spender"></dd></div>
+          </dl>
+          <p class="price-note" id="stats-note"></p>
+        </div>
+      </section>
     </main>
     <footer><span>DBFood <i>×</i> Fantozzi</span><a href="/admin">Administrácia</a></footer>
   </div>

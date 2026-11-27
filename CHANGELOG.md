@@ -5,6 +5,11 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.41.0] — 2026-11-27
+
+- Na pohľadnici pribudla štatistika nákupov, porcií, cien a najobjednávanejších jedál.
+- Nápis DBFood na rozlúčkovej pohľadnici spája písmo Manrope s rukopisným písmom Comforter.
+
 ## [1.40.0] — 2026-11-27
 
 - Objednávanie obedov sa skončilo. Úvodná pohľadnica vedie na výber oblátok od Yvonky. Správca môže objednávanie obedov obnoviť výberom inej témy.

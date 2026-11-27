@@ -109,6 +109,7 @@ const RestaurantSettings = require('./restaurant-storage').createRestaurantSetti
 const ManualRestaurantMenu = mongoose.model('ManualRestaurantMenu', new mongoose.Schema({
   key: { type: String, unique: true }, menu: mongoose.Schema.Types.Mixed
 }));
+require('./lunch-statistics').registerLunchStatistics(app, DenneObjednavky, ManualRestaurantMenu);
 const restaurantState = createRestaurantState({ store: RestaurantSettings, loadOrders,
   adminPassword: config.adminPassword, clearCache });
 configureRestaurants(restaurantState.context, ManualRestaurantMenu);

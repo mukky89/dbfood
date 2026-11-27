@@ -3,6 +3,12 @@
   src: url("./assets/christmas/comforter.ttf") format("truetype");
   font-display: swap;
 }
+@font-face {
+  font-family: Manrope;
+  src: url("./assets/wordmark/manrope-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
 :root {
   color-scheme: light;
   --paper: #f6eedc;
@@ -16,7 +22,8 @@ body { margin: 0; color: var(--ink); background: var(--paper); font: 1rem/1.55 '
 .sheet { max-width: 1480px; min-height: 100svh; margin: auto; padding: 0 clamp(1.25rem, 5vw, 5.5rem); display: flex; flex-direction: column; }
 header, footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 header { border-bottom: 3px double var(--ink); padding: 1.2rem 0; }
-.brand { font: bold 2.15rem/1 Georgia, serif; letter-spacing: -.04em; }
+.brand { display: inline-flex; align-items: baseline; flex-shrink: 0; font: 750 1.75rem/1 Manrope, sans-serif; letter-spacing: -.035em; }
+.brand span { margin-left: .04em; font: 400 2.85rem/.95 Pohladnica, cursive; letter-spacing: 0; }
 .brand span, em, figcaption, footer i { color: var(--red); }
 .status { font-size: .84rem; font-weight: 600; display: flex; align-items: center; gap: .58rem; line-height: 1.3; }
 .status::before { content: ''; flex: none; width: .62rem; height: .62rem; border-radius: 50%; background: var(--red); }
@@ -37,6 +44,19 @@ footer { border-top: 1px solid var(--rule); color: #655147; padding: .75rem 0; f
 footer span { font-family: Georgia, serif; font-weight: bold; }
 footer i { margin: 0 .38rem; }
 footer a { padding: .65rem 0; }
+.stats-link { display: inline-block; margin: .45rem 0 .45rem 1.1rem; padding: .5rem 0; font-size: .94rem; }
+.statistics { grid-column: 1 / -1; min-width: 0; border-top: 3px double var(--ink); padding-top: 2.25rem; }
+.statistics h2 { font: 500 clamp(2.25rem, 5vw, 3.8rem)/1.1 Georgia, serif; margin: 0 0 1.2rem; }
+.statistics p { max-width: 78ch; margin: 0 0 1rem; font-size: .95rem; }
+.totals, .records { margin: 0; display: grid; gap: 1rem 1.75rem; }
+.totals { grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--rule); padding: 1.25rem 0; }
+.totals dt, .records dt { color: #655147; font-size: .89rem; }
+.totals dd { margin: .3rem 0 0; font: 500 clamp(1.6rem, 3.2vw, 3rem)/1.15 Georgia, serif; color: var(--red); }
+.records { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 1.8rem 0; }
+.records dd { font: 600 1.15rem/1.45 Georgia, serif; margin: .25rem 0 0; overflow-wrap: anywhere; }
+.statistics .price-note { font-size: .82rem; color: #655147; }
+@media (max-width: 800px) { .totals { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 540px) { .records { grid-template-columns: 1fr; } .stats-link { margin-left: 0; display: table; } }
 @media (max-width: 700px) {
   main { grid-template-columns: minmax(0,1fr); gap: 2.15rem; padding: 2.5rem 0; }
   header { padding: 1rem 0; }
