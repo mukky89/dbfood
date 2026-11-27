@@ -55,6 +55,38 @@ footer a { padding: .65rem 0; }
 .records { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 1.8rem 0; }
 .records dd { font: 600 1.15rem/1.45 Georgia, serif; margin: .25rem 0 0; overflow-wrap: anywhere; }
 .statistics .price-note { font-size: .82rem; color: #655147; }
+.lunch-charts { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); }
+.lunch-chart { min-width: 0; padding: 1.8rem 0 1.65rem; border-bottom: 1px solid var(--rule); }
+.lunch-chart h3 { margin: 0 0 .65rem; font: 500 clamp(1.55rem, 2.4vw, 2.15rem)/1.15 Georgia, serif; color: var(--ink); }
+.chart-switch { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--rule); border-radius: 6px; }
+.chart-switch button { appearance: none; border: 0; border-radius: 3px; padding: .55rem .8rem; background: transparent; color: var(--ink); font: 600 .82rem/1.3 'Segoe UI', sans-serif; cursor: pointer; }
+.chart-switch button[aria-pressed="true"] { background: var(--red); color: #fffaf2; }
+.chart-switch button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.month-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--rule) transparent; }
+#month-bars { margin: 0; padding: 2.1rem .15rem .3rem; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(2.45rem, 1fr); list-style: none; }
+#month-bars.is-price { grid-auto-columns: minmax(4.9rem, 1fr); }
+.chart-month { display: flex; flex-direction: column-reverse; text-align: center; font-variant-numeric: tabular-nums; }
+.month-plot { position: relative; height: clamp(8rem, 13vw, 11rem); border-bottom: 1px solid var(--rule); background: repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), #b8a08459 calc(25% - 1px), #b8a08459 25%); }
+.month-bar { position: absolute; inset: auto 18% 0; max-width: 3rem; margin-inline: auto; background: var(--red); border-radius: 4px 4px 0 0; transform-origin: bottom; }
+.is-price .month-bar { background: #726034; }
+.month-label { padding-top: .45rem; color: var(--ink); font-size: .82rem; }
+.month-year { display: block; color: #655147; font-size: .68rem; }
+.bar-number { position: absolute; left: 50%; transform: translateX(-50%); padding-bottom: .18rem; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.statistics .chart-unit { margin: 0 0 1rem; font-size: .84rem; color: #655147; }
+#dish-bars { list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; }
+.dish-row { display: grid; grid-template-columns: 1fr auto; gap: .22rem 1rem; align-items: baseline; }
+.dish-name { font: .92rem/1.35 'Segoe UI', sans-serif; overflow-wrap: anywhere; }
+.dish-value { color: var(--red); font-size: .88rem; font-variant-numeric: tabular-nums; }
+.dish-track { grid-column: 1 / -1; height: .42rem; background: #e3d5bd; border-radius: 3px; }
+.dish-bar { height: 100%; background: #a36546; transform-origin: left; border-radius: inherit; }
+.dish-row:first-child .dish-bar { background: var(--red); }
+@media (prefers-reduced-motion: no-preference) {
+  .in-view .month-bar { animation: grow-month 720ms cubic-bezier(.2,.75,.25,1) var(--delay) backwards; }
+  .in-view .dish-bar { animation: grow-dish 680ms cubic-bezier(.2,.75,.25,1) var(--delay) backwards; }
+  @keyframes grow-month { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes grow-dish { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+@media (max-width: 900px) { .lunch-charts { grid-template-columns: 1fr; gap: 0; } }
 @media (max-width: 800px) { .totals { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 540px) { .records { grid-template-columns: 1fr; } .stats-link { margin-left: 0; display: table; } }
 @media (max-width: 700px) {

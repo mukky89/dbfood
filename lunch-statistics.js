@@ -14,17 +14,23 @@ function increment(map, name, amount) {
   entry.value += amount;
   map.set(key, entry);
 }
+function ranked(map) {
+  return [...map.values()].sort((a,b) => b.value - a.value || a.name.localeCompare(b.name, 'sk'));
+}
 function leaders(map, format = name => name) {
-  const sorted = [...map.values()].sort((a,b) => b.value - a.value || a.name.localeCompare(b.name, 'sk'));
+  const sorted = ranked(map);
   if (!sorted.length) return null;
   const tied = sorted.filter(row => row.value === sorted[0].value);
   return { names: tied.slice(0, 3).map(row => format(row.name)), count: tied.length, value: sorted[0].value };
 }
 async function summarizeLunches(days, menus = new Map()) {
   const dishes = new Map(), purchases = new Map(), quantities = new Map(), spending = new Map();
+  const months = new Map();
   const stats = { orders: 0, portions: 0, days: 0, pricedOrders: 0, pricedPortions: 0, cents: 0 };
   for await (const day of days) {
     const before = stats.orders;
+    const beforeCents = stats.cents;
+    const beforePriced = stats.pricedOrders;
     for (const [owner, order] of Object.entries(day.orders || {})) {
       if (!order || !(order.jedlo || order.pizza || order.polievka || order.dezert)) continue;
       const count = portions(order.porcie);
@@ -49,9 +55,20 @@ async function summarizeLunches(days, menus = new Map()) {
       stats.pricedPortions += count;
       increment(spending, name, cents);
     }
-    if (stats.orders > before) stats.days++;
+    if (stats.orders === before) continue;
+    stats.days++;
+    // Legacy date keys use Date.toDateString(); ISO civil dates also occur in exports.
+    const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(day.datum) ? day.datum : day.datum + ' UTC');
+    if (Number.isNaN(date.getTime())) continue;
+    const month = date.toISOString().slice(0, 7);
+    const entry = months.get(month) || { month, orders: 0, pricedOrders: 0, cents: 0 };
+    entry.orders += stats.orders - before;
+    entry.cents += stats.cents - beforeCents;
+    entry.pricedOrders += stats.pricedOrders - beforePriced;
+    months.set(month, entry);
   }
-  return { ...stats, favourite: leaders(dishes), buyer: leaders(quantities, publicName),
+  return { ...stats, months: [...months.values()].sort((a, b) => a.month.localeCompare(b.month)),
+    topDishes: ranked(dishes).slice(0, 5), favourite: leaders(dishes), buyer: leaders(quantities, publicName),
     regular: leaders(purchases, publicName), spender: leaders(spending, publicName) };
 }
 
@@ -60,7 +77,7 @@ function registerLunchStatistics(app, Daily, Menu) {
   async function read() {
     const rows = await Menu.find({}, { key: 1, menu: 1, _id: 0 }).lean();
     const menus = new Map(rows.map(row => [row.key, row.menu]));
-    result = await summarizeLunches(Daily.find({}, { orders: 1, _id: 0 }).lean().cursor(), menus);
+    result = await summarizeLunches(Daily.find({}, { datum: 1, orders: 1, _id: 0 }).lean().cursor(), menus);
     expires = Date.now() + 60000;
     return result;
   }

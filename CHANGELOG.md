@@ -5,6 +5,10 @@ Všetky podstatné zmeny v projekte **Fantozzi Objednávky** sú zdokumentované
 Formát vychádza z [Keep a Changelog](https://keepachangelog.com/),
 projekt používa [sémantické verzovanie](https://semver.org/lang/sk/).
 
+## [1.42.0] — 2026-11-27
+
+- V štatistike pribudli animované grafy mesačných objednávok, ich odhadovanej hodnoty a piatich najobjednávanejších jedál.
+
 ## [1.41.0] — 2026-11-27
 
 - Na pohľadnici pribudla štatistika nákupov, porcií, cien a najobjednávanejších jedál.

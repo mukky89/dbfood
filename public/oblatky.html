@@ -35,6 +35,21 @@
             <div><dt>Hodnota objednávok*</dt><dd id="stat-cents"></dd></div>
             <div><dt>Priemer za porciu*</dt><dd id="stat-average"></dd></div>
           </dl>
+          <div class="lunch-charts">
+            <section class="lunch-chart" id="monthly-chart" hidden aria-labelledby="month-title">
+              <h3 id="month-title">Obedy po mesiacoch</h3>
+              <div class="chart-switch" role="group" aria-label="Údaj mesačného grafu">
+                <button type="button" data-metric="orders" aria-pressed="true">Objednávky</button>
+                <button type="button" data-metric="cents" aria-pressed="false">Hodnota v €*</button>
+              </div>
+              <div class="month-scroll"><ul id="month-bars" aria-label="Počet objednávok podľa mesiaca"></ul></div>
+            </section>
+            <section class="lunch-chart" id="dishes-chart" hidden aria-labelledby="dish-title">
+              <h3 id="dish-title">Najobľúbenejšie jedlá</h3>
+              <p class="chart-unit">Podľa počtu objednaných porcií</p>
+              <ol id="dish-bars"></ol>
+            </section>
+          </div>
           <dl class="records">
             <div><dt>Najobjednávanejší obed</dt><dd id="stat-favourite"></dd></div>
             <div><dt>Najviac kúpených porcií</dt><dd id="stat-buyer"></dd></div>

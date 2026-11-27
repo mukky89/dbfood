@@ -6,8 +6,8 @@ test('finálne objednávky, porcie a ceny sa rátajú samostatne, bez zrušenýc
   const a = { meno: 'Jana Malá', jedlo: 'č.2 Rezeň', polievka: 'P1 Vývar', porcie: 2 };
   const b = { meno: 'Tomáš Veľký', jedlo: 'J3 Rezeň', polievka: 'P1 Vývar' };
   const stats = await summarizeLunches([
-    { orders: { a, b }, history: [{ akcia: 'ZRUSENIE' }] },
-    { orders: { b: { ...b, jedlo: 'J1 Losos', restaurantId: 'lupo' } } },
+    { datum: '2026-11-01', orders: { a, b }, history: [{ akcia: 'ZRUSENIE' }] },
+    { datum: 'Tue Oct 27 2026', orders: { b: { ...b, jedlo: 'J1 Losos', restaurantId: 'lupo' } } },
     { orders: {} },
   ]);
   assert.equal(stats.orders, 3);
@@ -16,6 +16,11 @@ test('finálne objednávky, porcie a ceny sa rátajú samostatne, bez zrušenýc
   assert.equal(stats.pricedOrders, 2);
   assert.equal(stats.cents, 1950);
   assert.equal(stats.pricedPortions, 3);
+  assert.deepEqual(stats.months, [
+    { month: '2026-10', orders: 1, pricedOrders: 0, cents: 0 },
+    { month: '2026-11', orders: 2, pricedOrders: 2, cents: 1950 },
+  ]);
+  assert.deepEqual(stats.topDishes, [{ name: 'Rezeň', value: 3 }, { name: 'Losos', value: 1 }]);
   assert.deepEqual(stats.favourite, { names: ['Rezeň'], count: 1, value: 3 });
   assert.deepEqual(stats.buyer.names, ['Jana M.', 'Tomáš V.']);
   assert.deepEqual(stats.spender, { names: ['Jana M.'], count: 1, value: 1300 });
